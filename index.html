@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#12100e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="装机生意">
+<meta name="apple-mobile-web-app-title" content="旺财装机店">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="一间小店，一台台机器，一单单生意。装机 / 维修 / 二手配件经营模拟。">
-<meta property="og:title" content="装机生意">
+<meta property="og:title" content="旺财装机店">
 <meta property="og:description" content="一间小店，一台台机器，一单单生意。">
 <meta property="og:type" content="website">
 <meta name="referrer" content="no-referrer">
-<title>装机生意</title>
+<title>旺财装机店</title>
 <style>
 :root{color-scheme:dark;
 --bg0:#08070a;--bg1:#12100e;--line:rgba(255,240,220,.08);--line2:rgba(255,240,220,.16);
@@ -1784,9 +1784,71 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 /* 电脑端引导：瞬时刷出，不做任何过渡/动画（手机端不受影响） */
 .coach.fast .coachHole,.coach.fast .coachTip,.coach.fast .coachShield,
 .coach.fast #coachNext,.coach.fast #coachSkip{transition:none!important;animation:none!important;opacity:1}
+/* ---------- QQ 内置浏览器：直接挡一层「请在浏览器打开」 ---------- */
+.qqBlock{display:none}
+html.qqblock .qqBlock{
+  display:flex;position:fixed;inset:0;z-index:99999;
+  align-items:center;justify-content:center;padding:26px;
+  background:
+    radial-gradient(520px 420px at 50% 12%,rgba(255,170,90,.16),rgba(255,170,90,0) 65%),
+    linear-gradient(180deg,#16120f 0%,#0a0806 62%,#050404 100%);
+  color:#f6f1e7;
+}
+html.qqblock body{overflow:hidden}
+.qqCard{width:100%;max-width:332px;text-align:center;padding:26px 20px 22px;
+  border-radius:18px;border:1px solid rgba(255,196,120,.26);
+  background:linear-gradient(180deg,rgba(46,36,24,.94),rgba(20,16,12,.96));
+  box-shadow:0 30px 80px -40px #000}
+.qqBadge{display:inline-block;font-size:10.5px;letter-spacing:1.6px;color:#c9a06a;
+  border:1px solid rgba(255,196,120,.28);border-radius:999px;padding:3px 10px;margin-bottom:14px}
+.qqCard h3{margin:0 0 10px;font-size:20px;font-weight:800;letter-spacing:1px;color:#ffd9a6}
+.qqCard p{margin:0;font-size:12.5px;line-height:1.8;color:#c9bda9}
+.qqHow{margin-top:12px!important;font-size:13px!important;color:#e8d9c2!important}
+.qqHow b{color:#ffd9a6}
+.qqLink{margin:16px 0 12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);font-size:11.5px;color:#9fb2c9;
+  word-break:break-all;-webkit-user-select:text;user-select:text}
+.qqBtn{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,196,120,.45);
+  background:linear-gradient(180deg,#ffc178,#f0952f);color:#241304;
+  font-size:14px;font-weight:700;font-family:inherit}
 </style>
 </head>
 <body>
+<!-- QQ 内置浏览器（X5）兼容性太差：不尝试渲染游戏，直接引导去系统浏览器 -->
+<div class="qqBlock" id="qqBlock">
+  <div class="qqCard">
+    <div class="qqBadge">QQ 内置浏览器</div>
+    <h3>请在浏览器中打开</h3>
+    <p>游戏在 QQ 的网页里会显示异常<br>（画面发白、动画丢失、有时打不开）。</p>
+    <p class="qqHow">点右上角 <b>···</b> → 选择 <b>在浏览器打开</b></p>
+    <div class="qqLink" id="qqLink">https://grapheas-creator.github.io/zhuangji/</div>
+    <button class="qqBtn" id="qqCopy" type="button">复制网址</button>
+  </div>
+</div>
+<script>
+(function(){
+  try{
+    var ua=navigator.userAgent||'';
+    if(!/MQQBrowser|QQBrowser|QQLive/i.test(ua))return;
+    document.documentElement.className+=' qqblock';
+    var b=document.getElementById('qqCopy');
+    if(b)b.addEventListener('click',function(){
+      var u='https://grapheas-creator.github.io/zhuangji/';
+      var ok=false;
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u);ok=true;} }catch(e){}
+      if(!ok){
+        try{
+          var ta=document.createElement('textarea');
+          ta.value=u;ta.style.position='fixed';ta.style.opacity='0';
+          document.body.appendChild(ta);ta.select();document.execCommand('copy');
+          document.body.removeChild(ta);ok=true;
+        }catch(e){}
+      }
+      b.textContent=ok?'已复制，去浏览器粘贴':'长按上面的网址复制';
+    });
+  }catch(e){}
+})();
+</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
@@ -1803,7 +1865,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00020</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.11.5.00024</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1971,14 +2033,14 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
   </div>
   <div class="tInner">
     <div class="tKicker">电脑维修 · 整机装机 · 二手配件</div>
-    <h2 class="tTitle">装机生意</h2>
+    <h2 class="tTitle">旺财装机店</h2>
     <div class="tDesc">一间小店，一台台机器，一单单生意。</div>
     <div class="tBtns">
       <button class="tBtn" id="tStart">开始新游戏</button>
       <button class="tBtn" id="tLoad">读档</button>
     </div>
 
-    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.0.6</span></div>
+    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.11.5.00024</span></div>
   </div>
   <div class="tMark">一只白玉菇</div>
 </div>
@@ -2031,7 +2093,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00023';
+const APP_BUILD='00024';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -3611,7 +3673,7 @@ function exportSave(){
   const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`装机生意-${state.date}-第${state.day}天.json`;
+  a.download=`旺财装机店-${state.date}-第${state.day}天.json`;
   document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
   toast('已导出存档文件');
@@ -6780,7 +6842,7 @@ function playStory(sd,j,onDone){
 }
 let _storyRetry=0;
 /* 开局用：有未看过的剧情就先播剧情，播完（或没有剧情）再继续下一步。
-   以前 startNew 里先弹「欢迎来到装机生意」，剧情只能等它关掉才挤出来，顺序反了。 */
+   以前 startNew 里先弹「欢迎来到旺财装机店」，剧情只能等它关掉才挤出来，顺序反了。 */
 function playStoryForToday(onDone){
   let j=null;
   try{j=state.jobs.find(x=>x.story&&x.status==='open');}catch(e){}
@@ -7167,7 +7229,7 @@ function maybeOnboard(){
   try{seen=localStorage.getItem('pcbs2_onboard')==='1';}catch(e){}
   if(seen){_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},240);return;}
   setTimeout(()=>{
-    modal('欢迎来到装机生意',
+    modal('欢迎来到旺财装机店',
       `<div style="line-height:1.85">
         左边最上面有一张<b>「新手任务」</b>卡片，共六步，做到了会自动打勾：<br>
         <b>① 接一单 → ② 进一个件 → ③ 装上工作台 → ④ 检查变绿 → ⑤ 交付 → ⑥ 打烊</b>
@@ -7198,7 +7260,7 @@ function showTitle(){
 applyState(state,build);
 (function stampVer(){
   try{
-    document.title='装机生意 '+APP_FULL;
+    document.title='旺财装机店 '+APP_FULL;
     const t=document.getElementById('verTag');if(t)t.textContent=APP_FULL;
     const m=document.getElementById('verLine');if(m)m.textContent='当前版本 '+APP_FULL;
   }catch(e){}
