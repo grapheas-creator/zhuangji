@@ -1194,7 +1194,7 @@ header{gap:12px}
   .hstats{grid-area:stats;gap:4px 10px;flex-wrap:nowrap;overflow:hidden}
   .hstats .stat{font-size:10px;white-space:nowrap}
   .hstats .stat b{font-size:12px;margin-left:3px}
-  h1 .ver{font-size:9px;margin-left:4px;padding:0 4px}
+  h1 .ver{font-size:8.5px;letter-spacing:0;margin-left:4px;padding:0 4px}
 }
 #perfSlider:disabled{opacity:.55}
 #perfSlider:disabled::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(255,180,99,.18)}
@@ -1707,7 +1707,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.8.10</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00001</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1924,6 +1924,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 <script>
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
+/* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
+const APP_BUILD='00001';
+const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
 function syncModalLock(){
@@ -6881,6 +6884,11 @@ function bindMNav(){
   nav.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{
     const v=b.dataset.view;
     if(v!=='docs'&&!state.activeId){toast('先在「单据」里接一单');mViewSet('docs');return;}
+    /* 从工作台 / 检查点回「单据」：先回到工单列表，
+       而不是停在离开时那个商店/仓库页 */
+    if(v==='docs'&&mView!=='docs'){
+      if(state.panel!=='jobs'){state.panel='jobs';save();renderAll();}
+    }
     mViewSet(v);
   });
 }
@@ -6984,7 +6992,7 @@ function maybeOnboard(){
 function hideTitle(){const t=document.getElementById('titleScr');if(t)t.classList.add('hide');}
 function showTitle(){
   const t=document.getElementById('titleScr');if(!t)return;
-  const ver=document.getElementById('tVer');if(ver)ver.textContent=APP_VER;
+  const ver=document.getElementById('tVer');if(ver)ver.textContent=APP_FULL;
   const hint=document.getElementById('tSaveHint');
   if(hint){
     try{
@@ -6998,9 +7006,9 @@ function showTitle(){
 applyState(state,build);
 (function stampVer(){
   try{
-    document.title='装机生意 '+APP_VER;
-    const t=document.getElementById('verTag');if(t)t.textContent=APP_VER;
-    const m=document.getElementById('verLine');if(m)m.textContent='当前版本 '+APP_VER;
+    document.title='装机生意 '+APP_FULL;
+    const t=document.getElementById('verTag');if(t)t.textContent=APP_FULL;
+    const m=document.getElementById('verLine');if(m)m.textContent='当前版本 '+APP_FULL;
   }catch(e){}
 })();
 applyLayoutShell();
