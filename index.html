@@ -1019,6 +1019,23 @@ button.bad{background:linear-gradient(180deg,#a3554f,#743631);border-color:#c471
   transition:opacity .35s ease,visibility .35s;
 }
 .titleScr.hide{opacity:0;visibility:hidden;pointer-events:none}
+/* ---------- QQ 内置浏览器（X5）标题页兜底 ----------
+   QQ 的 X5 内核会把标题页那张内联 SVG 场景里的半透明玻璃机箱
+   渲染成一整块发白的面板，标题和存档提示全糊在浅色底上。
+   这里直接不用内联 SVG，改用纯 CSS 渐变复刻「台灯 + 暗房」的观感：
+   颜色全部写死，不依赖 SVG 图层的合成。 */
+html.x5 .titleScr .tBg{display:none}
+html.x5 .titleScr{
+  background:
+    radial-gradient(120% 95% at 50% 28%,rgba(4,3,3,0) 36%,rgba(4,3,3,.78) 100%),
+    radial-gradient(760px 520px at 50% 14%,rgba(255,176,96,.20),rgba(255,176,96,0) 66%),
+    radial-gradient(560px 420px at 84% 86%,rgba(96,140,255,.10),rgba(96,140,255,0) 70%),
+    linear-gradient(180deg,#171310 0%,#0b0908 64%,#060505 100%);
+}
+html.x5 .titleScr::before{ /* 台面：一条暖光，压住下半屏 */
+  content:'';position:absolute;left:0;right:0;bottom:0;height:32%;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,196,120,.10),rgba(255,196,120,0) 24%,rgba(0,0,0,.42));
+}
 .tBg{position:absolute;inset:0;overflow:hidden}
 .tBg svg{width:100%;height:100%;display:block;
   /* 场景不动：大尺寸 SVG 的 transform 动画会触发逐帧重栅格化，正是闪烁来源 */
@@ -1942,7 +1959,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00020';
+const APP_BUILD='00021';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -1967,6 +1984,12 @@ function watchModals(){
     if(/Quark|UCBrowser|QQBrowser|MQQBrowser|baiduboxapp/i.test(ua)){
       document.documentElement.classList.add('lowfx');
       document.body.classList.add('lowfx');
+    }
+    /* QQ 内置浏览器（X5）：标题页的内联 SVG 场景会被渲染成发白的面板，
+       单独打个 x5 标记，标题页改走纯 CSS 背景（见 .x5 那段样式）。 */
+    if(/MQQBrowser|QQBrowser/i.test(ua)){
+      document.documentElement.classList.add('x5');
+      document.body.classList.add('x5');
     }
   }catch(e){}
   try{
