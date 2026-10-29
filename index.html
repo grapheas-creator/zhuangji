@@ -1720,7 +1720,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00003</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00004</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1938,7 +1938,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00003';
+const APP_BUILD='00004';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -2300,9 +2300,15 @@ CASE_BRANDS.forEach((br)=>CASE_TYPE.forEach(([tn,ff,mg,mc,rad,bay,base],ti)=>{
 [['4U 服务器机箱',['EATX','ATX','MATX'],350,175,360,8,900],['8 盘位工作站塔',['EATX','ATX','MATX'],400,185,360,8,1500],
 ['NAS 8 盘位机箱',['MATX','ITX'],330,165,240,8,1200],['NAS 12 盘位机箱',['EATX','ATX'],380,175,360,12,2200]]
 .forEach(([n,ff,mg,mc,rad,bay,p])=>K.push({n,ff,mg,mc,rad,bay,p:jitter(p,'ks'+n),u:null}));
-K.forEach(k=>{k.u=Math.max(15,R2(k.p*(0.22+rngFrom(hash('ku'+k.n))()*0.22),1));});
-/* 闲鱼实测：ATX 机箱 55 / 先马 30 / 追风者 150 / 乔思伯 D31 60，整体约为原值 0.6，高端封顶 400 */
-K.forEach(k=>{k.p=Math.max(30,Math.round(k.p*0.6));k.u=Math.max(15,Math.min(400,Math.round(k.u*0.6)));});
+/* 机箱行情修正（2026-10 实价）：入门箱全新 20 多到 90，
+   中端 110–260，海景房 / 全塔 / 服务器箱 300 以上；二手按新价 36%–52% 折算。
+   以前一律 ×0.6，入门箱还要 37 起，比闲鱼实际贵了一倍。 */
+K.forEach(k=>{
+  const f=k.p<=200?0.40:(k.p<=400?0.55:(k.p<=700?0.68:0.75));
+  k.p=Math.max(20,Math.round(k.p*f));
+  const ru=rngFrom(hash('ku2'+k.n))();
+  k.u=Math.max(15,Math.min(430,Math.round(k.p*(0.36+ru*0.16))));
+});
 const COOL_TYPE=[['廉价下压散热（60W级）',60,48,0,10],['原装风冷（70W级）',70,52,0,18],['双热管下压（95W）',95,55,0,35],
 ['四热管单塔（130W）',130,150,0,65],['六热管单塔（180W）',180,160,0,100],['双塔风冷（250W）',250,165,0,130],
 ['240 一体水冷（220W）',220,0,240,280],['360 一体水冷（320W）',320,0,360,450]];
