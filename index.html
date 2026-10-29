@@ -1724,7 +1724,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00007</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00008</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1942,7 +1942,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00007';
+const APP_BUILD='00008';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -2296,58 +2296,81 @@ const CASE_TYPE=[['薄铁皮办公箱',['MATX'],280,150,0,2,75],['M-ATX 入门�
 ['ITX 开放式',['ITX'],330,160,0,1,350],['ATX 中塔入门',['ATX','MATX','ITX'],330,160,240,3,180],
 ['ATX 中塔主流',['ATX','MATX','ITX'],380,170,360,3,380],['ATX 海景房',['EATX','ATX','MATX','ITX'],420,167,420,3,850],
 ['全塔入门',['EATX','ATX','MATX'],400,180,360,6,500],['全塔高端',['EATX','ATX','MATX'],430,190,420,6,2200]];
-/* 真实在售机箱（品牌 + 型号，2026 年国内电商大致成交价）。
+/* 真实在售机箱（2026-10 天猫搜索页截图抄录，价格取当时「首单价/补贴后」）。
    ff=支持板型  mg=显卡限长  mc=散热限高  rad=最大冷排  bay=硬盘位  p=全新价 */
 const K=[
-  /* 办公薄箱 / 入门 */
-  {n:'大水牛 普通办公机箱',ff:['ATX','MATX','ITX'],mg:300,mc:160,rad:0,bay:2,p:79},
-  {n:'金河田 办公机箱 M-ATX',ff:['MATX','ITX'],mg:300,mc:155,rad:0,bay:2,p:89},
-  {n:'长城 商祺办公机箱',ff:['ATX','MATX','ITX'],mg:320,mc:160,rad:0,bay:2,p:99},
-  {n:'金河田 预见N17',ff:['MATX','ITX'],mg:320,mc:160,rad:240,bay:2,p:139},
-  {n:'长城 启程M60',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:129},
-  {n:'先马 平头哥M2',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:139},
-  {n:'航嘉 暗夜猎手2',ff:['ATX','MATX','ITX'],mg:350,mc:160,rad:240,bay:2,p:149},
-  /* 主流 */
-  {n:'爱国者 星璨 岚',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:159},
-  {n:'鑫谷 阔斧者',ff:['ATX','MATX','ITX'],mg:380,mc:165,rad:360,bay:3,p:169},
-  {n:'先马 黑洞5',ff:['ATX','MATX','ITX'],mg:380,mc:160,rad:360,bay:3,p:199},
-  {n:'先马 趣造 ITX',ff:['ITX'],mg:320,mc:70,rad:0,bay:1,p:199},
-  {n:'酷冷至尊 Q300L',ff:['MATX','ITX'],mg:360,mc:159,rad:240,bay:2,p:249},
-  {n:'Tt 启航者S5',ff:['ATX','MATX','ITX'],mg:390,mc:170,rad:360,bay:2,p:259},
-  {n:'先马 鲁班1',ff:['ATX','MATX','ITX'],mg:380,mc:165,rad:360,bay:2,p:259},
-  {n:'酷冷至尊 MB511',ff:['ATX','MATX','ITX'],mg:400,mc:165,rad:360,bay:2,p:299},
-  {n:'爱国者 破晓X',ff:['ATX','MATX','ITX'],mg:380,mc:170,rad:360,bay:2,p:299},
-  {n:'乔思伯 D31',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:299},
-  /* 中高端 */
-  {n:'乔思伯 D40',ff:['ATX','MATX','ITX'],mg:380,mc:170,rad:360,bay:2,p:399},
-  {n:'乔思伯 T8',ff:['ITX'],mg:330,mc:130,rad:240,bay:1,p:399},
-  {n:'追风者 P360A',ff:['ATX','MATX','ITX'],mg:400,mc:170,rad:360,bay:2,p:399},
-  {n:'酷冷至尊 TD500 Mesh',ff:['ATX','MATX','ITX'],mg:410,mc:165,rad:360,bay:2,p:499},
-  {n:'乔思伯 A4',ff:['ITX'],mg:325,mc:71,rad:240,bay:1,p:599},
-  {n:'乔思伯 TK-1',ff:['ATX','MATX','ITX'],mg:400,mc:175,rad:360,bay:2,p:599},
-  {n:'NZXT H510',ff:['ATX','MATX','ITX'],mg:381,mc:165,rad:280,bay:3,p:599},
-  {n:'海盗船 4000D Airflow',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:360,bay:2,p:599},
-  {n:'联力 O11 Dynamic Mini',ff:['MATX','ITX'],mg:380,mc:170,rad:280,bay:2,p:699},
-  {n:'追风者 P500A',ff:['ATX','MATX','ITX'],mg:435,mc:190,rad:360,bay:4,p:699},
-  {n:'NZXT H5 Flow',ff:['ATX','MATX','ITX'],mg:365,mc:165,rad:280,bay:3,p:699},
-  {n:'联力 A4-H2O',ff:['ITX'],mg:322,mc:55,rad:240,bay:1,p:899},
-  {n:'分形工艺 Meshify 2 Compact',ff:['ATX','MATX','ITX'],mg:360,mc:169,rad:360,bay:3,p:899},
-  {n:'分形工艺 Ridge',ff:['ITX'],mg:335,mc:70,rad:240,bay:2,p:999},
-  {n:'联力 O11D EVO',ff:['EATX','ATX','MATX'],mg:420,mc:167,rad:360,bay:4,p:999},
-  {n:'追风者 Evolv Shift XT',ff:['ITX'],mg:325,mc:70,rad:240,bay:1,p:1199},
-  {n:'海盗船 7000D Airflow',ff:['EATX','ATX','MATX'],mg:450,mc:190,rad:420,bay:6,p:1499},
-  /* NAS / 服务器 */
-  {n:'乔思伯 N1 NAS 机箱',ff:['ITX'],mg:200,mc:70,rad:0,bay:5,p:599},
-  {n:'乔思伯 N2 NAS 机箱',ff:['ITX'],mg:200,mc:70,rad:0,bay:10,p:699},
-  {n:'银欣 CS351 五盘位',ff:['MATX','ITX'],mg:250,mc:160,rad:0,bay:5,p:1099},
-  {n:'银欣 CS380 八盘位',ff:['ATX','MATX'],mg:250,mc:160,rad:0,bay:8,p:1299},
-  {n:'银欣 RM400 4U 服务器',ff:['EATX','ATX','MATX'],mg:400,mc:175,rad:360,bay:8,p:1599},
-  {n:'银欣 RM43 4U 十二盘位',ff:['EATX','ATX'],mg:380,mc:175,rad:360,bay:12,p:2199}
+  /* 60–100：办公薄箱 / 入门 MATX */
+  {n:'大水牛 ATX 商务办公中塔',ff:['ATX','MATX','ITX'],mg:280,mc:155,rad:240,bay:2,p:58},
+  {n:'九尾狐 M2 迷你机箱',ff:['MATX','ITX'],mg:300,mc:70,rad:0,bay:1,p:69},
+  {n:'九尾狐 H7 机箱',ff:['MATX','ITX'],mg:330,mc:160,rad:0,bay:2,p:69},
+  {n:'九尾狐 T3 海景房',ff:['MATX','ITX'],mg:320,mc:160,rad:240,bay:2,p:69},
+  {n:'九尾狐 T10 机箱',ff:['ATX','MATX'],mg:330,mc:160,rad:0,bay:2,p:69},
+  {n:'九尾狐 T11 机箱',ff:['ATX','MATX','ITX'],mg:330,mc:165,rad:0,bay:2,p:69},
+  {n:'零度空间 M2 机箱',ff:['MATX','ITX'],mg:320,mc:160,rad:0,bay:2,p:69},
+  {n:'硕一 V280/M281 办公箱',ff:['MATX','ITX'],mg:300,mc:160,rad:0,bay:2,p:72},
+  {n:'巧美 Q40 开放式机架',ff:['ITX'],mg:330,mc:70,rad:0,bay:1,p:72},
+  {n:'硕一 麻雀 V100 14L',ff:['MATX','ITX'],mg:280,mc:160,rad:0,bay:1,p:73},
+  {n:'巧美 1U 迷你小机箱',ff:['ITX'],mg:200,mc:60,rad:0,bay:1,p:73},
+  {n:'AOC CG251B 办公机箱',ff:['MATX','ITX'],mg:290,mc:160,rad:0,bay:2,p:79},
+  {n:'积至 EVESKY 钢铁侠',ff:['MATX','ITX'],mg:330,mc:160,rad:0,bay:2,p:80},
+  {n:'航嘉 S900 沙尘暴',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:80},
+  {n:'酷鱼 迷你 ITX 手提箱',ff:['ITX'],mg:220,mc:60,rad:0,bay:1,p:84},
+  {n:'积至 EVESKY 坦克 侧透',ff:['ATX','MATX','ITX'],mg:340,mc:165,rad:240,bay:2,p:89},
+  /* 100–130：主流区间（真实走量款） */
+  {n:'硕一 M1/M5 手提 MATX',ff:['MATX','ITX'],mg:260,mc:160,rad:0,bay:1,p:97},
+  {n:'航嘉 星越 亚克力侧透',ff:['ATX','MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:101},
+  {n:'京特尔 G100 ITX',ff:['ITX'],mg:200,mc:60,rad:0,bay:1,p:101},
+  {n:'航嘉 S900 全景版',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:102},
+  {n:'航嘉 GS400C 大板背线',ff:['ATX','MATX'],mg:340,mc:170,rad:240,bay:2,p:103},
+  {n:'乔思伯 D31 MESH',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:105},
+  {n:'巧美 NAS 三盘位 ITX',ff:['ITX'],mg:200,mc:70,rad:0,bay:3,p:107},
+  {n:'巧美 小方块 Pro 14L',ff:['ITX'],mg:330,mc:135,rad:0,bay:2,p:107},
+  {n:'华南金牌 双路海景房',ff:['EATX','ATX','MATX'],mg:420,mc:170,rad:240,bay:3,p:108},
+  {n:'爱国者 V60 海景房',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
+  {n:'金河田 预见 FM01',ff:['ATX','MATX','ITX'],mg:340,mc:165,rad:240,bay:2,p:109},
+  {n:'金河田 简誉 墨屿',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
+  {n:'航嘉 超越 MATX 水冷箱',ff:['MATX','ITX'],mg:320,mc:165,rad:240,bay:2,p:109},
+  {n:'Sahara 太空舱 3 Pro',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:240,bay:3,p:109},
+  {n:'航嘉 赛亚人 S3 工作站',ff:['ATX','MATX'],mg:350,mc:170,rad:240,bay:3,p:109},
+  {n:'百盛 T600 全景海景房',ff:['MATX','ITX'],mg:330,mc:165,rad:360,bay:2,p:109},
+  {n:'酷冷魔神 X70 Pro',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
+  {n:'酷玩者 Mesh 网孔箱',ff:['MATX','ITX'],mg:325,mc:160,rad:240,bay:2,p:109},
+  {n:'Tt 启航者 S5 mini',ff:['ATX','MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
+  {n:'AOC CG391 海景房',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
+  {n:'机械大叔 G40 K39',ff:['ITX'],mg:195,mc:55,rad:0,bay:1,p:109},
+  {n:'巧美 小立方 8.8L',ff:['ITX','MATX'],mg:220,mc:135,rad:0,bay:1,p:111},
+  {n:'鑫谷 无尽 Pro+ 无立柱',ff:['EATX','ATX','MATX'],mg:400,mc:170,rad:360,bay:3,p:111},
+  {n:'先马 小朱雀 防尘',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:112},
+  {n:'巧美 小方块 ITX 侧透',ff:['ITX'],mg:240,mc:135,rad:240,bay:1,p:112},
+  {n:'航嘉 G5 铁网机箱',ff:['ATX','MATX','ITX'],mg:340,mc:170,rad:240,bay:2,p:115},
+  {n:'爱国者 A15 侧透',ff:['ATX','MATX','ITX'],mg:340,mc:170,rad:240,bay:2,p:117},
+  {n:'爱国者 JV13 亚克力侧透',ff:['MATX','ITX'],mg:320,mc:165,rad:240,bay:2,p:118},
+  {n:'航嘉 S960 海景房',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:240,bay:3,p:117},
+  {n:'雷利酷 旷野 M3',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:117},
+  {n:'航嘉 BU420 宽体办公',ff:['MATX','ITX'],mg:300,mc:160,rad:0,bay:2,p:117},
+  {n:'Tt 金刚 Mini 手提',ff:['ITX'],mg:280,mc:70,rad:0,bay:1,p:118},
+  {n:'硕一 U300 手提 MATX',ff:['MATX','ITX'],mg:310,mc:135,rad:0,bay:1,p:119},
+  {n:'SUMTAX 迅钛 VP500',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:119},
+  {n:'金河田 简誉 昊 水冷箱',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:119},
+  {n:'酷冷魔神 X80 手提',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:119},
+  {n:'九尾狐 V200 宽体',ff:['ATX','MATX','ITX'],mg:340,mc:165,rad:240,bay:2,p:123},
+  {n:'航嘉 BU550 商务箱',ff:['ATX','MATX'],mg:340,mc:170,rad:240,bay:2,p:124},
+  {n:'九尾狐 C3 三面玻璃',ff:['ATX','MATX','ITX'],mg:350,mc:170,rad:240,bay:3,p:137},
+  /* 150 以上：中高端 / 大板 / 多盘位 */
+  {n:'航嘉 S920 暴风雪 海景房',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:240,bay:3,p:148},
+  {n:'AOC CG261 ATX 侧透',ff:['ATX','MATX','ITX'],mg:295,mc:165,rad:240,bay:2,p:149},
+  {n:'先马 平头哥 M1 商务版',ff:['MATX','ITX'],mg:375,mc:165,rad:240,bay:2,p:150},
+  {n:'积至 EVESKY 全景海景房',ff:['MATX','ITX'],mg:330,mc:165,rad:360,bay:2,p:150},
+  {n:'固而美 ITX 迷你铝箱',ff:['ITX'],mg:180,mc:60,rad:0,bay:1,p:175},
+  {n:'金河田 简誉 极 白色',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:184},
+  {n:'巧美 大旋风 N3 12 盘位',ff:['ITX','MATX'],mg:280,mc:145,rad:0,bay:12,p:266},
+  {n:'Sahara 太空舱 3',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:279},
+  {n:'玩嘉 孤勇者 雪 海景房',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:599}
 ];
-/* 二手价：按新价 36%–52% 折算，最低 15 */
+/* 二手价：按新价 42%–56% 折算，最低 15（机箱是二手市场里贬值最快的大件之一） */
 K.forEach(k=>{
   const ru=rngFrom(hash('ku2'+k.n))();
-  k.u=Math.max(15,Math.min(430,Math.round(k.p*(0.36+ru*0.16))));
+  k.u=Math.max(15,Math.min(360,Math.round(k.p*(0.42+ru*0.14))));
 });
 
 const COOL_TYPE=[['廉价下压散热（60W级）',60,48,0,10],['原装风冷（70W级）',70,52,0,18],['双热管下压（95W）',95,55,0,35],
