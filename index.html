@@ -1720,7 +1720,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00002</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00003</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1938,7 +1938,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00002';
+const APP_BUILD='00003';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -5474,7 +5474,19 @@ function bindTut(){
     setTimeout(()=>{try{coachRefresh();}catch(e){}},150);
   };
   const cs=document.getElementById('coachSkip');
-  if(cs)cs.onclick=()=>{state.tut=state.tut||{done:{},hidden:false};state.tut.guideOff=true;save();coachHide();toast('已跳过引导，左侧任务清单还在');};
+  if(cs)cs.onclick=()=>{
+    /* 跳过是不可逆的（当天不再提示），先确认一下 */
+    modal('跳过新手引导？',
+      `跳过之后，第 1 天不会再一步步提示你先点哪里。<br>
+       <span style="font-size:11.5px;color:#8b93a1">左侧「新手任务」清单还在，照着做也能过。以后不能恢复，只能重开新游戏。</span>`,
+      ()=>{
+        state.tut=state.tut||{done:{},hidden:false};state.tut.guideOff=true;save();
+        coachHide();toast('已跳过引导，左侧任务清单还在');
+      });
+    const no=document.getElementById('mNo'),yes=document.getElementById('mYes');
+    if(no)no.textContent='继续引导';
+    if(yes)yes.textContent='跳过';
+  };
   document.querySelectorAll('[data-tut-hide]').forEach(b=>b.onclick=e=>{
     e.stopPropagation();state.tut.hidden=true;save();renderAll();
   });
