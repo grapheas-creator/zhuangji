@@ -1170,6 +1170,10 @@ body::after{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 #mobileBar .mbTgt b{color:#ffe0ae;font-weight:650;font-variant-numeric:tabular-nums}
+#mobileBar .mbTgt{display:flex;flex-wrap:wrap;align-items:center;gap:4px;white-space:normal;line-height:1.5}
+#mobileBar .tchip{font-style:normal;font-size:10px;padding:1px 6px;border-radius:6px;
+  color:#ffdca8;background:rgba(255,196,120,.12);border:1px solid rgba(255,196,120,.22);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
 /* ---------- 手机顶部工单条：像一张贴在屏幕上的施工单 ---------- */
 #mobileBar{
   background:linear-gradient(180deg,rgba(46,37,27,.97),rgba(23,19,15,.98));
@@ -1720,7 +1724,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00006</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00007</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1938,7 +1942,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00006';
+const APP_BUILD='00007';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -4377,6 +4381,32 @@ function modal(t,b,ok){
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('on'),1800);}
 let _benchPrev=null,_benchNew={};
 /* 工单门槛文案：只需要 CPU 分的办公单就别硬写 3DMark（0 = 这一项没要求） */
+/* 一张单子的「全部」硬性要求（顶部悬挂条、工单卡、检查区共用） */
+function targetBits(j){
+  const t=(j&&j.target)||{},out=[];
+  if(!j)return out;
+  if(j.repair){
+    out.push('维修');
+    (j.repair.clues||[]).slice(0,2).forEach(c=>out.push('现象 '+c));
+  }else if(j.hideScore){
+    out.push('别卡就行');
+  }else{
+    if(t.ts>0)out.push('3DMark '+t.ts.toLocaleString());
+    if(t.cs>0)out.push('CB '+t.cs.toLocaleString());
+  }
+  if(t.ram)out.push('内存 '+t.ram+'G');
+  if(j.minMhz)out.push('频率 '+j.minMhz+'MHz');
+  if(j.newOnly)out.push('只要全新件');
+  if(j.gpuPref)out.push(j.gpuPref==='amd'?'A 卡':'N 卡');
+  if(!j.repair){
+    if(j.cat==='工作机'&&j.tier===0)out.push('内存 128G');
+    if(j.cat==='工作机'&&j.tier===1)out.push('双卡');
+    if(j.cat==='工作机'&&j.tier===2)out.push('HDD 4 块');
+    if(j.cat==='游戏机'&&j.tier===2)out.push('水冷');
+  }
+  if(j.carry)out.push('客户旧机');
+  return out;
+}
 function fmtTarget(t){
   const bits=[];
   if(t&&t.ts>0)bits.push('3DMark ≥ '+t.ts.toLocaleString());
@@ -4588,11 +4618,11 @@ function renderMobileBar(){
         <span>${idx} / ${list.length}</span>
         <button type="button" data-sw="1" aria-label="下一单">›</button></div>`;})()}
     ${j.repair?'':`<div class="mbSw">能跑 ${j.sw}</div>`}
-    <div class="mbTgt">${j.repair
-      ? `维修 · ${(j.repair.clues&&j.repair.clues[0])||'按现象判断'}`
-      : (j.hideScore
-        ? `目标 别卡就行${t.ram?`　<b>内存 ${t.ram}G</b>`:''}`
-        : `目标 <b>${fmtTarget(t)||'能开机就行'}</b>`)}</div>
+    <div class="mbTgt">${(()=>{
+      const bits=targetBits(j);
+      if(!bits.length)return '目标 <b>能开机就行</b>';
+      return '目标 '+bits.map(b=>`<i class="tchip">${b}</i>`).join('');
+    })()}</div>
     <div class="mbChk" style="color:${fails.length?'#ffa3a3':'#8ff0b3'}">${
       fails.length?(fails.slice(0,3).map(f=>'✕ '+f.m).join('　')+(fails.length>3?`　等 ${fails.length} 项`:'')):'✓ 装机检查全部通过'}</div>`;
   bar.querySelectorAll('[data-sw]').forEach(b=>b.onclick=e=>{e.stopPropagation();switchJob(+b.dataset.sw);});
