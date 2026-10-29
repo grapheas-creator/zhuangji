@@ -8,6 +8,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="装机生意">
 <meta name="format-detection" content="telephone=no">
+<meta name="description" content="一间小店，一台台机器，一单单生意。装机 / 维修 / 二手配件经营模拟。">
+<meta property="og:title" content="装机生意">
+<meta property="og:description" content="一间小店，一台台机器，一单单生意。">
+<meta property="og:type" content="website">
+<meta name="referrer" content="no-referrer">
 <title>装机生意</title>
 <style>
 :root{color-scheme:dark;
@@ -24,6 +29,14 @@
 .lowfx .tBg svg{transform:none!important}
 .lowfx .coachHole::after{display:none!important}
 
+/* ---------- 微信内嵌浏览器 ---------- */
+html.wx,html.wx body{overscroll-behavior:none;-webkit-overflow-scrolling:auto}
+html.wx body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+html.wx input,html.wx textarea{-webkit-user-select:text;user-select:text}
+/* 微信底部工具条会压缩视口：全屏层用 100% 而不是 100vh */
+html.wx .titleScr,html.wx .coach,html.wx .mask{height:100%}
+/* 微信里长按不弹菜单（避免误触「保存图片/在浏览器打开」） */
+html.wx img,html.wx svg{-webkit-touch-callout:none}
 /* ---------- iOS / 全面屏适配 ---------- */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{
@@ -1707,7 +1720,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00001</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00002</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1925,7 +1938,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00001';
+const APP_BUILD='00002';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -1941,6 +1954,7 @@ function syncModalLock(){
 function watchModals(){
   try{
     const ua=navigator.userAgent||'';
+    if(/MicroMessenger/i.test(ua))document.documentElement.classList.add('wx');
     if(/Quark|UCBrowser|QQBrowser|MQQBrowser|baiduboxapp/i.test(ua)){
       document.documentElement.classList.add('lowfx');
       document.body.classList.add('lowfx');
