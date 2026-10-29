@@ -1724,7 +1724,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00010</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00011</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1942,7 +1942,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00010';
+const APP_BUILD='00011';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -2296,186 +2296,7 @@ const CASE_TYPE=[['薄铁皮办公箱',['MATX'],280,150,0,2,75],['M-ATX 入门�
 ['ITX 开放式',['ITX'],330,160,0,1,350],['ATX 中塔入门',['ATX','MATX','ITX'],330,160,240,3,180],
 ['ATX 中塔主流',['ATX','MATX','ITX'],380,170,360,3,380],['ATX 海景房',['EATX','ATX','MATX','ITX'],420,167,420,3,850],
 ['全塔入门',['EATX','ATX','MATX'],400,180,360,6,500],['全塔高端',['EATX','ATX','MATX'],430,190,420,6,2200]];
-/* 真实在售机箱：2026-10 天猫「机箱」搜索页截图逐条抄录（价格取当时首单价/补贴后）
-   共 170 款，覆盖 27 – 930 元。ff=支持板型 mg=显卡限长 mc=散热限高 rad=最大冷排 bay=硬盘位 */
-const K=[
-  {n:'九尾狐 3号机箱',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:27},
-  {n:'九尾狐 U1',ff:['MATX','ITX'],mg:280,mc:70,rad:0,bay:1,p:27},
-  {n:'九尾狐 1号机箱',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:28},
-  {n:'九尾狐 H1',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:29},
-  {n:'九尾狐 H3',ff:['ATX','MATX','ITX'],mg:320,mc:160,rad:0,bay:2,p:30},
-  {n:'九尾狐 U2',ff:['MATX','ITX'],mg:300,mc:70,rad:0,bay:1,p:30},
-  {n:'积至 家悦X1',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:34},
-  {n:'积至 迷你台式 MATX',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:39},
-  {n:'鑫桂盟 迷你台式',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:39},
-  {n:'积至 灵悦',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:40},
-  {n:'积至 EVESKY M-ATX 四USB',ff:['MATX','ITX'],mg:260,mc:150,rad:0,bay:2,p:40},
-  {n:'EATX 加厚开放式机架',ff:['EATX','ATX','MATX','ITX'],mg:400,mc:175,rad:0,bay:1,p:41},
-  {n:'巧美 ITX 开放式机架',ff:['ITX'],mg:330,mc:70,rad:0,bay:1,p:42},
-  {n:'巧美 mini ITX 17×17',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:44},
-  {n:'巧美 Q31 ITX',ff:['ITX'],mg:185,mc:50,rad:0,bay:1,p:46},
-  {n:'九尾狐 H2',ff:['ATX','MATX'],mg:330,mc:160,rad:0,bay:2,p:46},
-  {n:'九尾狐 U8',ff:['MATX','ITX'],mg:300,mc:160,rad:240,bay:2,p:48},
-  {n:'九尾狐 T8 海景房',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:48},
-  {n:'巧美 ITX 立卧两用',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:49},
-  {n:'巧美 Q36 ITX',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:50},
-  {n:'积至 机遇007',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:50},
-  {n:'迅钛 玄武 MINI 海景房',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:50},
-  {n:'九尾狐 H6',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:50},
-  {n:'九尾狐 V200',ff:['ATX','MATX','ITX'],mg:340,mc:165,rad:240,bay:2,p:53},
-  {n:'九尾狐 T13',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:53},
-  {n:'巧美 A4 ITX',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:56},
-  {n:'巧美 冰激凌 ITX',ff:['ITX'],mg:185,mc:47,rad:0,bay:1,p:56},
-  {n:'硕一 麻雀 V200',ff:['MATX','ITX'],mg:280,mc:160,rad:0,bay:2,p:57},
-  {n:'巧美 卧室 ITX',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:57},
-  {n:'巧美 ITX 1U 立式',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:57},
-  {n:'巧美 巴掌大 ITX',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:59},
-  {n:'九尾狐 T4',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:59},
-  {n:'九尾狐 海景房',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:59},
-  {n:'九尾狐 T07',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:59},
-  {n:'大水牛 商悦 ATX',ff:['ATX','MATX'],mg:280,mc:155,rad:240,bay:2,p:60},
-  {n:'迅钛 玄武 MINI 全景房',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:60},
-  {n:'迅钛 平头哥 M5',ff:['MATX','ITX'],mg:300,mc:165,rad:0,bay:2,p:60},
-  {n:'积至 黑骑士',ff:['ATX','MATX'],mg:330,mc:165,rad:240,bay:2,p:60},
-  {n:'巧美 小冰块 ITX',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:62},
-  {n:'迅钛 问境 M2',ff:['MATX','ITX'],mg:300,mc:160,rad:0,bay:2,p:64},
-  {n:'硕一 麻雀 V5 Pro',ff:['MATX','ITX'],mg:280,mc:160,rad:0,bay:2,p:65},
-  {n:'迅钛 商睿',ff:['MATX','ITX'],mg:300,mc:160,rad:0,bay:2,p:65},
-  {n:'巧美 185mm 独显 ITX',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:65},
-  {n:'鱼巢 M240 海景房',ff:['MATX','ITX'],mg:320,mc:160,rad:240,bay:2,p:67},
-  {n:'巧美 核显办公 ITX',ff:['ITX'],mg:0,mc:47,rad:0,bay:1,p:68},
-  {n:'巧美 卧式迷你 ITX',ff:['ITX'],mg:185,mc:70,rad:0,bay:1,p:68},
-  {n:'升技 i29',ff:['ITX','MATX'],mg:300,mc:70,rad:0,bay:1,p:69},
-  {n:'积至 凌至',ff:['ATX','MATX'],mg:330,mc:165,rad:240,bay:2,p:69},
-  {n:'九尾狐 T2',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:69},
-  {n:'积至 机遇003',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:70},
-  {n:'积至 扬天 M3',ff:['MATX','ITX'],mg:300,mc:150,rad:0,bay:2,p:70},
-  {n:'迅钛 非凡大师',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:70},
-  {n:'积至 无立柱全景 mini',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:70},
-  {n:'迅钛 海景房 360',ff:['MATX','ITX'],mg:350,mc:165,rad:360,bay:2,p:70},
-  {n:'航嘉 暮光',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:70},
-  {n:'硕一 麻雀 V100',ff:['MATX','ITX'],mg:280,mc:160,rad:0,bay:1,p:73},
-  {n:'巧美 1U 迷你',ff:['ITX'],mg:200,mc:60,rad:0,bay:1,p:73},
-  {n:'AOC CG251B',ff:['MATX','ITX'],mg:290,mc:160,rad:0,bay:2,p:79},
-  {n:'积至 钢铁侠',ff:['MATX','ITX'],mg:330,mc:160,rad:0,bay:2,p:80},
-  {n:'航嘉 S900 沙尘暴',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:80},
-  {n:'酷鱼 迷你 ITX',ff:['ITX'],mg:220,mc:60,rad:0,bay:1,p:84},
-  {n:'积至 坦克 侧透',ff:['ATX','MATX','ITX'],mg:340,mc:165,rad:240,bay:2,p:89},
-  {n:'九尾狐 H6 高配版',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:92},
-  {n:'九尾狐 T15',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:92},
-  {n:'硕一 M1/M5 手提',ff:['MATX','ITX'],mg:260,mc:160,rad:0,bay:1,p:97},
-  {n:'航嘉 星越',ff:['ATX','MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:101},
-  {n:'京特尔 G100 ITX',ff:['ITX'],mg:200,mc:60,rad:0,bay:1,p:101},
-  {n:'航嘉 S900 全景版',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:102},
-  {n:'航嘉 GS400C',ff:['ATX','MATX'],mg:340,mc:170,rad:240,bay:2,p:103},
-  {n:'乔思伯 D31 MESH',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:105},
-  {n:'巧美 NAS 三盘位',ff:['ITX'],mg:200,mc:70,rad:0,bay:3,p:107},
-  {n:'巧美 小方块 Pro 14L',ff:['ITX'],mg:330,mc:135,rad:0,bay:2,p:107},
-  {n:'华南金牌 双路海景房',ff:['EATX','ATX','MATX'],mg:420,mc:170,rad:240,bay:3,p:108},
-  {n:'爱国者 V60',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
-  {n:'金河田 预见 FM01',ff:['ATX','MATX','ITX'],mg:340,mc:165,rad:240,bay:2,p:109},
-  {n:'金河田 简誉 墨屿',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
-  {n:'航嘉 超越',ff:['MATX','ITX'],mg:320,mc:165,rad:240,bay:2,p:109},
-  {n:'Sahara 太空舱 3 Pro',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:240,bay:3,p:109},
-  {n:'航嘉 赛亚人 S3',ff:['ATX','MATX'],mg:350,mc:170,rad:240,bay:3,p:109},
-  {n:'百盛 T600',ff:['MATX','ITX'],mg:330,mc:165,rad:360,bay:2,p:109},
-  {n:'酷冷魔神 X70 Pro',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
-  {n:'酷玩者 Mesh',ff:['MATX','ITX'],mg:325,mc:160,rad:240,bay:2,p:109},
-  {n:'Tt 启航者 S5 mini',ff:['ATX','MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
-  {n:'AOC CG391',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:109},
-  {n:'机械大叔 G40 K39',ff:['ITX'],mg:195,mc:55,rad:0,bay:1,p:109},
-  {n:'巧美 小立方 8.8L',ff:['ITX','MATX'],mg:220,mc:135,rad:0,bay:1,p:111},
-  {n:'鑫谷 无尽 Pro+',ff:['EATX','ATX','MATX'],mg:400,mc:170,rad:360,bay:3,p:111},
-  {n:'先马 小朱雀',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:112},
-  {n:'巧美 小方块 ITX 侧透',ff:['ITX'],mg:240,mc:135,rad:240,bay:1,p:112},
-  {n:'航嘉 G5',ff:['ATX','MATX','ITX'],mg:340,mc:170,rad:240,bay:2,p:115},
-  {n:'爱国者 A15',ff:['ATX','MATX','ITX'],mg:340,mc:170,rad:240,bay:2,p:117},
-  {n:'爱国者 JV13',ff:['MATX','ITX'],mg:320,mc:165,rad:240,bay:2,p:118},
-  {n:'航嘉 S960',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:240,bay:3,p:117},
-  {n:'雷利酷 旷野 M3',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:117},
-  {n:'航嘉 BU420',ff:['MATX','ITX'],mg:300,mc:160,rad:0,bay:2,p:117},
-  {n:'Tt 金刚 Mini',ff:['ITX'],mg:280,mc:70,rad:0,bay:1,p:118},
-  {n:'硕一 U300',ff:['MATX','ITX'],mg:310,mc:135,rad:0,bay:1,p:119},
-  {n:'SUMTAX 迅钛 VP500',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:119},
-  {n:'金河田 简誉 昊',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:119},
-  {n:'酷冷魔神 X80',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:119},
-  {n:'航嘉 BU550',ff:['ATX','MATX'],mg:340,mc:170,rad:240,bay:2,p:124},
-  {n:'九尾狐 C3',ff:['ATX','MATX','ITX'],mg:350,mc:170,rad:240,bay:3,p:137},
-  {n:'航嘉 S920 暴风雪',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:240,bay:3,p:148},
-  {n:'AOC CG261',ff:['ATX','MATX','ITX'],mg:295,mc:165,rad:240,bay:2,p:149},
-  {n:'先马 平头哥 M1',ff:['MATX','ITX'],mg:375,mc:165,rad:240,bay:2,p:150},
-  {n:'积至 全景海景房',ff:['MATX','ITX'],mg:330,mc:165,rad:360,bay:2,p:150},
-  {n:'固而美 ITX 迷你铝',ff:['ITX'],mg:180,mc:60,rad:0,bay:1,p:175},
-  {n:'金河田 简誉 极',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:184},
-  {n:'RealDiy 无尽G+ 橘影橙',ff:['ATX','MATX','ITX'],mg:400,mc:170,rad:360,bay:3,p:256},
-  {n:'巧美 大旋风 N3 12盘',ff:['ITX','MATX'],mg:280,mc:145,rad:0,bay:12,p:266},
-  {n:'4盘位热插拔 NAS',ff:['ITX','MATX'],mg:250,mc:145,rad:0,bay:4,p:269},
-  {n:'Sahara 太空舱 3',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:279},
-  {n:'玩嘉 孤勇者 雪',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:599},
-  {n:'酷冷至尊 MF400 Mesh',ff:['MATX','ITX'],mg:380,mc:170,rad:240,bay:2,p:722},
-  {n:'酷冷至尊 MF500 Mesh',ff:['EATX','ATX','MATX'],mg:420,mc:180,rad:360,bay:4,p:930},
-  {n:'爱国者 YOGO T21 ATX',ff:['ATX','MATX','ITX'],mg:400,mc:170,rad:360,bay:3,p:239},
-  {n:'航嘉 S980 海景房',ff:['ATX','MATX','ITX'],mg:420,mc:175,rad:360,bay:4,p:239},
-  {n:'先马 黑洞PRO 黑洞X',ff:['ATX','MATX'],mg:380,mc:170,rad:240,bay:3,p:249},
-  {n:'硕一 鲲鹏 CH+ 曲面玻璃',ff:['ATX','MATX','ITX'],mg:420,mc:175,rad:360,bay:3,p:240},
-  {n:'硕一 V930 全景',ff:['MATX','ITX'],mg:400,mc:165,rad:360,bay:3,p:240},
-  {n:'硕一 鲲鹏 CH8+ 8N',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:250},
-  {n:'巧美 M3 mini 侧透',ff:['ITX','MATX'],mg:330,mc:160,rad:240,bay:2,p:245},
-  {n:'九尾狐 D1',ff:['ATX','MATX'],mg:380,mc:170,rad:240,bay:3,p:247},
-  {n:'航嘉 BU450 商用箱',ff:['MATX','ITX'],mg:330,mc:165,rad:0,bay:2,p:246},
-  {n:'巧美 NAS 12 盘位',ff:['ITX','MATX'],mg:280,mc:145,rad:0,bay:12,p:259},
-  {n:'硕一 鲲鹏 CH9L',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:254},
-  {n:'X 游戏帝国 F36',ff:['MATX','ITX'],mg:400,mc:165,rad:360,bay:3,p:254},
-  {n:'酷冷至尊 ELITE450',ff:['MATX','ITX'],mg:360,mc:165,rad:360,bay:2,p:256},
-  {n:'金河田 逐风 360 水冷',ff:['MATX','ITX'],mg:400,mc:165,rad:360,bay:3,p:255},
-  {n:'九尾狐 T10 高配',ff:['ATX','MATX'],mg:400,mc:170,rad:360,bay:3,p:267},
-  {n:'九尾狐 T12',ff:['ATX','MATX'],mg:400,mc:170,rad:240,bay:3,p:268},
-  {n:'九尾狐 T16',ff:['ATX','MATX'],mg:400,mc:170,rad:240,bay:3,p:267},
-  {n:'动力火车 御浪 EATX',ff:['EATX','ATX','MATX'],mg:430,mc:180,rad:360,bay:4,p:268},
-  {n:'联力 L216 中塔',ff:['ATX','MATX','ITX'],mg:400,mc:170,rad:360,bay:3,p:269},
-  {n:'迅钛 玄武 MINI 海景房 高配',ff:['MATX','ITX'],mg:350,mc:165,rad:240,bay:2,p:270},
-  {n:'闪鳞 G380 手提',ff:['MATX','ITX'],mg:365,mc:165,rad:240,bay:2,p:276},
-  {n:'鱼巢 S5MAX-V20',ff:['MATX','ITX'],mg:338,mc:135,rad:240,bay:2,p:288},
-  {n:'爱国者 星璨 岚/小岚',ff:['MATX','ITX'],mg:370,mc:165,rad:240,bay:2,p:289},
-  {n:'爱国者 星璨霄 Air',ff:['ATX','MATX','ITX'],mg:420,mc:175,rad:360,bay:4,p:289},
-  {n:'鱼巢 S5 PRO 背线',ff:['MATX','ITX'],mg:350,mc:160,rad:240,bay:2,p:293},
-  {n:'金河田 极 Pro',ff:['ATX','MATX'],mg:400,mc:170,rad:240,bay:3,p:295},
-  {n:'联力 飒 01 行政箱',ff:['ATX','MATX','ITX'],mg:400,mc:170,rad:360,bay:3,p:299},
-  {n:'瓦尔基里 VK03 触屏',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:3,p:299},
-  {n:'AOC CG420B',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:3,p:299},
-  {n:'金河田 幻屿 海景房',ff:['MATX','ITX'],mg:400,mc:170,rad:360,bay:3,p:304},
-  {n:'航嘉 BU550 商务版',ff:['ATX','MATX'],mg:350,mc:175,rad:0,bay:3,p:306},
-  {n:'瓦尔基里 VK03M 曲面',ff:['MATX','ITX'],mg:400,mc:170,rad:360,bay:3,p:319},
-  {n:'九尾狐 星耀 PRO',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:324},
-  {n:'银欣 SG02 HTPC 卧式',ff:['MATX','ITX'],mg:300,mc:120,rad:0,bay:1,p:356},
-  {n:'爱国者 扶摇千里',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:409},
-  {n:'硕一 鲲鹏 CH1+',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:409},
-  {n:'动力火车 臻界 G3',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:414},
-  {n:'微星 碉堡 海景房',ff:['MATX','ITX'],mg:420,mc:175,rad:360,bay:3,p:423},
-  {n:'先马 平头哥 M9',ff:['MATX','ITX'],mg:400,mc:165,rad:360,bay:3,p:428},
-  {n:'联力 VISION M 包豪斯',ff:['MATX','ITX'],mg:420,mc:175,rad:360,bay:3,p:429},
-  {n:'联力 O11D MINI V2',ff:['ATX','MATX','ITX'],mg:420,mc:175,rad:360,bay:4,p:449},
-  {n:'乔思伯 D300 海景房',ff:['MATX','ITX'],mg:420,mc:175,rad:360,bay:3,p:455},
-  {n:'技嘉 C103G 中塔',ff:['ATX','MATX'],mg:420,mc:180,rad:360,bay:4,p:460},
-  {n:'超频三 创界 C3N300',ff:['MATX','ITX'],mg:380,mc:170,rad:360,bay:3,p:463},
-  {n:'航嘉 GX750A 宽体',ff:['ATX','MATX'],mg:415,mc:165,rad:360,bay:3,p:465},
-  {n:'利民 A70 V2',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:479},
-  {n:'先马 颜之神 Mesh',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:479},
-  {n:'华硕 PA602 创梦',ff:['ATX','MATX'],mg:450,mc:185,rad:420,bay:4,p:489},
-  {n:'爱国者 星璨霄 背插',ff:['ATX','MATX'],mg:450,mc:185,rad:360,bay:4,p:489},
-  {n:'微星 300R/L PZ 悬浮',ff:['ATX','MATX'],mg:420,mc:180,rad:360,bay:4,p:508},
-  {n:'乔思伯 D33 玻璃侧透',ff:['MATX','ITX'],mg:420,mc:175,rad:360,bay:3,p:572},
-  {n:'航嘉 S980 暴风雪',ff:['ATX','MATX'],mg:440,mc:180,rad:360,bay:4,p:568},
-  {n:'分形工艺 Epoch',ff:['ATX','MATX'],mg:430,mc:180,rad:360,bay:4,p:599},
-  {n:'追风者 XT523',ff:['ATX','MATX'],mg:420,mc:175,rad:360,bay:4,p:649},
-  {n:'爱国者 御风 F90',ff:['ATX','MATX'],mg:450,mc:185,rad:360,bay:4,p:699}
-];
-/* 二手价：新价的 42%–56%，最低 15（机箱是二手市场贬值最快的大件之一） */
-K.forEach(k=>{
-  const ru=rngFrom(hash('ku2'+k.n))();
-  k.u=Math.max(15,Math.min(360,Math.round(k.p*(0.42+ru*0.14))));
-});
-
+const K=[];   /* 机箱数据统一由下面的 REAL_CASES 提供（见「真实型号覆盖」段） */
 const COOL_TYPE=[['廉价下压散热（60W级）',60,48,0,10],['原装风冷（70W级）',70,52,0,18],['双热管下压（95W）',95,55,0,35],
 ['四热管单塔（130W）',130,150,0,65],['六热管单塔（180W）',180,160,0,100],['双塔风冷（250W）',250,165,0,130],
 ['240 一体水冷（220W）',220,0,240,280],['360 一体水冷（320W）',320,0,360,450]];
@@ -2492,10 +2313,11 @@ COOL_BRANDS.forEach((br)=>COOL_TYPE.forEach(([tn,cap,h,rad,base],ti)=>{
 .forEach(([n,cap,h,rad,s,p])=>H.push({n,cap,h,rad,s,p:jitter(p,'hs'+n),u:jitter(R2(p*0.75,1),'hsu'+n)}));
 
 /* ===== 真实型号覆盖：清掉程序生成的机箱/散热，换成市面真实型号 ===== */
-const REAL_CASES=[{"n":"酷冷至尊 Q300L","ff":["MATX","ITX"],"mg":360,"mc":160,"rad":240,"bay":2,"p":179,"u":98},{"n":"酷冷至尊 MB400L","ff":["MATX","ITX"],"mg":344,"mc":166,"rad":240,"bay":2,"p":199,"u":109},{"n":"酷冷至尊 TD500 Mesh","ff":["ATX","MATX","ITX"],"mg":410,"mc":165,"rad":360,"bay":4,"p":399,"u":219},{"n":"先马 平头哥M2","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":129,"u":71},{"n":"先马 趣造","ff":["MATX","ITX"],"mg":320,"mc":158,"rad":240,"bay":2,"p":159,"u":87},{"n":"先马 黑洞5","ff":["ATX","MATX","ITX"],"mg":400,"mc":160,"rad":360,"bay":4,"p":249,"u":137},{"n":"先马 鲁班1","ff":["ATX","MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":4,"p":199,"u":109},{"n":"爱国者 星璨","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":119,"u":65},{"n":"爱国者 破晓X","ff":["ATX","MATX","ITX"],"mg":380,"mc":160,"rad":360,"bay":3,"p":199,"u":109},{"n":"爱国者 YOGO M2","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":159,"u":87},{"n":"乔思伯 D31","ff":["MATX","ITX"],"mg":330,"mc":168,"rad":240,"bay":2,"p":399,"u":219},{"n":"乔思伯 C6","ff":["ITX"],"mg":300,"mc":130,"rad":0,"bay":1,"p":269,"u":148},{"n":"乔思伯 A4","ff":["ITX"],"mg":320,"mc":130,"rad":240,"bay":1,"p":499,"u":274},{"n":"乔思伯 U4","ff":["ATX","MATX","ITX"],"mg":320,"mc":165,"rad":240,"bay":3,"p":299,"u":164},{"n":"追风者 G360A","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":4,"p":449,"u":247},{"n":"追风者 NV5","ff":["ATX","MATX","ITX"],"mg":440,"mc":180,"rad":360,"bay":4,"p":699,"u":384},{"n":"联力 216","ff":["ATX","MATX","ITX"],"mg":392,"mc":180,"rad":360,"bay":4,"p":499,"u":274},{"n":"联力 O11 Dynamic","ff":["ATX","MATX","ITX"],"mg":420,"mc":167,"rad":360,"bay":4,"p":699,"u":384},{"n":"长城 阿基米德KM-1","ff":["ATX","MATX","ITX"],"mg":380,"mc":160,"rad":360,"bay":3,"p":169,"u":93},{"n":"鑫谷 拉克斯","ff":["ATX","MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":4,"p":199,"u":109},{"n":"银欣 FARA R1","ff":["ATX","MATX","ITX"],"mg":380,"mc":165,"rad":360,"bay":3,"p":249,"u":137},{"n":"安钛克 NX200M","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":129,"u":71},{"n":"航嘉 S920","ff":["ATX","MATX","ITX"],"mg":390,"mc":160,"rad":360,"bay":3,"p":179,"u":98},{"n":"大水牛 追风者","ff":["MATX","ITX"],"mg":320,"mc":155,"rad":0,"bay":2,"p":89,"u":49},{"n":"金河田 预见N15","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":99,"u":54},{"n":"Tt 挑战者H3","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":159,"u":87},{"n":"NZXT H5 Flow","ff":["ATX","MATX","ITX"],"mg":365,"mc":165,"rad":360,"bay":4,"p":549,"u":302},{"n":"分形工艺 North","ff":["ATX","MATX","ITX"],"mg":355,"mc":170,"rad":360,"bay":4,"p":999,"u":549},{"n":"海盗船 4000D","ff":["ATX","MATX","ITX"],"mg":360,"mc":170,"rad":360,"bay":4,"p":599,"u":329},{"n":"乔思伯 N3 NAS","ff":["MATX","ITX"],"mg":220,"mc":160,"rad":0,"bay":8,"p":599,"u":329},{"n":"4U 服务器机箱","ff":["EATX","ATX","MATX"],"mg":350,"mc":175,"rad":360,"bay":8,"p":900,"u":495},{"n":"8 盘位工作站塔","ff":["EATX","ATX","MATX"],"mg":400,"mc":185,"rad":360,"bay":8,"p":1500,"u":825},{"n":"NAS 8 盘位机箱","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":8,"p":1200,"u":660},{"n":"NAS 12 盘位机箱","ff":["EATX","ATX"],"mg":380,"mc":175,"rad":360,"bay":12,"p":2200,"u":1210}];
+const REAL_CASES=[{"n":"九尾狐 3号机箱","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":27},{"n":"九尾狐 U1","ff":["MATX","ITX"],"mg":280,"mc":70,"rad":0,"bay":1,"p":27},{"n":"九尾狐 1号机箱","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":28},{"n":"九尾狐 H1","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":29},{"n":"九尾狐 H3","ff":["ATX","MATX","ITX"],"mg":320,"mc":160,"rad":0,"bay":2,"p":30},{"n":"九尾狐 U2","ff":["MATX","ITX"],"mg":300,"mc":70,"rad":0,"bay":1,"p":30},{"n":"积至 家悦X1","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":34},{"n":"积至 迷你台式 MATX","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":39},{"n":"鑫桂盟 迷你台式","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":39},{"n":"积至 灵悦","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":40},{"n":"积至 EVESKY M-ATX 四USB","ff":["MATX","ITX"],"mg":260,"mc":150,"rad":0,"bay":2,"p":40},{"n":"EATX 加厚开放式机架","ff":["EATX","ATX","MATX","ITX"],"mg":400,"mc":175,"rad":0,"bay":1,"p":41},{"n":"巧美 ITX 开放式机架","ff":["ITX"],"mg":330,"mc":70,"rad":0,"bay":1,"p":42},{"n":"巧美 mini ITX 17×17","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":44},{"n":"巧美 Q31 ITX","ff":["ITX"],"mg":185,"mc":50,"rad":0,"bay":1,"p":46},{"n":"九尾狐 H2","ff":["ATX","MATX"],"mg":330,"mc":160,"rad":0,"bay":2,"p":46},{"n":"九尾狐 U8","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":240,"bay":2,"p":48},{"n":"九尾狐 T8 海景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":48},{"n":"巧美 ITX 立卧两用","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":49},{"n":"巧美 Q36 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":50},{"n":"积至 机遇007","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":50},{"n":"迅钛 玄武 MINI 海景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":50},{"n":"九尾狐 H6","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":50},{"n":"九尾狐 V200","ff":["ATX","MATX","ITX"],"mg":340,"mc":165,"rad":240,"bay":2,"p":53},{"n":"九尾狐 T13","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":53},{"n":"巧美 A4 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":56},{"n":"巧美 冰激凌 ITX","ff":["ITX"],"mg":185,"mc":47,"rad":0,"bay":1,"p":56},{"n":"硕一 麻雀 V200","ff":["MATX","ITX"],"mg":280,"mc":160,"rad":0,"bay":2,"p":57},{"n":"巧美 卧室 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":57},{"n":"巧美 ITX 1U 立式","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":57},{"n":"巧美 巴掌大 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":59},{"n":"九尾狐 T4","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":59},{"n":"九尾狐 海景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":59},{"n":"九尾狐 T07","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":59},{"n":"大水牛 商悦 ATX","ff":["ATX","MATX"],"mg":280,"mc":155,"rad":240,"bay":2,"p":60},{"n":"迅钛 玄武 MINI 全景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":60},{"n":"迅钛 平头哥 M5","ff":["MATX","ITX"],"mg":300,"mc":165,"rad":0,"bay":2,"p":60},{"n":"积至 黑骑士","ff":["ATX","MATX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":60},{"n":"巧美 小冰块 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":62},{"n":"迅钛 问境 M2","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":0,"bay":2,"p":64},{"n":"硕一 麻雀 V5 Pro","ff":["MATX","ITX"],"mg":280,"mc":160,"rad":0,"bay":2,"p":65},{"n":"迅钛 商睿","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":0,"bay":2,"p":65},{"n":"巧美 185mm 独显 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":65},{"n":"鱼巢 M240 海景房","ff":["MATX","ITX"],"mg":320,"mc":160,"rad":240,"bay":2,"p":67},{"n":"巧美 核显办公 ITX","ff":["ITX"],"mg":0,"mc":47,"rad":0,"bay":1,"p":68},{"n":"巧美 卧式迷你 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":68},{"n":"升技 i29","ff":["ITX","MATX"],"mg":300,"mc":70,"rad":0,"bay":1,"p":69},{"n":"积至 凌至","ff":["ATX","MATX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":69},{"n":"九尾狐 T2","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":69},{"n":"积至 机遇003","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":70},{"n":"积至 扬天 M3","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":70},{"n":"迅钛 非凡大师","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":70},{"n":"积至 无立柱全景 mini","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":70},{"n":"迅钛 海景房 360","ff":["MATX","ITX"],"mg":350,"mc":165,"rad":360,"bay":2,"p":70},{"n":"航嘉 暮光","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":70},{"n":"硕一 麻雀 V100","ff":["MATX","ITX"],"mg":280,"mc":160,"rad":0,"bay":1,"p":73},{"n":"巧美 1U 迷你","ff":["ITX"],"mg":200,"mc":60,"rad":0,"bay":1,"p":73},{"n":"AOC CG251B","ff":["MATX","ITX"],"mg":290,"mc":160,"rad":0,"bay":2,"p":79},{"n":"积至 钢铁侠","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":0,"bay":2,"p":80},{"n":"航嘉 S900 沙尘暴","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":80},{"n":"酷鱼 迷你 ITX","ff":["ITX"],"mg":220,"mc":60,"rad":0,"bay":1,"p":84},{"n":"积至 坦克 侧透","ff":["ATX","MATX","ITX"],"mg":340,"mc":165,"rad":240,"bay":2,"p":89},{"n":"九尾狐 H6 高配版","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":92},{"n":"九尾狐 T15","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":92},{"n":"硕一 M1/M5 手提","ff":["MATX","ITX"],"mg":260,"mc":160,"rad":0,"bay":1,"p":97},{"n":"航嘉 星越","ff":["ATX","MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":101},{"n":"京特尔 G100 ITX","ff":["ITX"],"mg":200,"mc":60,"rad":0,"bay":1,"p":101},{"n":"航嘉 S900 全景版","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":102},{"n":"航嘉 GS400C","ff":["ATX","MATX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":103},{"n":"乔思伯 D31 MESH","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":105},{"n":"巧美 NAS 三盘位","ff":["ITX"],"mg":200,"mc":70,"rad":0,"bay":3,"p":107},{"n":"巧美 小方块 Pro 14L","ff":["ITX"],"mg":330,"mc":135,"rad":0,"bay":2,"p":107},{"n":"华南金牌 双路海景房","ff":["EATX","ATX","MATX"],"mg":420,"mc":170,"rad":240,"bay":3,"p":108},{"n":"爱国者 V60","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"金河田 预见 FM01","ff":["ATX","MATX","ITX"],"mg":340,"mc":165,"rad":240,"bay":2,"p":109},{"n":"金河田 简誉 墨屿","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"航嘉 超越","ff":["MATX","ITX"],"mg":320,"mc":165,"rad":240,"bay":2,"p":109},{"n":"Sahara 太空舱 3 Pro","ff":["ATX","MATX","ITX"],"mg":360,"mc":170,"rad":240,"bay":3,"p":109},{"n":"航嘉 赛亚人 S3","ff":["ATX","MATX"],"mg":350,"mc":170,"rad":240,"bay":3,"p":109},{"n":"百盛 T600","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":360,"bay":2,"p":109},{"n":"酷冷魔神 X70 Pro","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"酷玩者 Mesh","ff":["MATX","ITX"],"mg":325,"mc":160,"rad":240,"bay":2,"p":109},{"n":"Tt 启航者 S5 mini","ff":["ATX","MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"AOC CG391","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"机械大叔 G40 K39","ff":["ITX"],"mg":195,"mc":55,"rad":0,"bay":1,"p":109},{"n":"巧美 小立方 8.8L","ff":["ITX","MATX"],"mg":220,"mc":135,"rad":0,"bay":1,"p":111},{"n":"鑫谷 无尽 Pro+","ff":["EATX","ATX","MATX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":111},{"n":"先马 小朱雀","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":112},{"n":"巧美 小方块 ITX 侧透","ff":["ITX"],"mg":240,"mc":135,"rad":240,"bay":1,"p":112},{"n":"航嘉 G5","ff":["ATX","MATX","ITX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":115},{"n":"爱国者 A15","ff":["ATX","MATX","ITX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":117},{"n":"爱国者 JV13","ff":["MATX","ITX"],"mg":320,"mc":165,"rad":240,"bay":2,"p":118},{"n":"航嘉 S960","ff":["ATX","MATX","ITX"],"mg":360,"mc":170,"rad":240,"bay":3,"p":117},{"n":"雷利酷 旷野 M3","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":117},{"n":"航嘉 BU420","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":0,"bay":2,"p":117},{"n":"Tt 金刚 Mini","ff":["ITX"],"mg":280,"mc":70,"rad":0,"bay":1,"p":118},{"n":"硕一 U300","ff":["MATX","ITX"],"mg":310,"mc":135,"rad":0,"bay":1,"p":119},{"n":"SUMTAX 迅钛 VP500","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":119},{"n":"金河田 简誉 昊","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":119},{"n":"酷冷魔神 X80","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":119},{"n":"航嘉 BU550","ff":["ATX","MATX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":124},{"n":"九尾狐 C3","ff":["ATX","MATX","ITX"],"mg":350,"mc":170,"rad":240,"bay":3,"p":137},{"n":"航嘉 S920 暴风雪","ff":["ATX","MATX","ITX"],"mg":360,"mc":170,"rad":240,"bay":3,"p":148},{"n":"AOC CG261","ff":["ATX","MATX","ITX"],"mg":295,"mc":165,"rad":240,"bay":2,"p":149},{"n":"先马 平头哥 M1","ff":["MATX","ITX"],"mg":375,"mc":165,"rad":240,"bay":2,"p":150},{"n":"积至 全景海景房","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":360,"bay":2,"p":150},{"n":"固而美 ITX 迷你铝","ff":["ITX"],"mg":180,"mc":60,"rad":0,"bay":1,"p":175},{"n":"金河田 简誉 极","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":184},{"n":"RealDiy 无尽G+ 橘影橙","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":256},{"n":"巧美 大旋风 N3 12盘","ff":["ITX","MATX"],"mg":280,"mc":145,"rad":0,"bay":12,"p":266},{"n":"4盘位热插拔 NAS","ff":["ITX","MATX"],"mg":250,"mc":145,"rad":0,"bay":4,"p":269},{"n":"Sahara 太空舱 3","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":279},{"n":"玩嘉 孤勇者 雪","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":599},{"n":"酷冷至尊 MF400 Mesh","ff":["MATX","ITX"],"mg":380,"mc":170,"rad":240,"bay":2,"p":722},{"n":"酷冷至尊 MF500 Mesh","ff":["EATX","ATX","MATX"],"mg":420,"mc":180,"rad":360,"bay":4,"p":930},{"n":"爱国者 YOGO T21 ATX","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":239},{"n":"航嘉 S980 海景房","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":239},{"n":"先马 黑洞PRO 黑洞X","ff":["ATX","MATX"],"mg":380,"mc":170,"rad":240,"bay":3,"p":249},{"n":"硕一 鲲鹏 CH+ 曲面玻璃","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":240},{"n":"硕一 V930 全景","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":240},{"n":"硕一 鲲鹏 CH8+ 8N","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":250},{"n":"巧美 M3 mini 侧透","ff":["ITX","MATX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":245},{"n":"九尾狐 D1","ff":["ATX","MATX"],"mg":380,"mc":170,"rad":240,"bay":3,"p":247},{"n":"航嘉 BU450 商用箱","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":0,"bay":2,"p":246},{"n":"巧美 NAS 12 盘位","ff":["ITX","MATX"],"mg":280,"mc":145,"rad":0,"bay":12,"p":259},{"n":"硕一 鲲鹏 CH9L","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":254},{"n":"X 游戏帝国 F36","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":254},{"n":"酷冷至尊 ELITE450","ff":["MATX","ITX"],"mg":360,"mc":165,"rad":360,"bay":2,"p":256},{"n":"金河田 逐风 360 水冷","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":255},{"n":"九尾狐 T10 高配","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":267},{"n":"九尾狐 T12","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":240,"bay":3,"p":268},{"n":"九尾狐 T16","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":240,"bay":3,"p":267},{"n":"动力火车 御浪 EATX","ff":["EATX","ATX","MATX"],"mg":430,"mc":180,"rad":360,"bay":4,"p":268},{"n":"联力 L216 中塔","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":269},{"n":"迅钛 玄武 MINI 海景房 高配","ff":["MATX","ITX"],"mg":350,"mc":165,"rad":240,"bay":2,"p":270},{"n":"闪鳞 G380 手提","ff":["MATX","ITX"],"mg":365,"mc":165,"rad":240,"bay":2,"p":276},{"n":"鱼巢 S5MAX-V20","ff":["MATX","ITX"],"mg":338,"mc":135,"rad":240,"bay":2,"p":288},{"n":"爱国者 星璨 岚/小岚","ff":["MATX","ITX"],"mg":370,"mc":165,"rad":240,"bay":2,"p":289},{"n":"爱国者 星璨霄 Air","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":289},{"n":"鱼巢 S5 PRO 背线","ff":["MATX","ITX"],"mg":350,"mc":160,"rad":240,"bay":2,"p":293},{"n":"金河田 极 Pro","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":240,"bay":3,"p":295},{"n":"联力 飒 01 行政箱","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":299},{"n":"瓦尔基里 VK03 触屏","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":299},{"n":"AOC CG420B","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":299},{"n":"金河田 幻屿 海景房","ff":["MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":304},{"n":"航嘉 BU550 商务版","ff":["ATX","MATX"],"mg":350,"mc":175,"rad":0,"bay":3,"p":306},{"n":"瓦尔基里 VK03M 曲面","ff":["MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":319},{"n":"九尾狐 星耀 PRO","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":324},{"n":"银欣 SG02 HTPC 卧式","ff":["MATX","ITX"],"mg":300,"mc":120,"rad":0,"bay":1,"p":356},{"n":"爱国者 扶摇千里","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":409},{"n":"硕一 鲲鹏 CH1+","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":409},{"n":"动力火车 臻界 G3","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":414},{"n":"微星 碉堡 海景房","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":423},{"n":"先马 平头哥 M9","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":428},{"n":"联力 VISION M 包豪斯","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":429},{"n":"联力 O11D MINI V2","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":449},{"n":"乔思伯 D300 海景房","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":455},{"n":"技嘉 C103G 中塔","ff":["ATX","MATX"],"mg":420,"mc":180,"rad":360,"bay":4,"p":460},{"n":"超频三 创界 C3N300","ff":["MATX","ITX"],"mg":380,"mc":170,"rad":360,"bay":3,"p":463},{"n":"航嘉 GX750A 宽体","ff":["ATX","MATX"],"mg":415,"mc":165,"rad":360,"bay":3,"p":465},{"n":"利民 A70 V2","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":479},{"n":"先马 颜之神 Mesh","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":479},{"n":"华硕 PA602 创梦","ff":["ATX","MATX"],"mg":450,"mc":185,"rad":420,"bay":4,"p":489},{"n":"爱国者 星璨霄 背插","ff":["ATX","MATX"],"mg":450,"mc":185,"rad":360,"bay":4,"p":489},{"n":"微星 300R/L PZ 悬浮","ff":["ATX","MATX"],"mg":420,"mc":180,"rad":360,"bay":4,"p":508},{"n":"乔思伯 D33 玻璃侧透","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":572},{"n":"航嘉 S980 暴风雪","ff":["ATX","MATX"],"mg":440,"mc":180,"rad":360,"bay":4,"p":568},{"n":"分形工艺 Epoch","ff":["ATX","MATX"],"mg":430,"mc":180,"rad":360,"bay":4,"p":599},{"n":"追风者 XT523","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":649},{"n":"爱国者 御风 F90","ff":["ATX","MATX"],"mg":450,"mc":185,"rad":360,"bay":4,"p":699}];
 const REAL_COOLS=[{"n":"酷冷至尊 T400i","cap":150,"h":155,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","AM4","AM5"],"p":89,"u":53},{"n":"利民 AX120 R SE","cap":160,"h":155,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","AM4","AM5"],"p":79,"u":47},{"n":"利民 AK120","cap":180,"h":155,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":129,"u":77},{"n":"利民 PA120","cap":220,"h":157,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":199,"u":119},{"n":"利民 FC140","cap":265,"h":158,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":299,"u":179},{"n":"九州风神 玄冰400","cap":130,"h":158,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","AM4"],"p":69,"u":41},{"n":"九州风神 大霜塔V5","cap":250,"h":158,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":229,"u":137},{"n":"九州风神 AK620","cap":240,"h":160,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":249,"u":149},{"n":"超频三 红海H4","cap":120,"h":145,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","AM4"],"p":49,"u":29},{"n":"超频三 蜂鸟H3","cap":160,"h":150,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":89,"u":53},{"n":"乔思伯 CR-1000","cap":130,"h":150,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","AM4"],"p":79,"u":47},{"n":"乔思伯 CR-2000","cap":200,"h":160,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":159,"u":95},{"n":"猫头鹰 NH-D15","cap":250,"h":165,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":749,"u":449},{"n":"猫头鹰 NH-U12S","cap":180,"h":158,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":549,"u":329},{"n":"雅浚 B3","cap":160,"h":153,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":89,"u":53},{"n":"采融 风神AQ","cap":200,"h":155,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":129,"u":77},{"n":"大镰刀 无限5","cap":240,"h":158,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":199,"u":119},{"n":"ID-COOLING SE-224","cap":180,"h":154,"rad":0,"s":["LGA1700","LGA1200","AM4","AM5"],"p":99,"u":59},{"n":"利民 水冷 240","cap":250,"h":55,"rad":240,"s":["LGA1700","LGA1200","AM4","AM5"],"p":299,"u":179},{"n":"利民 水冷 360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1200","AM4","AM5"],"p":469,"u":281},{"n":"九州风神 冰堡垒360","cap":320,"h":55,"rad":360,"s":["LGA1700","LGA1200","AM4","AM5"],"p":799,"u":479},{"n":"瓦尔基里 E360","cap":350,"h":55,"rad":360,"s":["LGA1700","LGA1200","AM4","AM5"],"p":999,"u":599},{"n":"恩杰 Kraken 240","cap":280,"h":55,"rad":240,"s":["LGA1700","LGA1200","AM4","AM5"],"p":999,"u":599},{"n":"酷冷至尊 ML240L","cap":250,"h":55,"rad":240,"s":["LGA1700","LGA1200","AM4","AM5"],"p":449,"u":269},{"n":"超频三 巨浪360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1200","AM4","AM5"],"p":399,"u":239},{"n":"乔思伯 HX6250","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1200","AM4","AM5"],"p":599,"u":359},{"n":"先马 XW240","cap":250,"h":55,"rad":240,"s":["LGA1700","LGA1200","AM4","AM5"],"p":299,"u":179},{"n":"追风者 冰灵360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1200","AM4","AM5"],"p":699,"u":419},{"n":"几何未来 M360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1200","AM4","AM5"],"p":599,"u":359},{"n":"酷冷至尊 暴雪T520","cap":180,"h":158,"rad":0,"s":["LGA1700","LGA1200","AM4"],"p":169,"u":101}];
 const REAL_COOLS_EXTRA=[{"n":"服务器风冷 SP3","cap":400,"h":120,"rad":0,"s":["SP3","SP5","LGA2011","LGA2011-3"],"p":400,"u":300},{"n":"服务器风冷 SP5","cap":450,"h":125,"rad":0,"s":["SP3","SP5"],"p":600,"u":450},{"n":"LGA2011 专用风冷","cap":300,"h":140,"rad":0,"s":["LGA2011","LGA2011-3"],"p":300,"u":225}];
 K.length=0;REAL_CASES.forEach(x=>K.push(x));
+K.forEach(k=>{const ru=rngFrom(hash('ku2'+k.n))();k.u=Math.max(15,Math.min(360,Math.round(k.p*(0.42+ru*0.14))));});
 H.length=0;REAL_COOLS.forEach(x=>H.push(x));REAL_COOLS_EXTRA.forEach(x=>H.push(x));
 const ST=[];
 ['三星','西部数据','金士顿','致态','铠侠','英睿达','光威','梵想','雷克沙','影驰','海康威视','联想','惠普','东芝','建兴','闪迪'].forEach((br)=>{
