@@ -1865,7 +1865,7 @@ html.qqblock body{overflow:hidden}
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.11.5.00024</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.11.5.00025</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -2040,7 +2040,7 @@ html.qqblock body{overflow:hidden}
       <button class="tBtn" id="tLoad">读档</button>
     </div>
 
-    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.11.5.00024</span></div>
+    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.11.5.00025</span></div>
   </div>
   <div class="tMark">一只白玉菇</div>
 </div>
@@ -2093,7 +2093,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00024';
+const APP_BUILD='00025';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -4913,7 +4913,7 @@ function tutInstallEl(it){
   return box||document.querySelector('#benchBox');
 }
 function tutParts(){const t=state.tut||(state.tut={done:{},hidden:false});t.bought=t.bought||{};t.parts=t.parts||{};return t;}
-let _coachKey=null,_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null;
+let _coachKey=null,_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null,_coachEl=null,_coachPageSyncT=null;
 
 
 /* 引导锁：第一天引导没走完时，只能点引导指的控件 */
@@ -4993,7 +4993,7 @@ function coachStep(){
   if(!d.close)return {k:'close',title:'打烊',text:'今天的单处理完，点右上角「打烊」进第二天。',sel:()=>document.getElementById('btnClose')};
   return null;
 }
-function coachHide(){const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;}
+function coachHide(){const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachEl=null;}
 let _coachGlowEl=null;
 function coachGlow(el){
   if(_coachGlowEl===el)return;
@@ -5053,7 +5053,7 @@ function drawCoach(el,step){
     if(_tt&&_tt.textContent!==step.title)_tt.textContent=step.title;
     if(_tx&&_tx.textContent!==step.text)_tx.textContent=step.text;
   }
-  c.classList.add('on');_coachKey=step.k;
+  c.classList.add('on');_coachKey=step.k;_coachEl=el;
   coachWatchScroll();
   if(stepChanged){
     setTimeout(()=>{try{coachReposition(step);}catch(e){}},420);
@@ -5396,7 +5396,12 @@ function coachRefresh(){
      之后玩家自己点去别处（比如点仓库），不能被引导反复拽回来 */
   if(_coachForcedStep!==step.k){
     _coachForcedStep=step.k;
-    if(coachGo(step))return;
+    if(coachGo(step)){
+      /* 只切页、不补画一次的话，光圈会停在上一页的目标上（文字是新的、框是旧的）。
+         这里固定补一拍，切完页重新走完整的定位流程。 */
+      if(!_coachPageSyncT)_coachPageSyncT=setTimeout(()=>{_coachPageSyncT=null;try{coachRefresh();}catch(e){}},300);
+      return;
+    }
   }
   const el=step.sel();
   if(!el||typeof el.getBoundingClientRect!=='function'){
@@ -5421,13 +5426,10 @@ function coachRefresh(){
   _coachFrozen=false;
   scrollLockOn();
   /* 不慌不忙的节奏：切页淡入完 → 再停 0.35 秒 → 0.9 秒滑到位 → 停 0.3 秒再画框 */
-  /* 文案先写：这一步做什么，应该和「换页淡入」同时出现，
-     而不是等 0.9 秒滚动 + 收尾之后才写给玩家看。光圈自己会追上去。 */
-  {
-    const _tt=document.getElementById('coachTitle'),_tx=document.getElementById('coachText');
-    if(_tt&&_tt.textContent!==step.title)_tt.textContent=step.title;
-    if(_tx&&_tx.textContent!==step.text)_tx.textContent=step.text;
-  }
+  /* 文案统一交给 drawCoach 在「定位成功之后」写。
+     这里以前是提前写文案（想跟着切页淡入一起出现），结果定位失败、
+     或者切页把这一轮打断时，文字已经是下一步、光圈还停在上一件货上——
+     也就是玩家看到的「装上机箱 / 框着二手 ¥51」。 */
   const since=performance.now()-(_lastViewSwitchAt||0);
   const wait=Math.max(350,760-since);
   setTimeout(()=>{
@@ -7500,6 +7502,19 @@ renderAll();
     schedule(60);
   };
 })();
+/* 引导看门狗：光圈和文案必须描述同一步。
+   切页、重排、弹窗打断都可能让中间状态停住；这里每 0.7 秒核对一次，
+   发现框还停在旧目标上就重新走一遍定位，不再让玩家看到「装上机箱 / 框着二手 ¥51」。 */
+setInterval(function(){
+  try{
+    const c=document.getElementById('coach');
+    if(!c||!c.classList.contains('on'))return;
+    const st=(typeof coachStep==='function')?coachStep():null;
+    if(!st||!st.sel)return;
+    let want=null;try{want=st.sel();}catch(e){}
+    if(want&&want!==_coachEl){_coachKey=null;coachRefresh();}
+  }catch(e){}
+},700);
 </script>
 </body>
 </html>
