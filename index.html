@@ -1724,7 +1724,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00011</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00013</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1942,7 +1942,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00011';
+const APP_BUILD='00013';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -1950,6 +1950,11 @@ function syncModalLock(){
   try{
     const on=!!document.querySelector(MODAL_SEL);
     document.body.classList.toggle('modal-open',on);
+    /* 弹窗（剧情 / 说明 / 购买确认）关掉之后，把引导重新拉起来：
+       以前关掉弹窗没人叫醒教练，玩家会以为引导没了、卡在原地。 */
+    if(!on&&!_syncModalLock._t){
+      _syncModalLock._t=setTimeout(()=>{_syncModalLock._t=0;try{coachRefresh();}catch(e){}},140);
+    }
   }catch(e){}
 }
 /* 夸克 / UC / QQ 这类浏览器会注入自己的脚本和阅读模式，
@@ -2318,6 +2323,8 @@ const REAL_COOLS=[{"n":"酷冷至尊 T400i","cap":150,"h":155,"rad":0,"s":["LGA1
 const REAL_COOLS_EXTRA=[{"n":"服务器风冷 SP3","cap":400,"h":120,"rad":0,"s":["SP3","SP5","LGA2011","LGA2011-3"],"p":400,"u":300},{"n":"服务器风冷 SP5","cap":450,"h":125,"rad":0,"s":["SP3","SP5"],"p":600,"u":450},{"n":"LGA2011 专用风冷","cap":300,"h":140,"rad":0,"s":["LGA2011","LGA2011-3"],"p":300,"u":225}];
 K.length=0;REAL_CASES.forEach(x=>K.push(x));
 K.forEach(k=>{const ru=rngFrom(hash('ku2'+k.n))();k.u=Math.max(15,Math.min(360,Math.round(k.p*(0.42+ru*0.14))));});
+/* 散热限高校准：中塔/办公箱实际都能吃 155mm 风冷，之前 150 会把主流散热挡在门外 */
+K.forEach(k=>{if(k.mc>=120&&k.mc<155)k.mc=155;});
 H.length=0;REAL_COOLS.forEach(x=>H.push(x));REAL_COOLS_EXTRA.forEach(x=>H.push(x));
 const ST=[];
 ['三星','西部数据','金士顿','致态','铠侠','英睿达','光威','梵想','雷克沙','影驰','海康威视','联想','惠普','东芝','建兴','闪迪'].forEach((br)=>{
@@ -4769,7 +4776,12 @@ document.addEventListener('click',function(e){
   if(el.closest('#coach'))return;                     /* 引导自己的按钮 */
   if(el.closest('#mask'))return;                      /* 购买确认弹窗 */
   const tgt=tutTargetEl();
-  if(tgt&&(tgt===el||tgt.contains(el)||el.contains(tgt)))return;
+  /* 目标找不到、或者引导根本没显示时，一律不拦——
+     否则玩家会「所有按钮都点不动、提示卡又不在」直接卡死 */
+  if(!tgt)return;
+  const _coach=document.getElementById('coach');
+  if(!_coach||!_coach.classList.contains('on'))return;
+  if(tgt===el||tgt.contains(el)||el.contains(tgt))return;
   e.preventDefault();e.stopPropagation();
   window.__tutBlocks=(window.__tutBlocks||0)+1;
   if(window.__tutBlocks===4){try{toast('先照着引导做；不想看引导可以点「跳过引导」');window.__tutBlocks=0;return;}catch(x){}}
@@ -5094,9 +5106,13 @@ function coachGo(step){
   /* 只有「买件」类步骤才切到商店；接单回工单；装件/检查/交付不动面板，
      否则会把玩家想看的页面一直拽走 */
   if(k.indexOf('install:')===0){
-    /* 装件步如果被点去了商店，自动拉回仓库，不然提示和高亮都对不上 */
+    /* 装件步：面板切到仓库，同时把手机视图切回「单据」，
+       否则仓库栏被 CSS 隐藏，装上按钮的 offsetParent 为 null，引导会退回到空槽位 */
     const hasInv=state.inv.some(x=>x.cat===step.cat&&!x.broken);
-    if(hasInv&&state.panel!=='inv'){state.panel='inv';curCat=step.cat;changed=true;}
+    if(hasInv){
+      if(state.panel!=='inv'){state.panel='inv';curCat=step.cat;changed=true;}
+      try{forceDocsView();}catch(e){}
+    }
   }else if(k==='accept'||k==='close'){
     if(state.panel!=='jobs'){state.panel='jobs';changed=true;}
   }else if(k.indexOf('buy:')===0||k==='cpu_ig'||k==='cpu_slider'){
@@ -5305,6 +5321,7 @@ function renderLeft(){
   else{body.innerHTML=tutStripHTML()+shopHTML();bindShop();}
   bindTut();
   maybeTutTip();
+  try{tutAutoNav();}catch(e){}
   /* 换了面板 / 换了分类 / 换了排序结果：让内容像剧情卡那样浮上来，而不是硬替换 */
   const _k=state.panel+'|'+curCat+'|'+(filt.q||'')+'|'+(state.activeId||'');
   if(_k!==_lastLeftKey){
@@ -5489,7 +5506,9 @@ function bindTut(){
   document.querySelectorAll('[data-help]').forEach(b=>b.onclick=e=>{e.stopPropagation();openHelp();});
   const cn=document.getElementById('coachNext');
   if(cn)cn.onclick=()=>{
-    if(_coachKey!=='cpu_target')return;
+    /* 用当前步骤判断，而不是已绘制的 key：教练卡偶尔没画出来时按钮也要能用 */
+    const st=(typeof coachStep==='function')?coachStep():null;
+    if(!st||st.k!=='cpu_target')return;
     state.tut=state.tut||{};state.tut.targetSeen=1;save();
     coachHide();
     setTimeout(()=>{try{coachRefresh();}catch(e){}},150);
@@ -6218,6 +6237,19 @@ function renderChecks(){
       toast(md?'旧机已整机收回仓库'+(back?'（'+back+' 个件）':''):'工作台已清空，工单还在');
     };
   }else document.getElementById('deliverBox').innerHTML='';
+}
+let _tutNavKey=null,_tutNavBusy=false;
+function tutAutoNav(){
+  if(_tutNavBusy)return;
+  try{
+    const t=state.tut;
+    if(!t||t.guideOff||state.day>1)return;
+    const st=(typeof coachStep==='function')?coachStep():null;
+    if(!st||_tutNavKey===st.k)return;
+    _tutNavKey=st.k;
+    _tutNavBusy=true;
+    try{coachGo(st);}finally{_tutNavBusy=false;}
+  }catch(e){}
 }
 function renderAll(){
 
@@ -7082,6 +7114,7 @@ renderAll();
       /* 先把自动存档清掉再开新局，避免任何残留被下一次 load 读回来 */
       try{localStorage.removeItem(SAVE);}catch(e){}
       _openingSeq=true;
+      setTimeout(()=>{try{_openingSeq=false;coachRefresh();}catch(e){}},12000);
       newGame();
       /* 引导模式：跟着走 = 全程只能用高亮处的操作；自己玩 = 不弹引导 */
       state.tut=state.tut||{done:{},hidden:false};
