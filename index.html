@@ -1036,6 +1036,26 @@ html.x5 .titleScr::before{ /* 台面：一条暖光，压住下半屏 */
   content:'';position:absolute;left:0;right:0;bottom:0;height:32%;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,196,120,.10),rgba(255,196,120,0) 24%,rgba(0,0,0,.42));
 }
+/* X5 对 background-clip:text 的渐变文字支持有问题：
+   浅色渐变会被渲染成一整行发暗的古铜色，标题几乎看不清。
+   QQ 里退回纯色（标题金色、页眉淡蓝、结算日期暖白）。 */
+html.x5 .tTitle{
+  background:none!important;
+  -webkit-background-clip:border-box!important;background-clip:border-box!important;
+  color:#ffd9a6!important;-webkit-text-fill-color:#ffd9a6!important;
+  text-shadow:0 2px 22px rgba(255,150,60,.22);
+}
+html.x5 h1{
+  background:none!important;
+  -webkit-background-clip:border-box!important;background-clip:border-box!important;
+  color:#cfd8ff!important;-webkit-text-fill-color:#cfd8ff!important;
+}
+html.x5 .idle-hero .v,
+html.x5 .do-date{
+  background:none!important;
+  -webkit-background-clip:border-box!important;background-clip:border-box!important;
+  color:#ffe2b4!important;-webkit-text-fill-color:#ffe2b4!important;
+}
 .tBg{position:absolute;inset:0;overflow:hidden}
 .tBg svg{width:100%;height:100%;display:block;
   /* 场景不动：大尺寸 SVG 的 transform 动画会触发逐帧重栅格化，正是闪烁来源 */
@@ -1959,7 +1979,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00021';
+const APP_BUILD='00022';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
