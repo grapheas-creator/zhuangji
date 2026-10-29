@@ -1019,13 +1019,14 @@ button.bad{background:linear-gradient(180deg,#a3554f,#743631);border-color:#c471
   transition:opacity .35s ease,visibility .35s;
 }
 .titleScr.hide{opacity:0;visibility:hidden;pointer-events:none}
-/* ---------- QQ 内置浏览器（X5）标题页兜底 ----------
-   QQ 的 X5 内核会把标题页那张内联 SVG 场景里的半透明玻璃机箱
-   渲染成一整块发白的面板，标题和存档提示全糊在浅色底上。
-   这里直接不用内联 SVG，改用纯 CSS 渐变复刻「台灯 + 暗房」的观感：
-   颜色全部写死，不依赖 SVG 图层的合成。 */
+/* ---------- QQ（X5）标题页兜底 ----------
+   X5 会把那张内联 SVG 玻璃机箱渲染成一整块发白的面板，
+   所以 QQ 里不再加载 SVG，改用纯 CSS 重画一台机箱：
+   两条会转的风扇、底部呼吸的指示灯、右侧蓝色灯条，全是 div + 渐变，
+   背景仍是「台灯 + 暗房」，浮尘也用 CSS 动效补上。 */
 html.x5 .titleScr .tBg{display:none}
 html.x5 .titleScr{
+  overflow:hidden;
   background:
     radial-gradient(120% 95% at 50% 28%,rgba(4,3,3,0) 36%,rgba(4,3,3,.78) 100%),
     radial-gradient(760px 520px at 50% 14%,rgba(255,176,96,.20),rgba(255,176,96,0) 66%),
@@ -1036,6 +1037,47 @@ html.x5 .titleScr::before{ /* 台面：一条暖光，压住下半屏 */
   content:'';position:absolute;left:0;right:0;bottom:0;height:32%;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,196,120,.10),rgba(255,196,120,0) 24%,rgba(0,0,0,.42));
 }
+html.x5 .titleScr::after{ /* 浮尘：一小片光点缓慢上浮 */
+  content:'';position:absolute;inset:-240px 0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(2px 2px at 26px 40px,rgba(255,225,190,.55),rgba(255,225,190,0) 60%),
+    radial-gradient(1.6px 1.6px at 132px 104px,rgba(255,225,190,.40),rgba(255,225,190,0) 60%),
+    radial-gradient(2.6px 2.6px at 78px 168px,rgba(255,225,190,.50),rgba(255,225,190,0) 60%),
+    radial-gradient(1.8px 1.8px at 196px 216px,rgba(255,225,190,.34),rgba(255,225,190,0) 60%);
+  background-size:240px 240px;
+  animation:x5Dust 26s linear infinite;
+}
+@keyframes x5Dust{from{transform:translateY(0)}to{transform:translateY(-240px)}}
+/* 纯 CSS 机箱：比例照原 SVG 的 104:146 */
+.x5scene{display:none}
+html.x5 .x5scene{
+  display:block;position:absolute;left:50%;top:50%;z-index:0;pointer-events:none;
+  width:74vw;height:104vw;transform:translate(-50%,-50%);
+}
+html.x5 .x5case{
+  position:absolute;inset:0;border-radius:9%/6.4%;
+  border:1px solid rgba(255,205,155,.42);
+  background:linear-gradient(160deg,rgba(255,205,155,.10),rgba(30,24,18,.55) 46%,rgba(120,160,255,.06));
+  box-shadow:inset 0 1px 0 rgba(255,235,205,.12),0 34px 78px -46px rgba(0,0,0,.95);
+}
+html.x5 .x5fan{
+  position:absolute;left:50%;border-radius:50%;
+  border:1.5px dashed rgba(255,205,155,.34);animation:x5FanSpin 5.6s linear infinite;
+}
+html.x5 .x5fanA{top:20%;width:32.6vw;height:32.6vw;margin-left:-16.3vw}
+html.x5 .x5fanB{top:50%;width:26.6vw;height:26.6vw;margin-left:-13.3vw;border-style:solid;border-width:1.2px;
+  border-color:rgba(255,205,155,.22);animation-duration:9s;animation-direction:reverse}
+html.x5 .x5led{
+  position:absolute;left:50%;bottom:7.5%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;
+  background:#ffc478;box-shadow:0 0 14px 3px rgba(255,196,120,.55);
+  animation:x5Led 4.4s ease-in-out infinite;
+}
+html.x5 .x5strip{
+  position:absolute;right:9%;top:11%;width:4px;height:31%;border-radius:2px;
+  background:rgba(120,170,255,.35);box-shadow:0 0 10px rgba(120,170,255,.25);
+}
+@keyframes x5FanSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes x5Led{0%,100%{opacity:.45}50%{opacity:1}}
 /* X5 对 background-clip:text 的渐变文字支持有问题：
    浅色渐变会被渲染成一整行发暗的古铜色，标题几乎看不清。
    QQ 里退回纯色（标题金色、页眉淡蓝、结算日期暖白）。 */
@@ -1917,6 +1959,16 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
       </g>
     </svg>
   </div>
+  <!-- QQ（X5）专用的纯 CSS 机箱：内联 SVG 会被 X5 渲染成白板，这里用 div 重画，
+       风扇照转、指示灯照呼吸，不依赖 SVG 图层合成 -->
+  <div class="x5scene" aria-hidden="true">
+    <div class="x5case">
+      <i class="x5fan x5fanA"></i>
+      <i class="x5fan x5fanB"></i>
+      <i class="x5led"></i>
+      <i class="x5strip"></i>
+    </div>
+  </div>
   <div class="tInner">
     <div class="tKicker">电脑维修 · 整机装机 · 二手配件</div>
     <h2 class="tTitle">装机生意</h2>
@@ -1979,7 +2031,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00022';
+const APP_BUILD='00023';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -1994,19 +2046,19 @@ function syncModalLock(){
     }
   }catch(e){}
 }
-/* 夸克 / UC / QQ 这类浏览器会注入自己的脚本和阅读模式，
+/* 夸克 / UC / 百度这类浏览器会注入自己的脚本和阅读模式，
    重特效（backdrop-filter、大面积渐变、动画）在它们里面容易闪或掉帧。
-   识别到就切低特效：只保留必要的布局与颜色。 */
+   QQ 不再算低特效：玩家要保留动画与毛玻璃，X5 的两个渲染坑单独用 x5 兜底。 */
 function watchModals(){
   try{
     const ua=navigator.userAgent||'';
     if(/MicroMessenger/i.test(ua))document.documentElement.classList.add('wx');
-    if(/Quark|UCBrowser|QQBrowser|MQQBrowser|baiduboxapp/i.test(ua)){
+    if(/Quark|UCBrowser|baiduboxapp/i.test(ua)){
       document.documentElement.classList.add('lowfx');
       document.body.classList.add('lowfx');
     }
-    /* QQ 内置浏览器（X5）：标题页的内联 SVG 场景会被渲染成发白的面板，
-       单独打个 x5 标记，标题页改走纯 CSS 背景（见 .x5 那段样式）。 */
+    /* QQ（X5）：内联 SVG 会被渲染成白板、渐变文字会发暗，
+       单独打个 x5 标记，标题页改走纯 CSS 机箱（见 .x5 那段样式）。 */
     if(/MQQBrowser|QQBrowser/i.test(ua)){
       document.documentElement.classList.add('x5');
       document.body.classList.add('x5');
