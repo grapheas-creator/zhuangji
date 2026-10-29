@@ -1865,7 +1865,7 @@ html.qqblock body{overflow:hidden}
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.11.5.00026</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00001</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -2040,7 +2040,7 @@ html.qqblock body{overflow:hidden}
       <button class="tBtn" id="tLoad">读档</button>
     </div>
 
-    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.11.5.00026</span></div>
+    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00001</span></div>
   </div>
   <div class="tMark">一只白玉菇</div>
 </div>
@@ -2091,9 +2091,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.11.5';
+const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00026';
+const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -4913,7 +4913,7 @@ function tutInstallEl(it){
   return box||document.querySelector('#benchBox');
 }
 function tutParts(){const t=state.tut||(state.tut={done:{},hidden:false});t.bought=t.bought||{};t.parts=t.parts||{};return t;}
-let _coachKey=null,_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null,_coachEl=null,_coachPageSyncT=null;
+let _coachKey=null,_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null,_coachEl=null,_coachPageSyncT=null,_coachPageSig='';
 
 
 /* 引导锁：第一天引导没走完时，只能点引导指的控件 */
@@ -4947,6 +4947,11 @@ document.addEventListener('click',function(e){
   if(window.__tutBlocks===4){try{toast('先照着引导做；不想看引导可以点「跳过引导」');window.__tutBlocks=0;return;}catch(x){}}
   try{toast('先跟着引导走：'+(coachStep()||{}).title||'');}catch(err){try{toast('先跟着引导走');}catch(e2){}}
 },true);
+/* 引导画框时所在的「页面指纹」：面板 / 手机页签 / 分类 / 在施工单。
+   任何一个变了，旧框就必须先消失，不能让它挂在新页面上等重画。 */
+function _coachSig(){
+  try{return [state.panel,typeof mView==='undefined'?'':mView,curCat,state.activeId||''].join('|');}catch(e){return '';}
+}
 function coachStep(){
   const t=state.tut||{};
   if(t.guideOff||state.day>1)return null;
@@ -4993,7 +4998,7 @@ function coachStep(){
   if(!d.close)return {k:'close',title:'打烊',text:'今天的单处理完，点右上角「打烊」进第二天。',sel:()=>document.getElementById('btnClose')};
   return null;
 }
-function coachHide(){const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachEl=null;}
+function coachHide(){const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
 let _coachGlowEl=null;
 function coachGlow(el){
   if(_coachGlowEl===el)return;
@@ -5053,7 +5058,7 @@ function drawCoach(el,step){
     if(_tt&&_tt.textContent!==step.title)_tt.textContent=step.title;
     if(_tx&&_tx.textContent!==step.text)_tx.textContent=step.text;
   }
-  c.classList.add('on');_coachKey=step.k;_coachEl=el;
+  c.classList.add('on');_coachKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
   coachWatchScroll();
   if(stepChanged){
     setTimeout(()=>{try{coachReposition(step);}catch(e){}},420);
@@ -5453,17 +5458,21 @@ function coachRefresh(){
   setTimeout(()=>{
     try{resetCardScrolls();}catch(e){}
     let moved=false;
+    /* 这一步是否还是「当前步」：装完/买完之后 step 已经翻篇，
+       延迟的 drawCoach 不能把旧框再画回来，否则引导层会整块留在屏幕上 */
+    const still=()=>{try{const s=(typeof coachStep==='function')?coachStep():null;return !!(s&&s.k===step.k);}catch(e){return false;}};
     try{
       moved=coachScrollTo(el,900,()=>{
         setTimeout(()=>{
           scrollLockOff();
           try{resetCardScrolls();}catch(e){}
+          if(!still())return;
           drawCoach(el,step);
         },120);
       });
     }catch(e){}
     if(!moved){
-      setTimeout(()=>{scrollLockOff();drawCoach(el,step);},140);
+      setTimeout(()=>{scrollLockOff();if(!still())return;drawCoach(el,step);},140);
     }
   },wait);
 }
@@ -6432,6 +6441,12 @@ function tutAutoNav(){
   }catch(e){}
 }
 function renderAll(){
+  /* 换页 / 换分类之前先把旧引导收掉：不然会出现「商店/仓库已经切过去了，
+     上一件货的框还亮着」，等 0.3~1 秒才消失的错位。 */
+  try{
+    const _c=document.getElementById('coach');
+    if(_c&&_c.classList.contains('on')&&_coachPageSig!==_coachSig())coachHide();
+  }catch(e){}
 
   try{renderMNav();}catch(e){}
   renderHeader();renderMobileBar();renderLeft();renderBench();tbRender();
@@ -7526,9 +7541,15 @@ renderAll();
 setInterval(function(){
   try{
     const c=document.getElementById('coach');
-    if(!c||!c.classList.contains('on'))return;
     const st=(typeof coachStep==='function')?coachStep():null;
-    if(!st||!st.sel)return;
+    /* 已经没有要引导的步骤了，引导层却还挂着：直接收掉（连带滚动锁/压暗） */
+    if(!st){
+      if(c&&c.classList.contains('on'))coachHide();
+      try{scrollLockOff();scrollDimOff();}catch(e){}
+      return;
+    }
+    if(!c||!c.classList.contains('on'))return;
+    if(!st.sel)return;
     let want=null;try{want=st.sel();}catch(e){}
     if(want&&want!==_coachEl){_coachKey=null;coachRefresh();}
   }catch(e){}
