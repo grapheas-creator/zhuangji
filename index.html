@@ -1720,7 +1720,7 @@ button.readyPulse{animation:readyPulse 1.15s ease-out 2}
 </defs></svg>
 
 <header>
-  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00004</span></h1>
+  <h1>装机生意<span class="ver" id="verTag">v0.11.5.00006</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -1938,7 +1938,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00004';
+const APP_BUILD='00006';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -2292,23 +2292,60 @@ const CASE_TYPE=[['薄铁皮办公箱',['MATX'],280,150,0,2,75],['M-ATX 入门�
 ['ITX 开放式',['ITX'],330,160,0,1,350],['ATX 中塔入门',['ATX','MATX','ITX'],330,160,240,3,180],
 ['ATX 中塔主流',['ATX','MATX','ITX'],380,170,360,3,380],['ATX 海景房',['EATX','ATX','MATX','ITX'],420,167,420,3,850],
 ['全塔入门',['EATX','ATX','MATX'],400,180,360,6,500],['全塔高端',['EATX','ATX','MATX'],430,190,420,6,2200]];
-const K=[];
-CASE_BRANDS.forEach((br)=>CASE_TYPE.forEach(([tn,ff,mg,mc,rad,bay,base],ti)=>{
-  const rj=rngFrom(hash(br+ti)),price=R2(base*(0.82+rj()*0.42),1);
-  K.push({n:`${br} ${tn}`,ff,mg,mc,rad,bay,p:jitter(price,'k'+br+ti),u:null});
-}));
-[['4U 服务器机箱',['EATX','ATX','MATX'],350,175,360,8,900],['8 盘位工作站塔',['EATX','ATX','MATX'],400,185,360,8,1500],
-['NAS 8 盘位机箱',['MATX','ITX'],330,165,240,8,1200],['NAS 12 盘位机箱',['EATX','ATX'],380,175,360,12,2200]]
-.forEach(([n,ff,mg,mc,rad,bay,p])=>K.push({n,ff,mg,mc,rad,bay,p:jitter(p,'ks'+n),u:null}));
-/* 机箱行情修正（2026-10 实价）：入门箱全新 20 多到 90，
-   中端 110–260，海景房 / 全塔 / 服务器箱 300 以上；二手按新价 36%–52% 折算。
-   以前一律 ×0.6，入门箱还要 37 起，比闲鱼实际贵了一倍。 */
+/* 真实在售机箱（品牌 + 型号，2026 年国内电商大致成交价）。
+   ff=支持板型  mg=显卡限长  mc=散热限高  rad=最大冷排  bay=硬盘位  p=全新价 */
+const K=[
+  /* 办公薄箱 / 入门 */
+  {n:'大水牛 普通办公机箱',ff:['ATX','MATX','ITX'],mg:300,mc:160,rad:0,bay:2,p:79},
+  {n:'金河田 办公机箱 M-ATX',ff:['MATX','ITX'],mg:300,mc:155,rad:0,bay:2,p:89},
+  {n:'长城 商祺办公机箱',ff:['ATX','MATX','ITX'],mg:320,mc:160,rad:0,bay:2,p:99},
+  {n:'金河田 预见N17',ff:['MATX','ITX'],mg:320,mc:160,rad:240,bay:2,p:139},
+  {n:'长城 启程M60',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:129},
+  {n:'先马 平头哥M2',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:139},
+  {n:'航嘉 暗夜猎手2',ff:['ATX','MATX','ITX'],mg:350,mc:160,rad:240,bay:2,p:149},
+  /* 主流 */
+  {n:'爱国者 星璨 岚',ff:['MATX','ITX'],mg:330,mc:160,rad:240,bay:2,p:159},
+  {n:'鑫谷 阔斧者',ff:['ATX','MATX','ITX'],mg:380,mc:165,rad:360,bay:3,p:169},
+  {n:'先马 黑洞5',ff:['ATX','MATX','ITX'],mg:380,mc:160,rad:360,bay:3,p:199},
+  {n:'先马 趣造 ITX',ff:['ITX'],mg:320,mc:70,rad:0,bay:1,p:199},
+  {n:'酷冷至尊 Q300L',ff:['MATX','ITX'],mg:360,mc:159,rad:240,bay:2,p:249},
+  {n:'Tt 启航者S5',ff:['ATX','MATX','ITX'],mg:390,mc:170,rad:360,bay:2,p:259},
+  {n:'先马 鲁班1',ff:['ATX','MATX','ITX'],mg:380,mc:165,rad:360,bay:2,p:259},
+  {n:'酷冷至尊 MB511',ff:['ATX','MATX','ITX'],mg:400,mc:165,rad:360,bay:2,p:299},
+  {n:'爱国者 破晓X',ff:['ATX','MATX','ITX'],mg:380,mc:170,rad:360,bay:2,p:299},
+  {n:'乔思伯 D31',ff:['MATX','ITX'],mg:330,mc:165,rad:240,bay:2,p:299},
+  /* 中高端 */
+  {n:'乔思伯 D40',ff:['ATX','MATX','ITX'],mg:380,mc:170,rad:360,bay:2,p:399},
+  {n:'乔思伯 T8',ff:['ITX'],mg:330,mc:130,rad:240,bay:1,p:399},
+  {n:'追风者 P360A',ff:['ATX','MATX','ITX'],mg:400,mc:170,rad:360,bay:2,p:399},
+  {n:'酷冷至尊 TD500 Mesh',ff:['ATX','MATX','ITX'],mg:410,mc:165,rad:360,bay:2,p:499},
+  {n:'乔思伯 A4',ff:['ITX'],mg:325,mc:71,rad:240,bay:1,p:599},
+  {n:'乔思伯 TK-1',ff:['ATX','MATX','ITX'],mg:400,mc:175,rad:360,bay:2,p:599},
+  {n:'NZXT H510',ff:['ATX','MATX','ITX'],mg:381,mc:165,rad:280,bay:3,p:599},
+  {n:'海盗船 4000D Airflow',ff:['ATX','MATX','ITX'],mg:360,mc:170,rad:360,bay:2,p:599},
+  {n:'联力 O11 Dynamic Mini',ff:['MATX','ITX'],mg:380,mc:170,rad:280,bay:2,p:699},
+  {n:'追风者 P500A',ff:['ATX','MATX','ITX'],mg:435,mc:190,rad:360,bay:4,p:699},
+  {n:'NZXT H5 Flow',ff:['ATX','MATX','ITX'],mg:365,mc:165,rad:280,bay:3,p:699},
+  {n:'联力 A4-H2O',ff:['ITX'],mg:322,mc:55,rad:240,bay:1,p:899},
+  {n:'分形工艺 Meshify 2 Compact',ff:['ATX','MATX','ITX'],mg:360,mc:169,rad:360,bay:3,p:899},
+  {n:'分形工艺 Ridge',ff:['ITX'],mg:335,mc:70,rad:240,bay:2,p:999},
+  {n:'联力 O11D EVO',ff:['EATX','ATX','MATX'],mg:420,mc:167,rad:360,bay:4,p:999},
+  {n:'追风者 Evolv Shift XT',ff:['ITX'],mg:325,mc:70,rad:240,bay:1,p:1199},
+  {n:'海盗船 7000D Airflow',ff:['EATX','ATX','MATX'],mg:450,mc:190,rad:420,bay:6,p:1499},
+  /* NAS / 服务器 */
+  {n:'乔思伯 N1 NAS 机箱',ff:['ITX'],mg:200,mc:70,rad:0,bay:5,p:599},
+  {n:'乔思伯 N2 NAS 机箱',ff:['ITX'],mg:200,mc:70,rad:0,bay:10,p:699},
+  {n:'银欣 CS351 五盘位',ff:['MATX','ITX'],mg:250,mc:160,rad:0,bay:5,p:1099},
+  {n:'银欣 CS380 八盘位',ff:['ATX','MATX'],mg:250,mc:160,rad:0,bay:8,p:1299},
+  {n:'银欣 RM400 4U 服务器',ff:['EATX','ATX','MATX'],mg:400,mc:175,rad:360,bay:8,p:1599},
+  {n:'银欣 RM43 4U 十二盘位',ff:['EATX','ATX'],mg:380,mc:175,rad:360,bay:12,p:2199}
+];
+/* 二手价：按新价 36%–52% 折算，最低 15 */
 K.forEach(k=>{
-  const f=k.p<=200?0.40:(k.p<=400?0.55:(k.p<=700?0.68:0.75));
-  k.p=Math.max(20,Math.round(k.p*f));
   const ru=rngFrom(hash('ku2'+k.n))();
   k.u=Math.max(15,Math.min(430,Math.round(k.p*(0.36+ru*0.16))));
 });
+
 const COOL_TYPE=[['廉价下压散热（60W级）',60,48,0,10],['原装风冷（70W级）',70,52,0,18],['双热管下压（95W）',95,55,0,35],
 ['四热管单塔（130W）',130,150,0,65],['六热管单塔（180W）',180,160,0,100],['双塔风冷（250W）',250,165,0,130],
 ['240 一体水冷（220W）',220,0,240,280],['360 一体水冷（320W）',320,0,360,450]];
@@ -6000,7 +6037,7 @@ function renderActionBar(){
     <button class="primary" id="abDeliver">交付 · 成本 ${money(cost)}</button>
     ${j.story?`<button class="mini" id="abClear">清空</button>`:`<button class="bad mini" id="abGive">放弃</button>`}`;
   document.getElementById('abInv').onclick=()=>{state.panel='inv';save();renderAll();scrollLeftTop();};
-  document.getElementById('abDeliver').onclick=deliver;
+  document.getElementById('abDeliver').onclick=confirmDeliver;
   const g=document.getElementById('abGive');
   if(g)g.onclick=()=>{const b=document.getElementById('btnAbandon');if(b)b.click();else toast('在右侧面板操作');};
   const c=document.getElementById('abClear');
@@ -6160,7 +6197,7 @@ function renderChecks(){
       <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
       <button class="primary" id="btnDeliver">开机测试并交付</button>
       ${j.story?`<button id="btnClearBench">清空工作台</button>`:`<button class="bad" id="btnAbandon">放弃本单</button>`}</div>`;
-    document.getElementById('btnDeliver').onclick=deliver;
+    document.getElementById('btnDeliver').onclick=confirmDeliver;
     try{if(_readyUntil&&Date.now()<_readyUntil)document.getElementById('btnDeliver').classList.add('readyPulse');}catch(e){}
     try{
       const box=document.getElementById('deliverBox');
@@ -6401,6 +6438,21 @@ function gameOver(){
   document.body.appendChild(ov);
   const b=document.getElementById('goRestart');
   if(b)b.onclick=()=>{try{localStorage.removeItem(SAVE);}catch(e){}location.reload();};
+}
+/* 交付前确认：交付是不可逆的（件随单交出、单子关闭） */
+function confirmDeliver(){
+  const j=state.activeId?job():null;
+  if(!j){deliver();return;}
+  let cost=0;try{cost=buildCost();}catch(e){}
+  const labor=jobLabor(j);
+  modal('确认交付？',
+    `<b>${j.client}</b> 的《${j.sw}》<br>
+     <span style="font-size:12px;color:#b9aa96">本单成本 ${money(cost)}　人工费 ${money(labor)}</span><br>
+     <span style="font-size:11.5px;color:#8b93a1">交付后装机件随单交出、工单关闭，不能反悔。</span>`,
+    ()=>deliver());
+  const no=document.getElementById('mNo'),yes=document.getElementById('mYes');
+  if(no)no.textContent='再检查一下';
+  if(yes)yes.textContent='确认交付';
 }
 function deliver(){
   const j=state.activeId?job():null;
