@@ -1865,7 +1865,7 @@ html.qqblock body{overflow:hidden}
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.11.5.00025</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.11.5.00026</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -2040,7 +2040,7 @@ html.qqblock body{overflow:hidden}
       <button class="tBtn" id="tLoad">读档</button>
     </div>
 
-    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.11.5.00025</span></div>
+    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.11.5.00026</span></div>
   </div>
   <div class="tMark">一只白玉菇</div>
 </div>
@@ -2093,7 +2093,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.11.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00025';
+const APP_BUILD='00026';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -5408,6 +5408,24 @@ function coachRefresh(){
     /* DOM 可能刚被重画（刚切页签 / 刚买完件），别急着判定「没得指」，稍等再看一眼 */
     if(!_coachRetry){_coachRetry=setTimeout(()=>{_coachRetry=null;try{coachRefresh();}catch(e){}},90);return;}
     coachHide();return;
+  }
+  /* 换步的瞬间就让旧光圈让位：
+     能直接定位（目标已经在屏幕上）就把框和文案一起挪过去；
+     定位不了（目标还在屏幕外）就先把框藏起来，等滚动结束再画。
+     以前这里什么都不做，上一件货的框会一直亮到 0.9 秒滚动跑完 —— 就是「消失晚了」。 */
+  if(_coachKey!==step.k){
+    let _moved=false;
+    try{_moved=positionCoach(el);}catch(e){}
+    if(_moved){
+      try{
+        const _tt=document.getElementById('coachTitle'),_tx=document.getElementById('coachText');
+        if(_tt)_tt.textContent=step.title;
+        if(_tx)_tx.textContent=step.text;
+      }catch(e){}
+    }else{
+      try{const _h=document.getElementById('coachHole');if(_h)_h.style.opacity='0';}catch(e){}
+    }
+    try{document.querySelectorAll('.tut-glow').forEach(e=>e.classList.remove('tut-glow'));}catch(e){}
   }
   /* 先把目标滚到位，滚稳了再画引导框：
      滚动期间不收框的话，每帧重定位会拖慢滚动，还会有「框在追目标」的廉价感 */
