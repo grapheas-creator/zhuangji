@@ -1865,7 +1865,7 @@ html.qqblock body{overflow:hidden}
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00001</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00002</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -2040,7 +2040,7 @@ html.qqblock body{overflow:hidden}
       <button class="tBtn" id="tLoad">读档</button>
     </div>
 
-    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00001</span></div>
+    <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00002</span></div>
   </div>
   <div class="tMark">一只白玉菇</div>
 </div>
@@ -2093,7 +2093,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00001';
+const APP_BUILD='00002';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
@@ -4913,7 +4913,7 @@ function tutInstallEl(it){
   return box||document.querySelector('#benchBox');
 }
 function tutParts(){const t=state.tut||(state.tut={done:{},hidden:false});t.bought=t.bought||{};t.parts=t.parts||{};return t;}
-let _coachKey=null,_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null,_coachEl=null,_coachPageSyncT=null,_coachPageSig='';
+let _coachKey=null,_coachDrawnKey='',_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null,_coachEl=null,_coachPageSyncT=null,_coachPageSig='';
 
 
 /* 引导锁：第一天引导没走完时，只能点引导指的控件 */
@@ -5017,7 +5017,8 @@ function drawCoach(el,step){
   }
   const c=document.getElementById('coach'),hole=document.getElementById('coachHole'),tip=document.getElementById('coachTip');
   if(!c||!hole||!tip)return;
-  const stepChanged=(_coachKey!==step.k);
+  const _wasOn=c.classList.contains('on');
+  const stepChanged=(_coachDrawnKey!==step.k);
   /* 文字、按钮显隐、脉冲动画只在「换了一步」时写一次；
      同一步骤内的重定位只挪几何，避免每帧重排导致卡顿 */
   if(stepChanged){
@@ -5035,7 +5036,9 @@ function drawCoach(el,step){
       const _h=document.getElementById('coachHole'),_tp=document.getElementById('coachTip');
       /* 只淡入提示卡；光圈如果从 opacity:0 淡入，那一瞬间没有高亮洞，
          四块挡板就变成整屏压暗 = 闪一下 */
-      if(_tp){_tp.classList.remove('cFade');void _tp.offsetWidth;_tp.classList.add('cFade');}
+      /* 卡片已经亮着时换步骤只换内容，不再重播淡入——
+         否则每一步都会「弹一下」，玩家会以为引导弹了两三遍 */
+      if(_tp&&!_wasOn){_tp.classList.remove('cFade');void _tp.offsetWidth;_tp.classList.add('cFade');}
     }catch(e){}
   }
   if(!positionCoach(el)){
@@ -5058,7 +5061,7 @@ function drawCoach(el,step){
     if(_tt&&_tt.textContent!==step.title)_tt.textContent=step.title;
     if(_tx&&_tx.textContent!==step.text)_tx.textContent=step.text;
   }
-  c.classList.add('on');_coachKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
+  c.classList.add('on');_coachKey=step.k;_coachDrawnKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
   coachWatchScroll();
   if(stepChanged){
     setTimeout(()=>{try{coachReposition(step);}catch(e){}},420);
@@ -7551,7 +7554,11 @@ setInterval(function(){
     if(!c||!c.classList.contains('on'))return;
     if(!st.sel)return;
     let want=null;try{want=st.sel();}catch(e){}
-    if(want&&want!==_coachEl){_coachKey=null;coachRefresh();}
+    /* 只把框挪到正确目标，不走整轮 coachRefresh：
+       coachRefresh 会把卡片淡入动画重播一次，玩家就会看到引导「弹了第二遍」 */
+    if(want&&want!==_coachEl){
+      try{ if(positionCoach(want)) _coachEl=want; }catch(e){}
+    }
   }catch(e){}
 },700);
 </script>
