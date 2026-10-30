@@ -1896,6 +1896,7 @@ html.qqblock body{overflow:hidden}
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
     <div class="stat cash">现金<b id="cashTxt">¥0</b></div>
+    <div class="stat" id="debtTxt" style="display:none"></div>
     <div class="stat">今日<b id="progTxt">0/0</b></div>
     <div class="stat" id="repTxt" style="display:none">口碑<b>★★★☆☆</b></div>
   </div>
@@ -2119,7 +2120,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.12';
+const APP_VER='v0.13.13';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4383,15 +4384,25 @@ const PLOT_EVENTS={
       '我：翻一倍的都干不长。'
     ],
     tip:'墨桀又拉来一个客户。'},
-  mojie20:{id:'mojie20',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
+  mojie15:{id:'mojie15',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
     lines:[
-      '我：墨桀，八千块，我攒出来了。',
+      '我：墨桀，两个星期了。八千块，我攒出来了。',
       '墨桀：急什么，先留着进货。',
       '我：该还就还。你也有你要用钱的时候。',
       '墨桀：……行吧，收了。下次扩店缺钱，再跟我说。',
       '我：一定。'
     ],
-    tip:'欠墨桀的八千，还上了。'},
+    tip:'欠墨桀的八千，还上了。店算是真正立住了。'},
+  gameoverDebt:{id:'gameoverDebt',who:'我',role:'开张第十四天',av:'我',col:'#d0705e',
+    lines:[
+      '墨桀站在门口，没进来。',
+      '墨桀：八千块，我下周要交了。你这边……能拿出来吗？',
+      '我把抽屉翻了一遍，零钱、发票、几张欠条，凑不齐。',
+      '墨桀：算了。我不是来逼你的。',
+      '他走了。店里安静得能听见风扇的声音。',
+      '我把卷帘门拉下来，在门上贴了张纸：旺财装机店，停业。'
+    ],
+    tip:''},
   day3end:{id:'day3end',who:'韩经理',role:'上门推销 · 配件批发',av:'韩',col:'#8a7dff',
     lines:[
       '老板，还没关灯吧？耽误你两分钟。',
@@ -4419,7 +4430,7 @@ function playPlotEvent(evId,onDone){
   return true;
 }
 /* 死党墨桀的几段剧情：第 2 / 6 / 12 / 20 天各来一趟 */
-const MOJIE_PLOTS={2:'mojie2',6:'mojie6',12:'mojie12',20:'mojie20'};
+const MOJIE_PLOTS={2:'mojie2',6:'mojie6',12:'mojie12'};
 function maybeMojiePlot(){
   if(!state||!state.story||!state.story.flags)return false;
   const evId=MOJIE_PLOTS[state.day];
@@ -4428,6 +4439,62 @@ function maybeMojiePlot(){
   if(state.story.flags[flag])return false;
   state.story.flags[flag]=true;save();
   return playPlotEvent(evId,()=>{setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},180);});
+}
+/* ================= 两周还债 =================
+   第 15 天（开张后两周）墨桀来收那八千：现金够就扣钱还上，不够就悲愤关店，游戏结束。 */
+const DEBT_AMOUNT=8000, DEBT_DUE_DAY=15;
+function debtPaid(){
+  try{return !!(state&&state.story&&state.story.flags&&state.story.flags.repaid);}catch(e){return true;}
+}
+function updateDebtUI(){
+  const el=document.getElementById('debtTxt');if(!el)return;
+  if(!state||debtPaid()||state.over){el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML='欠墨桀<b>¥8,000</b>';
+}
+function debtDue(){
+  if(!state||state.over)return false;
+  if(state.day!==DEBT_DUE_DAY||debtPaid())return false;
+  if(state.story.flags.debtDone)return false;
+  state.story.flags.debtDone=true;
+  if((state.cash||0)>=DEBT_AMOUNT){
+    state.cash-=DEBT_AMOUNT;state.todayOut=(state.todayOut||0)+DEBT_AMOUNT;
+    state.story.flags.repaid=true;
+    save();renderAll();
+    playPlotEvent('mojie15',()=>{setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},180);});
+    return true;
+  }
+  /* 钱不够：关店结局 */
+  save();
+  playPlotEvent('gameoverDebt',()=>{try{showGameOver();}catch(e){}});
+  return true;
+}
+function showGameOver(){
+  state.over=true;save();
+  let ov=document.getElementById('gameOver');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='gameOver';
+    ov.style.cssText='position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;padding:18px;'+
+      'background:radial-gradient(120% 90% at 50% 30%,rgba(30,12,10,.94),rgba(3,3,3,.98))';
+    ov.innerHTML='<div style="max-width:420px;width:100%;padding:22px 20px;border-radius:18px;text-align:center;'+
+      'background:linear-gradient(180deg,#2a1c19,#121010);border:1px solid rgba(255,150,130,.35);'+
+      'box-shadow:0 34px 90px rgba(0,0,0,.85)">'+
+      '<div style="font-size:10.5px;letter-spacing:2px;color:#c98b7e;margin-bottom:8px">GAME OVER</div>'+
+      '<div style="font-size:21px;font-weight:800;color:#ffe3d9;margin-bottom:10px">悲愤关店</div>'+
+      '<div id="goStats" style="font-size:12.5px;line-height:1.9;color:#d7c6bd;margin-bottom:16px"></div>'+
+      '<button class="btn primary" id="goRestart" style="min-width:160px">重新开一家</button></div>';
+    document.body.appendChild(ov);
+  }
+  const st=document.getElementById('goStats');
+  if(st)st.innerHTML='撑到第 <b>'+(state.day||1)+'</b> 天<br>现金 <b>'+money(state.cash||0)+'</b>　口碑 <b>'+
+    (state.rep&&state.rep.score?state.rep.score.toFixed(1):'3.0')+'</b> 星<br>欠墨桀的八千，没还上。';
+  const b=document.getElementById('goRestart');
+  if(b)b.onclick=()=>{
+    try{ov.remove();}catch(e){}
+    newGame(false);state.over=false;renderAll();
+  };
+  ov.style.display='flex';
 }
 function maybeDay3Plot(){
   if(!state||!state.story||!state.story.flags)return false;
@@ -8289,7 +8356,7 @@ function tutAutoNav(){
     try{coachGo(st);}finally{_tutNavBusy=false;}
   }catch(e){}
 }
-function renderAll(){
+function renderAll(){try{updateDebtUI();}catch(e){}
   /* 换页 / 换分类之前先把旧引导收掉：不然会出现「商店/仓库已经切过去了，
      上一件货的框还亮着」，等 0.3~1 秒才消失的错位。 */
   try{
@@ -8968,7 +9035,7 @@ document.getElementById('btnClose').onclick=()=>{
     /* 过场收掉之后，让页眉的日期再闪一次，玩家才看得见「换天了」 */
     try{animPulse(document.getElementById('dateTxt'),'dateFlip',760);
         animPulse(document.getElementById('dayTxt'),'dateFlip',760);}catch(e){}
-    setTimeout(()=>{try{if(!maybeMojiePlot()&&!maybeDay3Plot())maybeStoryPopup();}catch(e){}},260);
+    setTimeout(()=>{try{if(debtDue())return;if(!maybeMojiePlot()&&!maybeDay3Plot())maybeStoryPopup();}catch(e){}},260);
     toast('第 '+state.day+' 天 · 今日 '+state.jobs.length+' 单，挑一单开工');
   });
   });
@@ -9147,6 +9214,8 @@ document.getElementById('tbMask').onclick=e=>{if(e.target.id==='tbMask'){const o
 document.getElementById('tbMini').onclick=()=>{const o=state.tb;if(o){o.closed=false;save();tbRender();}};
 try{const vm=document.getElementById('verMark');if(vm)vm.textContent=APP_VER+' · '+APP_BUILD;}catch(e){}
 if(!load())newGame(true);
+/* 读档时补一次欠款检查：万一存档停在第 15 天还没触发过判定 */
+try{if(state&&state.day>=DEBT_DUE_DAY&&!debtPaid()&&!state.story.flags.debtDone)setTimeout(()=>{try{debtDue();}catch(e){}},600);}catch(e){}
 function maybeOnboard(){
   let seen=false;
   try{seen=localStorage.getItem('pcbs2_onboard')==='1';}catch(e){}
