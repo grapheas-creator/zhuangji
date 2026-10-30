@@ -1529,6 +1529,21 @@ header{gap:12px}
   #mNav{display:grid!important}
 }
 
+
+/* ---------- 右下角版本水印：只做标记，不抢视觉 ---------- */
+#verMark{
+  position:fixed;right:8px;z-index:9;pointer-events:none;user-select:none;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 8px);
+  font-size:9px;line-height:1;letter-spacing:.4px;
+  color:rgba(255,255,255,.22);text-shadow:0 1px 2px rgba(0,0,0,.55);
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:1159px){
+  #verMark{bottom:calc(var(--navh,60px) + env(safe-area-inset-bottom,0px) + 6px);right:10px;font-size:9px}
+}
+@media(min-width:1160px){
+  #verMark{bottom:8px;right:10px;font-size:9.5px;color:rgba(255,255,255,.18)}
+}
 /* ---------- 手机底部页签 ---------- */
 #mNav{
   display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:44;
@@ -1947,6 +1962,7 @@ html.qqblock body{overflow:hidden}
 <div class="mask" id="tbMask"><div class="modal letter" id="tbCard"></div></div>
 <div class="tbmini" id="tbMini"><span class="dot"></span><span id="tbMiniTxt">淘宝来信</span></div>
 <div id="actionBar"></div>
+<div id="verMark" aria-hidden="true"></div>
 <div class="titleScr" id="titleScr">
   <div class="tBg" aria-hidden="true">
     <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
@@ -2103,7 +2119,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.9';
+const APP_VER='v0.13.10';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4330,6 +4346,15 @@ STORY[18]={day:18,id:'c3d6',who:'房东',role:'铺面房东',av:'房',col:'#ff92
 
 /* ================= 剧情插曲：第三天打烊后，技嘉推销员上门 ================= */
 const PLOT_EVENTS={
+  opening:{id:'opening',who:'我',role:'开业第一天',av:'我',col:'#ffcf8f',
+    lines:[
+      '招牌挂上去了，「旺财装机店」。红布一掀，就算是开张了。',
+      '押金、房租、焊台、第一批配件……卡里的钱只剩个位数了。',
+      '这条街上没人知道这儿有家装机店，今天大概率不会有客人。',
+      '只有老同学陈默说了好几天，开张这天来捧场，装一台剪视频的机器。',
+      '那就先把这一单做好。店是一单一单攒起来的。'
+    ],
+    tip:'第一单是提前约好的老同学；街坊还不知道这家店，从明天起才会慢慢有人上门。'},
   day3end:{id:'day3end',who:'韩经理',role:'上门推销 · 配件批发',av:'韩',col:'#8a7dff',
     lines:[
       '老板，还没关灯吧？耽误你两分钟。',
@@ -4565,11 +4590,12 @@ function makeJobs(dateStr,day){
   const rand=rngFrom(hash(dateStr+'#'+day+'#'+((state&&state.seed)||0))),jobs=[];
   const s=STORY[day];
   if(s&&!(state.story&&state.story.done[s.id]))jobs.push(buildStoryJob(s));
-  /* 第 1 天不再只给剧情单：新手也要有点随机单可挑 */
+  /* 第 1 天只有老同学这一单：店刚开张，街坊还不知道这儿有家装机店 */
+  if(day===1)return jobs;
   const fl=(state.story&&state.story.flags)||{};
   let n=repOrderCount(rand);
-  if(day===1)n=Math.max(2,n-1);      /* 第 1 天：剧情单 + 2 张随机单 */
-  else if(day<=3)n+=1;               /* 前三天多给一张，店刚开张别太空 */
+  if(day===2)n=2;                    /* 第二天：陈默回去说了，来了两单亲戚介绍的 */
+  else if(day===3)n=3;               /* 第三天：慢慢传开 */
 
   /* 预算随天数逐步放宽：第 1 周 ≤5k、第 2 周 ≤8k、第 3 周 ≤12k、第 4 周 ≤20k，之后不设限。
      超了就降一档重来（最多 3 次），保证前期不会蹦出高预算单，也不会卡死在「装不起」。 */
@@ -4711,6 +4737,7 @@ function makeJobs(dateStr,day){
     if(_job.partBudget<=_cap||tier===0)break;
     _tier=Math.max(0,tier-1);
     }
+    if(_job&&(day===2||day===3))_job.extra.push('老同学陈默介绍来的');
     if(_job&&!_job.ultra&&!_job.tight&&!_job.newOnly&&rand()<0.8){
       _job.newFor=['case','psu','cooler'];
       _job.extra.push('机箱、电源、散热要用全新件');
@@ -8674,6 +8701,12 @@ function maybeStoryPopup(){
     }
     const scr=document.getElementById('titleScr');
     if(scr&&!scr.classList.contains('hide'))return;
+    /* 开局先讲「开张」：解释第一天为什么只有一单 */
+    state.story=state.story||{done:{},flags:{}};
+    if(state.day===1&&!state.story.flags.opening){
+      state.story.flags.opening=true;save();
+      if(playPlotEvent('opening',()=>{setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},200);}))return;
+    }
     const j=state.jobs.find(x=>x.story&&x.status==='open');
     if(!j)return;
     state.story=state.story||{done:{},flags:{}};
@@ -9044,6 +9077,7 @@ document.addEventListener('visibilitychange',()=>{
 });
 document.getElementById('tbMask').onclick=e=>{if(e.target.id==='tbMask'){const o=state.tb;if(o){o.closed=true;save();}tbRender();}};
 document.getElementById('tbMini').onclick=()=>{const o=state.tb;if(o){o.closed=false;save();tbRender();}};
+try{const vm=document.getElementById('verMark');if(vm)vm.textContent=APP_VER+' · '+APP_BUILD;}catch(e){}
 if(!load())newGame(true);
 function maybeOnboard(){
   let seen=false;
