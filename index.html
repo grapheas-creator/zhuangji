@@ -1343,6 +1343,13 @@ header{gap:12px}
 }
 .ibtn:active{transform:translateY(1px)}
 .ibtn.ghost{background:linear-gradient(180deg,#241f19,#191510);color:#c9b79c;border-color:rgba(255,222,178,.22)}
+/* 「装上」用和打烊一样的橙色，一眼能找到主操作 */
+button.ibtn[data-install]{
+  background:linear-gradient(180deg,#ffb463,#ef8f36)!important;
+  border-color:#ffd0a0!important;color:#2a1705!important;font-weight:750;
+  box-shadow:0 6px 18px -10px rgba(255,150,60,.85),inset 0 1px 0 rgba(255,255,255,.35);
+}
+button.ibtn[data-install]:active{background:linear-gradient(180deg,#f5a952,#e0821f)!important;transform:translateY(1px)}
 @media(max-width:620px){
   .item .irow-acts{flex:1 1 auto}
   .ibtn{flex:1 1 0}
@@ -2151,7 +2158,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.19';
+const APP_VER='v0.13.20';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
