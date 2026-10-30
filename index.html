@@ -2102,7 +2102,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.3';
+const APP_VER='v0.13.4';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4529,10 +4529,12 @@ function makeJobs(dateStr,day){
   const rand=rngFrom(hash(dateStr+'#'+day)),jobs=[];
   const s=STORY[day];
   if(s&&!(state.story&&state.story.done[s.id]))jobs.push(buildStoryJob(s));
-  /* 第 1 天是新手教学：只给这一单，别看花眼 */
-  if(day===1)return jobs;
+  /* 第 1 天不再只给剧情单：新手也要有点随机单可挑 */
   const fl=(state.story&&state.story.flags)||{};
-  const n=repOrderCount(rand);
+  let n=repOrderCount(rand);
+  if(day===1)n=Math.max(2,n-1);      /* 第 1 天：剧情单 + 2 张随机单 */
+  else if(day<=3)n+=1;               /* 前三天多给一张，店刚开张别太空 */
+
   /* 预算随天数逐步放宽：第 1 周 ≤5k、第 2 周 ≤8k、第 3 周 ≤12k、第 4 周 ≤20k，之后不设限。
      超了就降一档重来（最多 3 次），保证前期不会蹦出高预算单，也不会卡死在「装不起」。 */
   const _day=state.day||1;
@@ -4649,9 +4651,16 @@ function makeJobs(dateStr,day){
     if(cat==='工作机'&&tier===1)extra.push('显卡 ×2（同型号）');
     if(cat==='工作机'&&tier===2)extra.push('HDD ≥ 4 块');
     if(cat==='游戏机'&&tier===2)extra.push('必须水冷');
-    _job={id:'J'+day+'-'+i,cat,tier,baseCost:cost,name:jobNameFor(cat,swList,rand,ultra),
+    /* 随机"加急单"：手工费高一点，但预算压得更死，逼你在时间和利润之间选 */
+    let _labor=labor,_extra=extra,_jname=jobNameFor(cat,swList,rand,ultra);
+    if(rand()<0.16){
+      _labor=Math.round(_labor*1.4/10)*10;
+      _extra.push('加急：今天就要，别拖到明天');
+      _jname='急单 · '+_jname;
+    }
+    _job={id:'J'+day+'-'+i,cat,tier,baseCost:cost,name:_jname,
       client:CLIENT_NAMES[Math.floor(rand()*CLIENT_NAMES.length)],
-      sw:swNames,swList:swNames,level,target,newOnly,tight,ultra,gpuPref:ref.pref,partBudget,labor,extra,status:'open',
+      sw:swNames,swList:swNames,level,target,newOnly,tight,ultra,gpuPref:ref.pref,partBudget,labor:_labor,extra:_extra,status:'open',
       hideScore:!_showScore,minMhz:(cat==="办公机"?0:(cat==="游戏机"?[3200,3600,6000][tier]:3200))};
     if(_job.partBudget<=_cap||tier===0)break;
     _tier=Math.max(0,tier-1);
