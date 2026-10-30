@@ -2119,7 +2119,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.11';
+const APP_VER='v0.13.12';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4349,12 +4349,49 @@ const PLOT_EVENTS={
   opening:{id:'opening',who:'我',role:'开业第一天',av:'我',col:'#ffcf8f',
     lines:[
       '招牌挂上去了，「旺财装机店」。红布一掀，就算是开张了。',
-      '押金、房租、焊台、第一批配件……卡里的钱只剩个位数了。',
+      '押金、房租、焊台、第一批配件，把攒的几年工资全砸进去了。',
+      '卡里剩下的这八千，是墨桀借给我的。',
+      '墨桀：拿着，先把店开起来。赔了算我的，赚了算你的。',
       '这条街上没人知道这儿有家装机店，今天大概率不会有客人。',
       '只有老同学陈默说了好几天，开张这天来捧场，装一台剪视频的机器。',
       '那就先把这一单做好。店是一单一单攒起来的。'
     ],
     tip:'第一单是提前约好的老同学；街坊还不知道这家店，从明天起才会慢慢有人上门。'},
+  mojie2:{id:'mojie2',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
+    lines:[
+      '墨桀：店开着呢？我还以为你卷铺盖跑路了。',
+      '我：跑什么，第一单刚交完。',
+      '墨桀：我跟我舅、我表姐都说了，他们要装机就找你。别给我丢人。',
+      '我：你借我的八千，我记着呢。',
+      '墨桀：先把店干起来，钱不急。赔了算我的，赚了算你的。'
+    ],
+    tip:'墨桀把亲戚都介绍了过来——这两天陆续有人上门。'},
+  mojie6:{id:'mojie6',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
+    lines:[
+      '墨桀：路过，看看你店还活着没。',
+      '我：活得挺好，单子排着呢。',
+      '墨桀：行啊，比你以前坐办公室强。别把自己累死就行。',
+      '我：累死之前先把你的钱还上。',
+      '墨桀：滚，谁催你了。'
+    ],
+    tip:'店活下来了。'},
+  mojie12:{id:'mojie12',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
+    lines:[
+      '墨桀：有个发小要装台机器，预算不低，我让他来找你了。',
+      '我：你介绍的，我成本上加一点就行。',
+      '墨桀：就喜欢你这种傻的。别人开店都恨不得翻一倍。',
+      '我：翻一倍的都干不长。'
+    ],
+    tip:'墨桀又拉来一个客户。'},
+  mojie20:{id:'mojie20',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
+    lines:[
+      '我：墨桀，八千块，我攒出来了。',
+      '墨桀：急什么，先留着进货。',
+      '我：该还就还。你也有你要用钱的时候。',
+      '墨桀：……行吧，收了。下次扩店缺钱，再跟我说。',
+      '我：一定。'
+    ],
+    tip:'欠墨桀的八千，还上了。'},
   day3end:{id:'day3end',who:'韩经理',role:'上门推销 · 配件批发',av:'韩',col:'#8a7dff',
     lines:[
       '老板，还没关灯吧？耽误你两分钟。',
@@ -4380,6 +4417,17 @@ function playPlotEvent(evId,onDone){
   const btn=ov.querySelector('#plotOk');if(btn)btn.onclick=close;
   ov.onclick=e=>{if(e.target===ov)close();};
   return true;
+}
+/* 死党墨桀的几段剧情：第 2 / 6 / 12 / 20 天各来一趟 */
+const MOJIE_PLOTS={2:'mojie2',6:'mojie6',12:'mojie12',20:'mojie20'};
+function maybeMojiePlot(){
+  if(!state||!state.story||!state.story.flags)return false;
+  const evId=MOJIE_PLOTS[state.day];
+  if(!evId)return false;
+  const flag='plot_'+evId;
+  if(state.story.flags[flag])return false;
+  state.story.flags[flag]=true;save();
+  return playPlotEvent(evId,()=>{setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},180);});
 }
 function maybeDay3Plot(){
   if(!state||!state.story||!state.story.flags)return false;
@@ -8920,7 +8968,7 @@ document.getElementById('btnClose').onclick=()=>{
     /* 过场收掉之后，让页眉的日期再闪一次，玩家才看得见「换天了」 */
     try{animPulse(document.getElementById('dateTxt'),'dateFlip',760);
         animPulse(document.getElementById('dayTxt'),'dateFlip',760);}catch(e){}
-    setTimeout(()=>{try{if(!maybeDay3Plot())maybeStoryPopup();}catch(e){}},260);
+    setTimeout(()=>{try{if(!maybeMojiePlot()&&!maybeDay3Plot())maybeStoryPopup();}catch(e){}},260);
     toast('第 '+state.day+' 天 · 今日 '+state.jobs.length+' 单，挑一单开工');
   });
   });
