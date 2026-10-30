@@ -2120,7 +2120,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.17';
+const APP_VER='v0.13.18';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4600,8 +4600,7 @@ function chatHTML(s){
   return `<div class="chat"><div class="h">
     <div class="av" style="background:${s.col||'#5b8cff'}">${s.av||s.who[0]}</div>
     <div><div class="who">${s.who}</div><div class="role">${s.role||'剧情客户'}</div></div></div>
-    ${(s.lines||[]).map(t=>`<div class="line">${t}</div>`).join('')}
-    ${s.tip?`<div class="tip">提示：${s.tip}</div>`:''}</div>`;
+    ${(s.lines||[]).map(t=>`<div class="line">${t}</div>`).join('')}</div>`;
 }
 
 /* ================= 任务 ================= */
