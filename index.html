@@ -2102,7 +2102,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.4';
+const APP_VER='v0.13.5';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -3980,6 +3980,10 @@ const CPU_TC_SCORE={"AMD Ryzen 3 1200":3010,
 "Intel Xeon E3-1231 v3":4409,"Intel Core i3-2100":1422,"Intel Core i5-2400":2011,"Intel Core i5-2500K":2432,"Intel Core i5-3570K":2752,"Intel Core i7-2600K":3964,"Intel Core i7-3770":3650,"Intel Xeon E3-1230 v2":3466,"Intel Core i5-4460":3093,"Intel Core i5-4590":3133,"Intel Core i5-4690K":4243,"Intel Core i7-4770":3349,"Intel Core i7-4790K":4936,"Intel Core i3-7100":2824,"Intel Core i5-7500":4004,"Intel Xeon E5-2670":5476,"Intel Xeon E5-2620 v3":4720,"Intel Xeon E5-2630 v3":5758,"Intel Xeon E5-2678 v3":10327,"Intel Xeon E5-2690 v3":11611,"Intel Xeon E5-2696 v3":12416,"Intel Xeon E5-2699 v3":12503,"AMD FX-8350":3355,"AMD Athlon 200GE":2060,"AMD Athlon 3000G":2163,"AMD EPYC 9654":104913,"AMD FX-6350":2887,"AMD FX-8300":2498,"Intel Xeon E3-1220 v2":2761,"Intel Core i5-3470S":2440,"Intel Core i5-3470T":1453,"Intel Core i5-2400S":1965,"Intel Core i3-3220":1715,"Intel Pentium G2030":1215,"Intel Xeon E3-1220 v3":2778,"Intel Xeon E3-1226 v3":3152,"Intel Core i3-4160T":1859,"Intel Core i5-9400":5341,"Intel Core i5-9400T":4974,"Intel Core i5-4460S":2617,"Intel Core i7-4770S":4253,"Intel Core i5-4590T":2466,"Intel Core i5-7600":4362};
 
 C.forEach(c=>{if(CPU_TC_SCORE[c.n]!=null)c.cs=CPU_TC_SCORE[c.n];});
+/* 跑分核实修正（子智能体对照 Cinebench R23 / PassMark 复核，只改核实出偏差的 6 条） */
+const CPU_CS_FIX={"AMD EPYC 9354": 52060, "AMD EPYC 9454": 62530, "AMD Threadripper 3960X": 34930, "Intel Core i7-4770": 4480, "Intel Core i7-7800X": 7270, "Intel Xeon E5-2666 v3": 8910};
+C.forEach(c=>{if(CPU_CS_FIX[c.n]!=null)c.cs=CPU_CS_FIX[c.n];});
+
 
 /* ================= 软件库 ================= */
 const SOFTWARE=[
@@ -4451,6 +4455,16 @@ const brandOK=(g,pref)=>!pref||(pref==='nvidia'?isNVIDIA(g):isAMD(g));
 const prefName=p=>p==='nvidia'?'NVIDIA':p==='amd'?'AMD':null;
 function pickCheap(arr,pred,usedOK){const pool=arr.filter(x=>pred(x)&&(usedOK||x.p!=null));if(!pool.length)return null;
   return pool.reduce((a,b)=>cheapest(a)<=cheapest(b)?a:b);}
+/* 机箱/电源/散热强制全新时，预算要跟着抬：按最便宜的新件与二手件差价补 */
+function newForDelta(){
+  const minP=(arr,key)=>{let m=Infinity;for(const x of arr){const v=x[key];if(v!=null&&v<m)m=v;}return m===Infinity?null:m;};
+  const one=(arr)=>{
+    const np=minP(arr,'p'),up=minP(arr,'u');
+    if(np==null)return 0;
+    return np-(up==null?np:up);
+  };
+  return Math.max(0,Math.round((one(K)+one(P)+one(H))/10)*10);
+}
 function buildRef(cat,tier,usedOK,pref,ultra){
   const s=SPEC[cat][tier];
   const _minMhz=(cat==="办公机"?0:(cat==="游戏机"?([3200,3600,6000][tier]||3200):3200));
@@ -4665,6 +4679,11 @@ function makeJobs(dateStr,day){
     if(_job.partBudget<=_cap||tier===0)break;
     _tier=Math.max(0,tier-1);
     }
+    if(_job&&!_job.ultra&&!_job.tight&&!_job.newOnly&&rand()<0.8){
+      _job.newFor=['case','psu','cooler'];
+      _job.extra.push('机箱、电源、散热要用全新件');
+      _job.partBudget=Math.ceil((_job.partBudget+newForDelta())/50)*50;
+    }
     if(_job)jobs.push(_job);
   }
   return jobs;
@@ -4729,7 +4748,7 @@ function newGame(silent){const d=today();
   if(!silent)save();}
 function isFriday(){return new Date(state.date+'T12:00:00').getDay()===5;}
 let uidSeq=1;
-function addInv(item){state.inv.push({uid:'i'+(uidSeq++),cat:item.cat,part:item.part,paid:item.paid,shop:item.shop,owner:item.owner||null,broken:!!item.broken});}
+function addInv(item){state.inv.push({uid:'i'+(uidSeq++),cat:item.cat,part:item.part,paid:item.paid,shop:item.shop,owner:item.owner||null,broken:!!item.broken,faulty:!!item.faulty});}
 function invList(cat){return state.inv.filter(x=>x.cat===cat);}
 function part(k){return build[k]?build[k].part:null;}
 function ramPart(i){return build.rams[i]?build.rams[i].part:null;}
@@ -6007,6 +6026,7 @@ function targetBits(j){
   if(t.ram)out.push('内存 '+t.ram+'G');
   if(j.minMhz)out.push('频率 '+j.minMhz+'MHz');
   if(j.newOnly)out.push('只要全新件');
+  else if(j.newFor&&j.newFor.length)out.push('机箱电源散热全新');
   if(j.gpuPref)out.push(j.gpuPref==='amd'?'A 卡':'N 卡');
   if(!j.repair){
     if(j.cat==='工作机'&&j.tier===0)out.push('内存 128G');
@@ -7541,16 +7561,18 @@ function renderShopList(){
   box.innerHTML=`<div style="font-size:11px;color:#8d95a3;margin:4px 0 6px">共 ${all.length} 件${all.length>arr.length?`，先显示 ${arr.length} 件`:''}</div>`+
    arr.map(x=>{
     if(isInv){
-      const p=x.part,own=!!x.owner,brk=!!x.broken;
+      const p=x.part,own=!!x.owner,brk=!!x.broken,bad=!!x.faulty;
       const sell=resaleValue(x);
+      const badNote=x.claim==='fail'?'仲裁失败，钱要不回来了，只能当废品卖':(x.claim==='ok'?'':'买到坏件：可以点「仲裁」要一次钱，80% 能要回来');
       return `<div class="item"><div class="ic">${partIcon(curCat,p.kind)}</div>
-        <div class="mid"><div class="n">${p.n}${own?'<span class="tbbadge own">客户</span>':''}${brk?'<span class="tbbadge brk">故障</span>':''}</div>
-        <div class="s">${brk?'故障件 · 装不上，只能当废品卖':specOf(curCat,p)}</div></div>
+        <div class="mid"><div class="n">${p.n}${own?'<span class="tbbadge own">客户</span>':''}${brk?'<span class="tbbadge brk">故障</span>':''}${bad&&x.claim!=='ok'?'<span class="tbbadge brk">坏件</span>':''}</div>
+        <div class="s">${brk?'故障件 · 装不上，只能当废品卖':(bad&&x.claim!=='ok'?badNote:specOf(curCat,p))}</div></div>
         <div class="irow">
           ${own?'':`<div class="ipaid">${money(x.paid)} · ${x.shop==='xianyu'?'二手':'全新'}</div>`}
           <div class="irow-acts">
-            ${brk?'':`<button class="ibtn" data-install="${x.uid}">装上</button>`}
-            ${own?'':`<button class="ibtn ghost" data-sell="${x.uid}">${brk?'卖废品':'卖 '+money(sell)}</button>`}
+            ${(brk||bad)?'':`<button class="ibtn" data-install="${x.uid}">装上</button>`}
+            ${bad&&x.claim!=='ok'?`<button class="ibtn" data-claim="${x.uid}">仲裁</button>`:''}
+            ${own?'':`<button class="ibtn ghost" data-sell="${x.uid}">${(brk||bad)?'卖废品':'卖 '+money(sell)}</button>`}
           </div>
         </div></div>`;
     }
@@ -7575,7 +7597,14 @@ function bindShopList(){
     modal('确认购买',`<b>${p.n}</b><br>${used?'二手':'全新'}　单价 <b>${money(price)}</b><br>
       现金 ${money(state.cash)} → ${money(state.cash-price)}`,()=>{
       if(state.cash<price){toast('现金不够');return;}
-      state.cash-=price;state.todayOut=(state.todayOut||0)+price;addInv({cat:curCat,part:p,paid:price,shop:used?'xianyu':'taobao'});
+      state.cash-=price;state.todayOut=(state.todayOut||0)+price;
+      /* 二手件（机箱除外）有 10% 是坏的：新手引导期间不触发，免得把教程卡死 */
+      let _bad=false;
+      try{
+        const tutOn=!!(state.tut&&!state.tut.guideOff);
+        if(used&&curCat!=='case'&&!tutOn&&Math.random()<0.10)_bad=true;
+      }catch(e){}
+      addInv({cat:curCat,part:_bad?Object.assign({},p,{faulty:true}):p,paid:price,shop:used?'xianyu':'taobao',faulty:_bad});
       if(state.tut){state.tut.done.buy=true;state.tut.bought=state.tut.bought||{};state.tut.bought[curCat]=true;}
       /* 买完件后如果引导下一步就是「装上」，直接把面板切到仓库再渲染，
          只重绘一次；否则会有「商店重绘 → 立刻切仓库重绘」的连续两次，中间那下就是闪 */
@@ -7597,6 +7626,22 @@ function bindShopList(){
     const sell=resaleValue(it);
     modal('确认卖出',`<b>${it.part.n}</b><br>买入 ${money(it.paid)}　回收 <b>${money(sell)}</b>`,()=>{
       state.cash+=sell;state.todayIn=(state.todayIn||0)+sell;state.inv.splice(i,1);save();renderAll();toast('已卖出');});
+  });
+  document.querySelectorAll('[data-claim]').forEach(el=>el.onclick=e=>{
+    e.stopPropagation();
+    const i=state.inv.findIndex(x=>x.uid===el.dataset.claim);if(i<0)return;
+    const it=state.inv[i];
+    if(!it.faulty||it.claim)return;
+    const win=Math.random()<0.8;
+    if(win){
+      state.cash+=it.paid||0;state.todayIn=(state.todayIn||0)+(it.paid||0);
+      state.inv.splice(i,1);
+      toast('仲裁成功，退回 '+money(it.paid||0));
+    }else{
+      it.claim='fail';
+      toast('仲裁失败：卖家不认，钱要不回来了');
+    }
+    save();renderAll();
   });
   document.querySelectorAll('[data-install]').forEach(el=>el.onclick=e=>{
     e.stopPropagation();
@@ -8265,6 +8310,11 @@ function deliver(){
       ...build.rams,...build.m2,...build.sata].filter(Boolean);
     const used=all.filter(s=>s.shop==='xianyu');
     if(used.length)fails.push(`客户只要全新件，你用了 ${used.length} 个二手件`);
+  }
+  if(j.newFor&&j.newFor.length){
+    const nm={case:'机箱',psu:'电源',cooler:'散热'};
+    const bad=j.newFor.filter(k=>build[k]&&build[k].shop==='xianyu').map(k=>nm[k]||k);
+    if(bad.length)fails.push('客户要求 '+bad.join('/')+' 用全新件');
   }
   if(j.gpuPref){
     const gs=[build.gpu1,build.gpu2].filter(Boolean);
