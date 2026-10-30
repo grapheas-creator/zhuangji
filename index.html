@@ -2119,7 +2119,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.10';
+const APP_VER='v0.13.11';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4847,7 +4847,7 @@ function newBuild(){
           rams:[null,null,null,null],m2:[null,null,null,null],sata:[null,null,null,null,null,null]};
 }
 let state=null,build=newBuild(),curCat='cpu';
-function defaultFilt(){return {price:[],extra:[],ig:'all',mem:[],cap:[],mhz:[],sort:'usedAsc',minPerf:0,q:''};}
+function defaultFilt(){return {price:[],extra:[],cond:[],ig:'all',mem:[],cap:[],mhz:[],sort:'usedAsc',minPerf:0,q:''};}
 let filt=defaultFilt();
 let swOpen={};
 function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -5417,6 +5417,16 @@ function qPred(){
     if(qn&&hay.indexOf(qn)>=0)return true;          /* 去空格后的整体匹配：650ti → 650 Ti */
     return toks.every(t=>hay.indexOf(t)>=0);        /* 多关键词仍然按"都出现" */
   };
+}
+/* 货况筛选：全新 / 二手，多选取「或」——选全新只看有全新货的，选二手只看有二手货的 */
+function condPred(){
+  const c=Array.isArray(filt.cond)?filt.cond:[];
+  if(!c.length)return ()=>true;
+  const nw=c.indexOf('new')>=0,us=c.indexOf('used')>=0;
+  if(nw&&us)return x=>x&&(x.p!=null||x.u!=null);
+  if(nw)return x=>x&&x.p!=null;
+  if(us)return x=>x&&x.u!=null;
+  return ()=>true;
 }
 const PERF_META={
  cpu:{max:40000,step:1000,label:'Cinebench 多核 ≥',fmt:v=>v.toLocaleString()},
@@ -7001,6 +7011,7 @@ function coachGo(step){
         if(filt.ig!=='all'){filt.ig='all';changed=true;}
       }
       if(filt.price.length){filt.price=[];changed=true;}
+      if(Array.isArray(filt.cond)&&filt.cond.length){filt.cond=[];changed=true;}
       if(filt.extra.length){filt.extra=[];changed=true;}
       if(filt.mhz.length){filt.mhz=[];changed=true;}
       const q=tutBuyQuery(cat);
@@ -7464,6 +7475,11 @@ function shopHTML(){
   const _selP=Array.isArray(filt.price)?filt.price:[];
   html+=`<div class="frow"><div class="lab">价格 <span class="slval">可多选</span></div><div class="fchips">${
     PRICE_OPTS.map(([k,n])=>`<span class="chip ${(k==='all'?(!_selP.length):_selP.includes(k))?'on':''}" data-price="${k}">${n}</span>`).join('')}</div></div>`;
+  const _selC=Array.isArray(filt.cond)?filt.cond:[];
+  html+=`<div class="frow"><div class="lab">货况 <span class="slval">可多选 · 或</span></div><div class="fchips">`+
+    `<span class="chip ${!_selC.length?'on':''}" data-condall="1">全部</span>`+
+    `<span class="chip ${_selC.includes('new')?'on':''}" data-cond="new">全新</span>`+
+    `<span class="chip ${_selC.includes('used')?'on':''}" data-cond="used">二手</span></div></div>`;
   /* 规格 / 内存类型两行都可多选：同维度取「或」，跨维度取「与」 */
   const _ef=EXTRA_FILTERS[curCat]||[];
   const _selE=Array.isArray(filt.extra)?filt.extra:[];
@@ -7531,6 +7547,8 @@ function filterSummary(){
   const psel=Array.isArray(filt.price)?filt.price:[];
   if(psel.length)bits.push('价 '+psel.map(k=>{const o=PRICE_OPTS.find(x=>x[0]===k);return o?o[1]:k;}).join('/'));
   const esel=Array.isArray(filt.extra)?filt.extra:[];
+  const csel=Array.isArray(filt.cond)?filt.cond:[];
+  if(csel.length)bits.push('货况 '+(csel.includes('new')?'全新':'')+(csel.length>1?'/':'')+(csel.includes('used')?'二手':''));
   if(esel.length){const list=EXTRA_FILTERS[curCat]||[];
     bits.push(esel.map(k=>{const o=list.find(x=>x[0]===k);return o?o[1]:k;}).join('/'));}
   if(curCat==='cpu'&&filt.ig&&filt.ig!=='all')bits.push(filt.ig==='ig'?'带核显':'无核显');
@@ -7597,6 +7615,8 @@ function bindShop(){
     if(k==='all')return [];
     const i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);return a;};
   document.querySelectorAll('[data-price]').forEach(el=>el.onclick=()=>{filt.price=toggle(filt.price,el.dataset.price);renderLeft();});
+  document.querySelectorAll('[data-cond]').forEach(el=>el.onclick=()=>{filt.cond=toggle(filt.cond,el.dataset.cond);renderLeft();});
+  document.querySelectorAll('[data-condall]').forEach(el=>el.onclick=()=>{filt.cond=[];renderLeft();});
   document.querySelectorAll('[data-extra]').forEach(el=>el.onclick=()=>{filt.extra=toggle(filt.extra,el.dataset.extra);renderLeft();});
   document.querySelectorAll('[data-xall]').forEach(el=>el.onclick=()=>{
     const dims=String(el.dataset.xall||'').split(',');
@@ -7634,7 +7654,7 @@ function bindShop(){
 }
 function extraPred(){
   const list=EXTRA_FILTERS[curCat]||[];
-  const sel=Array.isArray(filt.extra)?filt.extra:[];
+  const sel=Array.isArray(filt.extra)?filt.extra:[];const cpred=condPred();
   if(!sel.length)return ()=>true;
   const dims={};
   sel.forEach(k=>{const o=list.find(x=>x[0]===k);if(!o)return;
@@ -7656,7 +7676,7 @@ function currentList(){
   let arr;
   if(isInv)arr=invList(curCat).filter(x=>x.broken||(inPrice(x.paid,filt.price)&&pred(x.part)&&ip(x.part)&&qp(x.part)&&mpred(x.part)&&memPred(x.part)&&capPred(x.part)&&PERFVAL[curCat](x.part)>=filt.minPerf));
   else arr=MAP[curCat].filter(x=>(x.p!=null||x.u!=null))
-    .filter(x=>inPrice(refPrice(x),filt.price)&&pred(x)&&ip(x)&&qp(x)&&mpred(x)&&memPred(x)&&capPred(x)&&PERFVAL[curCat](x)>=filt.minPerf);
+    .filter(x=>inPrice(refPrice(x),filt.price)&&condPred()(x)&&pred(x)&&ip(x)&&qp(x)&&mpred(x)&&memPred(x)&&capPred(x)&&PERFVAL[curCat](x)>=filt.minPerf);
   const perfOf=x=>PERFVAL[curCat](isInv?x.part:x);
   /* 排序口径跟着下拉框走：全新价只看 p，二手价只看 u，没有该渠道的排到最后 */
   const priceOf=x=>{
