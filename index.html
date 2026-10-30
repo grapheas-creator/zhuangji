@@ -2120,7 +2120,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.16';
+const APP_VER='v0.13.17';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4360,13 +4360,23 @@ const PLOT_EVENTS={
     tip:'第一单是提前约好的老同学；街坊还不知道这家店，从明天起才会慢慢有人上门。'},
   mojie2:{id:'mojie2',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
     lines:[
-      '墨桀：店开着呢？我还以为你卷铺盖跑路了。',
-      '我：跑什么，第一单刚交完。',
-      '墨桀：我跟我舅、我表姐都说了，他们要装机就找你。别给我丢人。',
-      '我：你借我的八千，我记着呢。',
-      '墨桀：先把店干起来，钱不急。赔了算我的，赚了算你的。'
+      '昨天我想给自家那台老电脑升个显卡，在二手市场淘了张 1060 3G。',
+      '六百多块，卖家说“自用、没拆没修”，照片拍得干干净净。',
+      '到手插上，风扇转，屏幕黑的。换台机器再试，花了半屏，然后就重启。',
+      '我找卖家。卖家：你电源不行吧？你主板插槽坏了吧？我：那退了吧。',
+      '他就不回消息了。',
+      '我把开箱视频、聊天记录、快递面单全翻出来，走了平台介入。',
+      '折腾到半夜，钱退回来了。显卡还在我桌上，当个教训。',
+      '墨桀听完，先笑，然后说：你运气好。',
+      '我：怎么说？',
+      '墨桀：二手件这行，十件里保不齐有一件是坏的。买到坏的，能扯皮要回来的，大概八成。',
+      '墨桀：剩下两成，卖家拉黑你，平台让你举证，你举不出来，就只能自认倒霉。',
+      '我：那我以后收二手件，得一件一件验。',
+      '墨桀：还有，你要拿这种件去装客户机器，坏的装上去，客户不认卖家，只认你。',
+      '我：明白。这亏我吃一次就够了。',
+      '墨桀：行了，不说这个。我跟我舅、我表姐都说了，他们要装机就找你。别给我丢人。'
     ],
-    tip:'墨桀把亲戚都介绍了过来——这两天陆续有人上门。'},
+    tip:'二手件大约 10% 是坏的：买到坏的可以申请仲裁，约 80% 能把钱要回来，剩下 20% 只能认栽。'},
   mojie6:{id:'mojie6',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
     lines:[
       '墨桀：路过，看看你店还活着没。',
@@ -4962,7 +4972,20 @@ const SFX={
   success(){aeResume();const t=AE.ctx?AE.ctx.currentTime:0;[523,659,784,1047].forEach((f,i)=>aeTone(f,0.22,'triangle',0.18,f,t+i*0.09));},
   fail(){aeResume();const t=AE.ctx?AE.ctx.currentTime:0;aeTone(220,0.22,'sawtooth',0.16,150,t);aeTone(180,0.26,'sawtooth',0.14,120,t+0.12);},
   whoosh(){aeResume();aeNoise(0.35,0.10,500);},
-  pop(){aeResume();aeTone(420,0.08,'sine',0.16,620);}
+  pop(){aeResume();aeTone(420,0.08,'sine',0.16,620);},
+  /* 跑分：一段上扫 + 滴答，跑完来一个上扬和弦 */
+  bench(){
+    aeResume();const ctx=AE.ctx;if(!ctx)return;const t=ctx.currentTime;
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(150,t);
+    o.frequency.exponentialRampToValueAtTime(760,t+1.15);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.linearRampToValueAtTime(0.05,t+0.12);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+1.22);
+    o.connect(g);g.connect(AE.sfxGain);o.start(t);o.stop(t+1.26);
+    for(let i=0;i<6;i++)aeTone(1150+i*90,0.045,'square',0.04,0,t+0.08+i*0.18);
+  },
+  benchDone(){aeResume();const t=AE.ctx?AE.ctx.currentTime:0;[880,1174,1568].forEach((f,i)=>aeTone(f,0.26,'triangle',0.17,f,t+i*0.08));}
 };
 /* BGM：Am7 - F - C - G 的循环，低音量垫底 */
 const AE_CHORDS=[[220.0,261.6,329.6,392.0],[174.6,220.0,261.6,349.2],[261.6,329.6,392.0,523.3],[196.0,246.9,293.7,392.0]];
@@ -8500,6 +8523,7 @@ function playHandover(box,finalHTML,sc,onDone){
   },200);
   function stageBench(){
     if(!document.getElementById('hoCard')){abort();return;}
+    try{SFX.bench();}catch(e){}
     card.innerHTML=`<div class="ho-title"><span class="dot"></span>跑分测试</div>
       <div class="ho-bar"><i id="hoBar"></i></div>
       <div class="ho-score">
@@ -8516,7 +8540,7 @@ function playHandover(box,finalHTML,sc,onDone){
       if(cb)cb.textContent=Math.round(sc.cs*e).toLocaleString();
       if(rm)rm.textContent=Math.round(sc.ram*e)+'G';
       if(k<1)requestAnimationFrame(tick);
-      else setTimeout(()=>{close();box.className='result pass';box.dataset.job='';box.innerHTML=finalHTML;finish();},280);
+      else setTimeout(()=>{try{SFX.benchDone();}catch(e){}close();box.className='result pass';box.dataset.job='';box.innerHTML=finalHTML;finish();},280);
     };
     requestAnimationFrame(tick);
   }
