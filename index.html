@@ -2103,7 +2103,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.7';
+const APP_VER='v0.13.8';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4008,9 +4008,26 @@ const SOFTWARE=[
  {n:'AutoCAD 三维建模',g:'工作站',m:{ts:3000,cs:8000,ram:16},r:{ts:6000,cs:12000,ram:32}},
  {n:'ANSYS 有限元仿真',g:'工作站',m:{ts:2000,cs:20000,ram:64},r:{ts:3000,cs:30000,ram:128}},
  {n:'虚拟机 8 开',g:'工作站',m:{ts:800,cs:12000,ram:32},r:{ts:1000,cs:20000,ram:64}},
- {n:'剪映 1080p 简单剪辑（核显可用）',g:'办公',m:{ts:400,cs:3000,ram:8},r:{ts:1500,cs:5500,ram:16}}];
-const POOL={'0-0':[0,1,2,3],'0-1':[4,5,6,1],'0-2':[4,5,6],'1-0':[7,8,13],'1-1':[9,10,11,12],'1-2':[9,10,11,12],
- '2-0':[14,15,16,17,19],'2-1':[18,15,16],'2-2':[19,17]};
+ {n:'剪映 1080p 简单剪辑（核显可用）',g:'办公',m:{ts:400,cs:3000,ram:8},r:{ts:1500,cs:5500,ram:16}},
+ {n:'《无畏契约》电竞',g:'游戏',m:{ts:1200,cs:3500,ram:8},r:{ts:2500,cs:5000,ram:8},k:{ts:12000,cs:12000,ram:16}},
+ {n:'《DOTA2》',g:'游戏',m:{ts:1500,cs:4000,ram:8},r:{ts:3000,cs:5500,ram:8},k:{ts:14000,cs:13000,ram:16}},
+ {n:'《穿越火线 HD》',g:'游戏',m:{ts:1000,cs:3500,ram:8},r:{ts:2200,cs:5000,ram:8}},
+ {n:'《原神》',g:'游戏',m:{ts:2000,cs:5000,ram:16},r:{ts:5000,cs:8000,ram:16},k:{ts:14000,cs:13000,ram:16}},
+ {n:'《永劫无间》',g:'游戏',m:{ts:3000,cs:6000,ram:16},r:{ts:7000,cs:9000,ram:16},k:{ts:20000,cs:14000,ram:32}},
+ {n:'《艾尔登法环》',g:'游戏',m:{ts:2500,cs:6000,ram:16},r:{ts:6000,cs:8000,ram:16}},
+ {n:'《三角洲行动》',g:'游戏',m:{ts:3000,cs:6000,ram:16},r:{ts:8000,cs:10000,ram:16}},
+ {n:'《幻兽帕鲁》',g:'游戏',m:{ts:2500,cs:5000,ram:16},r:{ts:5000,cs:8000,ram:16}},
+ {n:'千牛 / 电商客服 8 开',g:'办公',m:{ts:0,cs:5000,ram:8},r:{ts:0,cs:8000,ram:16},k:{ts:0,cs:12000,ram:32}},
+ {n:'网课录屏 + 直播',g:'办公',m:{ts:300,cs:4000,ram:8},r:{ts:1000,cs:7000,ram:16}},
+ {n:'VS Code + Docker 编程',g:'办公',m:{ts:0,cs:5000,ram:16},r:{ts:0,cs:9000,ram:32}},
+ {n:'达芬奇 4K 调色',g:'工作站',m:{ts:1500,cs:10000,ram:32},r:{ts:3000,cs:16000,ram:64}},
+ {n:'本地 AI 推理（7B~14B）',g:'工作站',m:{ts:3000,cs:9000,ram:32},r:{ts:6000,cs:14000,ram:64}},
+ {n:'Blender 多机渲染农场',g:'工作站',m:{ts:2000,cs:12000,ram:32},r:{ts:3000,cs:20000,ram:64}},
+ {n:'4K 家庭影院播放',g:'办公',m:{ts:0,cs:4000,ram:8},r:{ts:500,cs:6000,ram:16}},
+ {n:'剪映多轨道 4K',g:'办公',m:{ts:2000,cs:9000,ram:16},r:{ts:4000,cs:14000,ram:32}}];
+const POOL={'0-0':[0,1,2,3,29,35],'0-1':[4,5,6,1,30,31,36],'0-2':[4,5,6,32,36],
+ '1-0':[7,8,13,21,22,23,24],'1-1':[9,10,11,12,25,26,27,28],'1-2':[9,10,11,12,25,27],
+ '2-0':[14,15,16,17,19,32,33,34],'2-1':[18,15,16,33],'2-2':[19,17,34]};
 function refGpuName(ts){if(ts<=0)return '核显即可';
   const g=G.filter(x=>x.u!=null).slice().sort((a,b)=>a.ts-b.ts).find(x=>x.ts>=ts);return g?g.n:'（无）';}
 function refCpuName(cs){if(cs<=0)return '任意';
@@ -4434,6 +4451,8 @@ function pickJobName(cat,rand,ultra){
   return pool[Math.floor(rand()*pool.length)];
 }
 /* 客户就给个名字：现实里你先知道的是「谁找你装机」，不是他的标签 */
+const CLIENT_ROLES=['大学生','刚毕业','游戏主播','剪辑师','摄影师','会计','网店店主','网吧老板','打印店老板',
+ '程序员','设计师','中学老师','医生','中介','房东','小老板','宝妈','退休大爷','婚庆摄像','带货主播'];
 const CLIENT_NAMES=['王建国','李秀兰','张伟','刘敏','陈静','杨帆','赵磊','黄晓燕','周涛','吴倩',
 '徐鹏','孙丽娟','胡军','朱文博','高翔','林晓东','何雨桐','郭强','马晓峰','罗静怡',
 '梁文杰','宋佳','郑海涛','谢楠','韩雪','唐志强','冯磊','于洋','董秀英','萧然',
@@ -4543,7 +4562,7 @@ function minBuildCost(need,opt){
   return best;
 }
 function makeJobs(dateStr,day){
-  const rand=rngFrom(hash(dateStr+'#'+day)),jobs=[];
+  const rand=rngFrom(hash(dateStr+'#'+day+'#'+((state&&state.seed)||0))),jobs=[];
   const s=STORY[day];
   if(s&&!(state.story&&state.story.done[s.id]))jobs.push(buildStoryJob(s));
   /* 第 1 天不再只给剧情单：新手也要有点随机单可挑 */
@@ -4556,6 +4575,7 @@ function makeJobs(dateStr,day){
      超了就降一档重来（最多 3 次），保证前期不会蹦出高预算单，也不会卡死在「装不起」。 */
   const _day=state.day||1;
   const _cap=_day<7?5000:(_day<14?8000:(_day<21?12000:(_day<28?20000:Infinity)));
+  const _usedSw=new Set();
   for(let i=0;i<n;i++){
     const _cat0=pickCat(rand), _tierStart=pickTier(rand,_cat0);
     let _tier=_tierStart, _job=null;
@@ -4599,7 +4619,9 @@ function makeJobs(dateStr,day){
       const _w=id=>{const nd=needOf(id);return (nd.ts||0)*2+(nd.cs||0)/10+(nd.ram||0)*30;};
       _pool=idxs.slice().sort((a,b)=>_w(a)-_w(b)).slice(0,3);
     }
-    const pickId=_pool[Math.floor(rand()*_pool.length)];
+    let pickId=_pool[Math.floor(rand()*_pool.length)];
+    for(let _try=0;_try<6&&_usedSw.has(pickId)&&_pool.length>1;_try++)pickId=_pool[Math.floor(rand()*_pool.length)];
+    _usedSw.add(pickId);
     const sw=SOFTWARE[pickId];
     let need=needOf(pickId);
     /* 有的客户既要办公又要打游戏：约 18% 的单子会多要 1–2 个软件（仍以单软件为主），
@@ -4683,6 +4705,7 @@ function makeJobs(dateStr,day){
     }
     _job={id:'J'+day+'-'+i,cat,tier,baseCost:cost,name:_jname,
       client:CLIENT_NAMES[Math.floor(rand()*CLIENT_NAMES.length)],
+      clientRole:CLIENT_ROLES[Math.floor(rand()*CLIENT_ROLES.length)],
       sw:swNames,swList:swNames,level,target,newOnly,tight,ultra,gpuPref:ref.pref,partBudget,labor:_labor,extra:_extra,status:'open',deadline:_dl,dueDay:day+_dl-1,bornDay:day,
       hideScore:!_showScore,minMhz:(cat==="办公机"?0:(cat==="游戏机"?[3200,3600,6000][tier]:3200))};
     if(_job.partBudget<=_cap||tier===0)break;
@@ -4841,7 +4864,7 @@ function newGame(silent){const d=today();
     story:{done:{},flags:{}},customers:{},tb:null,diag:{},benches:{},machines:[],benchMachines:{},
     dayStartCash:8000,todayIn:0,todayOut:0,todayStory:0,
     rep:{score:3,log:[],bad:0},life:{car:null,house:null},extraIncome:0,done:[],
-    tut:{done:{},hidden:false}};
+    tut:{done:{},hidden:false},seed:(Math.random()*1e9)|0};
   state.jobs=makeJobs(d,1);state.dayTotal=state.jobs.length;build=newBuild();
   const r=document.getElementById('result');if(r){r.className='';r.innerHTML='';}
   /* silent：初始化时只要内存里有一局可渲染，不写盘——不然还没开局就多出一条「第1天」的自动存档 */
@@ -5355,13 +5378,18 @@ function igPred(){
 function qPred(){
   const q=(filt.q||'').trim().toLowerCase();
   if(!q)return ()=>true;
-  const toks=q.split(/\s+/).filter(Boolean);
+  const norm=t=>String(t||'').toLowerCase().replace(/[\s\-_/\\()（）\[\]【】]+/g,'');
+  const qn=norm(q);
+  const toks=q.split(/\s+/).filter(Boolean).map(norm).filter(Boolean);
   /* 注意：机箱的 ff 是数组，主板的 ff 是字符串（'MATX'）——以前这里直接 x.ff.join()，
      在「主板」分类里一搜索就抛 TypeError，整个列表渲染中断，看起来就是「搜完什么都没了」。 */
   const ffOf=x=>{const v=x&&x.ff;if(!v)return '';return Array.isArray(v)?v.join(' '):String(v);};
-  return x=>{const hay=(((x&&x.n)||'')+' '+(x&&x.s||'')+' '+(x&&x.m||'')+' '+(x&&x.kind||'')+' '
-    +ffOf(x)+' '+(x&&x.series||'')).toLowerCase();
-    return toks.every(t=>hay.indexOf(t)>=0);};
+  return x=>{
+    const raw=(((x&&x.n)||'')+' '+(x&&x.s||'')+' '+(x&&x.m||'')+' '+(x&&x.kind||'')+' '+ffOf(x)+' '+(x&&x.series||''));
+    const hay=norm(raw);
+    if(qn&&hay.indexOf(qn)>=0)return true;          /* 去空格后的整体匹配：650ti → 650 Ti */
+    return toks.every(t=>hay.indexOf(t)>=0);        /* 多关键词仍然按"都出现" */
+  };
 }
 const PERF_META={
  cpu:{max:40000,step:1000,label:'Cinebench 多核 ≥',fmt:v=>v.toLocaleString()},
@@ -6617,7 +6645,8 @@ function coachStep(){
   if(!d.close)return {k:'close',title:'打烊',text:'今天的单处理完，点右上角「打烊」进第二天。',sel:()=>document.getElementById('btnClose')};
   return null;
 }
-function coachHide(){const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
+let _coachHiddenAt=0;
+function coachHide(){_coachHiddenAt=performance.now();const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
 let _coachGlowEl=null;
 function coachGlow(el){
   if(_coachGlowEl===el)return;
@@ -6640,6 +6669,7 @@ function drawCoach(el,step){
   const stepChanged=(_coachDrawnKey!==step.k);
   /* 文字、按钮显隐、脉冲动画只在「换了一步」时写一次；
      同一步骤内的重定位只挪几何，避免每帧重排导致卡顿 */
+  const _recentHide=(performance.now()-(_coachHiddenAt||0))<800;
   if(stepChanged){
     const _cn=document.getElementById('coachNext');
     if(_cn)_cn.style.display=(step.k==='cpu_target')?'':'none';
@@ -6657,7 +6687,7 @@ function drawCoach(el,step){
          四块挡板就变成整屏压暗 = 闪一下 */
       /* 卡片已经亮着时换步骤只换内容，不再重播淡入——
          否则每一步都会「弹一下」，玩家会以为引导弹了两三遍 */
-      if(_tp&&!_wasOn){_tp.classList.remove('cFade');void _tp.offsetWidth;_tp.classList.add('cFade');}
+      if(_tp&&!_wasOn&&!_recentHide){_tp.classList.remove('cFade');void _tp.offsetWidth;_tp.classList.add('cFade');}
     }catch(e){}
   }
   if(!positionCoach(el)){
@@ -7002,7 +7032,7 @@ function coachRefresh(){
   /* 一次点击会从好几个地方排队调用（40/80/150ms…），而且每调一次就要重排遮罩。
      这里做一次合并：70ms 内的重复调用只留最后一次。 */
   const _now=performance.now();
-  if(_now-_crAt<70){
+  if(_now-_crAt<180){
     if(!_crTrail)_crTrail=setTimeout(()=>{_crTrail=null;try{coachRefresh();}catch(e){}},80);
     return;
   }
@@ -7224,7 +7254,7 @@ function jobsHTML(){
     return `<div class="job${cls} ${j.status==='open'?'':(j.status==='taken'?' taken':' done')}">
       <div class="top"><div><span class="tag ${tag}">${tagText}</span><span class="nm">${j.name}</span></div>
       <div class="money">${money(j.partBudget)}<small>部件费</small></div></div>
-      <div class="who">客户：${j.client}</div>
+      <div class="who">客户：${j.client}${j.clientRole?'（'+j.clientRole+'）':''}</div>
       <div class="softline">能运行 <b>${j.sw}</b>（${lv}）</div>
       <ul>${lines.map(r=>`<li>${r}</li>`).join('')}</ul>
       <div class="pay">人工费 ${money(labor)}${j.carry?'　·　旧机自动装到工作台':''}</div>
