@@ -2091,7 +2091,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.0';
+const APP_VER='v0.13.1';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4225,6 +4225,41 @@ STORY[18]={day:18,id:'c3d6',who:'房东',role:'铺面房东',av:'房',col:'#ff92
     extra:['给新店的收银机用','预算别超，房租还没交']},
   after:'装修你自己张罗，下个月起，这条街上就有你的招牌了。',
   reward:{money:1200,note:'攒够定金，铺面到手'}};
+
+/* ================= 剧情插曲：第三天打烊后，技嘉推销员上门 ================= */
+const PLOT_EVENTS={
+  day3end:{id:'day3end',who:'韩经理',role:'上门推销 · 配件批发',av:'韩',col:'#8a7dff',
+    lines:[
+      '老板，还没关灯吧？耽误你两分钟。',
+      '我这边有一批技嘉的主板，B760M 迫击炮、B650M 都有，工包全新，按七折给你。',
+      '显卡、机箱、电源也能一起走，你要多少我供多少，账期好商量。',
+      '我：技嘉的东西，我不收。',
+      '我：爱国嘉的东西，狗都不卖。',
+      '有钱不赚？这条街上就你一家这么硬。行吧，那我换一家问问。'
+    ],
+    tip:'店规：技嘉的配件不进、不卖。上门推销的一律回绝。'}
+};
+function playPlotEvent(evId,onDone){
+  const ev=PLOT_EVENTS[evId];if(!ev)return false;
+  if(document.getElementById('plotEvent'))return false;
+  const ov=document.createElement('div');
+  ov.className='dayopen static';ov.id='plotEvent';
+  ov.innerHTML='<div style="max-width:560px;width:calc(100% - 28px);padding:0 2px">'+chatHTML(ev)+
+    '<div style="text-align:center;margin-top:10px"><button class="btn primary" id="plotOk">知道了</button></div></div>';
+  document.body.appendChild(ov);
+  let done=false;
+  const close=()=>{if(done)return;done=true;try{ov.remove();}catch(e){}
+    if(typeof onDone==='function')onDone();};
+  const btn=ov.querySelector('#plotOk');if(btn)btn.onclick=close;
+  ov.onclick=e=>{if(e.target===ov)close();};
+  return true;
+}
+function maybeDay3Plot(){
+  if(!state||!state.story||!state.story.flags)return false;
+  if(state.day!==4||state.story.flags.day3end)return false;
+  state.story.flags.day3end=true;save();
+  return playPlotEvent('day3end',()=>{setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},180);});
+}
 
 const CHAPTERS=[
   {id:1,name:'开张',end:7,tail:'小店的回头客多起来了，门口开始排队。'},
@@ -8450,7 +8485,7 @@ document.getElementById('btnClose').onclick=()=>{
     /* 过场收掉之后，让页眉的日期再闪一次，玩家才看得见「换天了」 */
     try{animPulse(document.getElementById('dateTxt'),'dateFlip',760);
         animPulse(document.getElementById('dayTxt'),'dateFlip',760);}catch(e){}
-    setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},260);
+    setTimeout(()=>{try{if(!maybeDay3Plot())maybeStoryPopup();}catch(e){}},260);
     toast('第 '+state.day+' 天 · 今日 '+state.jobs.length+' 单，挑一单开工');
   });
   });
