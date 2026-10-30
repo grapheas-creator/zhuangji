@@ -2102,7 +2102,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.5';
+const APP_VER='v0.13.6';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4372,6 +4372,8 @@ function buildStoryJob(s){
   const j=Object.assign({id:'S'+s.day,story:true,storyId:s.id,client:s.who,status:'open',
     ultra:false,gpuPref:null,tight:false,newOnly:false,extra:[]},s.job);
   j.carry=s.carry||null;j.minMhz=(j.cat==="办公机"?0:(j.cat==="游戏机"?([3200,3600,6000][j.tier]||3200):3200));
+  /* 剧情单给 3 天交期，别让新手一上来就超时 */
+  j.deadline=3;j.dueDay=s.day+2;j.bornDay=s.day;
   return j;
 }
 function chatHTML(s){
@@ -4565,7 +4567,8 @@ function makeJobs(dateStr,day){
     const pref=pickGpuPref(rand,cat,tier);
     const sp0=SPEC[cat][tier];
     const canAllNew=C.some(c=>sp0.cpu(c)&&c.p!=null)&&B.some(b=>sp0.mb(b)&&b.p!=null)&&M.some(r=>sp0.ram(r)&&r.p!=null)&&P.some(p=>sp0.psu(p)&&p.p!=null)&&K.some(k=>sp0.case(k)&&k.p!=null)&&ST.some(d=>sp0.disk(d)&&d.p!=null);
-    const newOnly=rand()<[0.25,0.45,0.70][tier]&&canAllNew;
+    /* 极限装机（ultra）一律全套全新件 */
+    const newOnly=(ultra?canAllNew:(rand()<[0.25,0.45,0.70][tier]))&&canAllNew;
     const ref=buildRef(cat,tier,!newOnly,pref,ultra);
     const cost=newOnly?costOf(ref.list,true):costOf(ref.list,false);
     const pad=newOnly?(1.20+rand()*0.20):(1.24+rand()*0.28);
@@ -4661,20 +4664,25 @@ function makeJobs(dateStr,day){
     else extra.push('预算宽松，但电源要用全新的');
     if(ref.pref)extra.push('显卡只要 '+prefName(ref.pref));
     if(ultra)extra.push('指定要 RTX 5090 级别');
+    if(ultra)extra.push('极限装机：全套必须全新件');
     if(cat==='工作机'&&tier===0)extra.push('内存 ≥ 128G');
     if(cat==='工作机'&&tier===1)extra.push('显卡 ×2（同型号）');
     if(cat==='工作机'&&tier===2)extra.push('HDD ≥ 4 块');
     if(cat==='游戏机'&&tier===2)extra.push('必须水冷');
-    /* 随机"加急单"：手工费高一点，但预算压得更死，逼你在时间和利润之间选 */
+    /* 交期：1~7 天，近似正态（均值约 3.2 天，两头越来越少见） */
+    let _dl=Math.round(3.2+(rand()+rand()+rand()-1.5)*1.9);
+    _dl=Math.max(1,Math.min(7,_dl));
+    /* 随机"加急单"：交期压到 1 天，手工费高一点 */
     let _labor=labor,_extra=extra,_jname=jobNameFor(cat,swList,rand,ultra);
     if(rand()<0.16){
-      _labor=Math.round(_labor*1.4/10)*10;
-      _extra.push('加急：今天就要，别拖到明天');
+      _dl=1;
+      _labor=Math.round(_labor*1.5/10)*10;
+      _extra.push('加急：今天就要，拖到明天就退单');
       _jname='急单 · '+_jname;
     }
     _job={id:'J'+day+'-'+i,cat,tier,baseCost:cost,name:_jname,
       client:CLIENT_NAMES[Math.floor(rand()*CLIENT_NAMES.length)],
-      sw:swNames,swList:swNames,level,target,newOnly,tight,ultra,gpuPref:ref.pref,partBudget,labor:_labor,extra:_extra,status:'open',
+      sw:swNames,swList:swNames,level,target,newOnly,tight,ultra,gpuPref:ref.pref,partBudget,labor:_labor,extra:_extra,status:'open',deadline:_dl,dueDay:day+_dl-1,bornDay:day,
       hideScore:!_showScore,minMhz:(cat==="办公机"?0:(cat==="游戏机"?[3200,3600,6000][tier]:3200))};
     if(_job.partBudget<=_cap||tier===0)break;
     _tier=Math.max(0,tier-1);
@@ -6216,7 +6224,8 @@ function renderHeader(){
       rt.innerHTML='口碑 <b style="color:'+(s>=4?'#7de0a8':(s>=3?'#ffd27a':'#ff9c92'))+'">'+'★'.repeat(s)+'☆'.repeat(5-s)+'</b>';
     }
   }catch(e){}
-  document.getElementById('btnClose').disabled=state.jobs.some(j=>j.status==='open'||j.status==='taken');
+  /* 允许带着没做完的单打烊：按钮不再因为有待办而禁用 */
+  document.getElementById('btnClose').disabled=false;
   document.getElementById('btnToJobs').style.display=state.panel==='jobs'?'none':'';
   try{
     const lb=document.getElementById('btnLife');
@@ -7104,6 +7113,12 @@ function jobsHTML(){
       if(t.ram)lines.push(`内存 ≥ ${t.ram}G`);
     }
     if(j.minMhz)lines.push("内存频率 ≥ "+j.minMhz+"MHz"); (j.extra||[]).forEach(e=>lines.push(e));
+    if(j.dueDay!=null){
+      const left=j.dueDay-(state.day||1);
+      if(left<=0)lines.push('⚠ 今天到期，不做完就退单');
+      else if(left===1)lines.push('交期：还剩 1 天');
+      else lines.push('交期：还剩 '+left+' 天');
+    }
     const labor=jobLabor(j);
     const cls=(j.cat==='办公机'?'':j.cat==='游戏机'?' game':' work')+(j.story?' story':'');
     const tag=j.story?'t3':(j.cat==='办公机'?'t0':j.cat==='游戏机'?'t1':'t2');
@@ -7807,7 +7822,7 @@ function idleTipsHTML(){
     '部件费是客户给的预算，花得越少利润越高，但别省到跑不动软件。',
     '每张工单都写了要跑什么软件，照着那个分数去配最稳。',
     '机箱限长、电源功率、散热高度——这三样最容易在最后翻车。',
-    '打烊前必须把当天工单处理完（接或拒），不然进不了下一天。'
+    '没做完的单可以带到明天，但过了交期客户会退单、掉口碑。'
   ];
   const pick=tips[(state.day*3)%tips.length];
   return `<div class="tipcard"><div class="t">今日提示</div>${pick}</div>
@@ -8660,8 +8675,7 @@ document.getElementById('btnLife').onclick=openLife;
 document.getElementById('btnHistory').onclick=openHistory;
 document.getElementById('btnToJobs').onclick=()=>{state.panel='jobs';if(isMobile())mViewSet('docs',true);save();renderAll();};
 document.getElementById('btnClose').onclick=()=>{
-  if(state.jobs.some(j=>j.status==='open')){toast('还有工单没处理');return;}
-  if(state.jobs.some(j=>j.status==='taken')){toast('还有 '+state.jobs.filter(j=>j.status==='taken').length+' 单接了没交付，先交付再打烊');return;}
+  /* 现在允许带着没做完的单打烊：没到交期的明天继续，过了交期的算退单 */
   /* 先记账（这一天的数只在切换前有效），再播结算，最后才真正翻页 */
   /* 5 星附近的额外订单：伙计代做，直接进当日收入 */
   const side=repSideBusiness();
@@ -8684,9 +8698,24 @@ document.getElementById('btnClose').onclick=()=>{
   playDaySummary(st,()=>{
   const d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+1);
   const next=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  state.date=next;state.day+=1;state.jobs=makeJobs(next,state.day);
+  state.date=next;state.day+=1;
+  /* 跨天保留：没做完且没到交期的单继续挂着；过了交期的算退单并扣口碑 */
+  const _nextDay=state.day;
+  const _carry=[];let _expired=0;
+  for(const j of state.jobs){
+    if(j.status!=='open'&&j.status!=='taken')continue;
+    if(j.dueDay!=null&&j.dueDay<_nextDay){_expired++;}
+    else {if(j.status==='taken')j.status='open';_carry.push(j);}   /* 接了没做完的退回"待接"，工作台进度还在 */
+  }
+  const _fresh=makeJobs(next,_nextDay);
+  state.jobs=_carry.concat(_fresh);
   state.dayTotal=state.jobs.length;
-  state.activeId=null;state.benches={};state.diag={};state.panel='jobs';build=newBuild();
+  state.activeId=null;
+  /* 只保留"还挂着"的工单工作台，退单的清掉 */
+  const _keep=new Set(_carry.map(j=>j.id));
+  const _nb={};for(const k in (state.benches||{})){if(_keep.has(k))_nb[k]=state.benches[k];}
+  state.benches=_nb;state.diag={};state.panel='jobs';build=newBuild();
+  if(_expired>0){try{repApply(false);}catch(e){} setTimeout(()=>toast(_expired+' 单过了交期，客户退单了'),1200);}
   /* 昨天的机器跟着昨天的工单一起清掉，别一直堆在仓库里 */
   if(state.machines&&state.machines.length){
     state.machines=state.machines.filter(m=>!m.jobId||state.jobs.some(j=>j.id===m.jobId));
