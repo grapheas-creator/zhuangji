@@ -2103,7 +2103,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.8';
+const APP_VER='v0.13.9';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -7047,12 +7047,15 @@ function coachRefresh(){
     const mask=document.getElementById('mask');
     const busy=_openingSeq||!!document.getElementById('storyPop')||!!(mask&&mask.classList.contains('on'));
     if(busy){
+      /* 弹窗开着时不重画引导，但也别把引导收掉：
+         收掉再重新出现，玩家看到的就是「这张卡弹了两遍」。
+         弹窗层级本来就比引导高，留着不会盖住确认框。 */
       if(_coachWaitCount===undefined)_coachWaitCount=0;
       if(_coachWaitCount<40){
         _coachWaitCount++;
         if(!_coachRetry)_coachRetry=setTimeout(()=>{_coachRetry=null;try{coachRefresh();}catch(e){}},220);
       }
-      coachHide();return;
+      return;
     }
     _coachWaitCount=0;
   }
@@ -7061,7 +7064,7 @@ function coachRefresh(){
   if(_coachDismissed===step.k)return;
   /* 先切页、再画框：这一轮负责切，切完重新进 refresh 才画 */
   if(_coachSyncPage(step)){
-    coachHide();
+    /* 切页时不收卡片（收了再画 = 肉眼看到两次弹出） */
     if(!_coachPageSyncT)_coachPageSyncT=setTimeout(()=>{
       _coachPageSyncT=null;
       try{coachRefresh();}catch(e){}
