@@ -989,7 +989,6 @@ button.bad{background:linear-gradient(180deg,#a3554f,#743631);border-color:#c471
   position:absolute;border-radius:14px;pointer-events:none;
   
   box-shadow:0 0 0 2px rgba(255,196,120,.9);
-  () => { n3++; return ''; }
 }
 .coachHole::after{
   content:'';position:absolute;inset:-6px;border-radius:18px;
@@ -1563,6 +1562,18 @@ header{gap:12px}
 #mNav .cnt.bad{background:rgba(255,116,102,.92);color:#fff;border-color:rgba(255,150,140,.9)}
 #mNav .cnt:empty{display:none}
 #mNav button.off{opacity:.55}
+/* ---------- 手机端底部控件缩小一档（用户反馈：交付栏和三个页签太大） ---------- */
+@media(max-width:1040px){
+  body{--navh:48px}
+  #actionBar{gap:6px!important;padding:6px 12px 7px!important}
+  #actionBar button{min-height:34px!important;padding:7px 8px!important;font-size:12.5px!important;border-radius:10px!important}
+  #actionBar .mini{padding:7px 11px!important;font-size:11.5px!important}
+  #mNav{padding:4px 8px calc(4px + env(safe-area-inset-bottom))!important;gap:4px!important}
+  #mNav button{min-height:34px!important;padding:2px 2px!important;font-size:10px!important;gap:1px!important;border-radius:10px!important}
+  #mNav button svg{width:16px!important;height:16px!important}
+  #mNav .cnt{top:0!important;min-width:13px!important;height:13px!important;line-height:13px!important;font-size:9px!important}
+}
+
 
 /* ---------- 通用：吸顶标签条别让下面的内容「看起来被切掉」 ---------- */
 .modes{
@@ -2091,7 +2102,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.1';
+const APP_VER='v0.13.2';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -2586,7 +2597,7 @@ COOL_BRANDS.forEach((br)=>COOL_TYPE.forEach(([tn,cap,h,rad,base],ti)=>{
 .forEach(([n,cap,h,rad,s,p])=>H.push({n,cap,h,rad,s,p:jitter(p,'hs'+n),u:jitter(R2(p*0.75,1),'hsu'+n)}));
 
 /* ===== 真实型号覆盖：清掉程序生成的机箱/散热，换成市面真实型号 ===== */
-const REAL_CASES=[{"n":"九尾狐 3号机箱","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":27},{"n":"九尾狐 U1","ff":["MATX","ITX"],"mg":280,"mc":70,"rad":0,"bay":1,"p":27},{"n":"九尾狐 1号机箱","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":28},{"n":"九尾狐 H1","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":29},{"n":"九尾狐 H3","ff":["ATX","MATX","ITX"],"mg":320,"mc":160,"rad":0,"bay":2,"p":30},{"n":"九尾狐 U2","ff":["MATX","ITX"],"mg":300,"mc":70,"rad":0,"bay":1,"p":30},{"n":"积至 家悦X1","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":34},{"n":"积至 迷你台式 MATX","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":39},{"n":"鑫桂盟 迷你台式","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":39},{"n":"积至 灵悦","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":40},{"n":"积至 EVESKY M-ATX 四USB","ff":["MATX","ITX"],"mg":260,"mc":150,"rad":0,"bay":2,"p":40},{"n":"EATX 加厚开放式机架","ff":["EATX","ATX","MATX","ITX"],"mg":400,"mc":175,"rad":0,"bay":1,"p":41},{"n":"巧美 ITX 开放式机架","ff":["ITX"],"mg":330,"mc":70,"rad":0,"bay":1,"p":42},{"n":"巧美 mini ITX 17×17","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":44},{"n":"巧美 Q31 ITX","ff":["ITX"],"mg":185,"mc":50,"rad":0,"bay":1,"p":46},{"n":"九尾狐 H2","ff":["ATX","MATX"],"mg":330,"mc":160,"rad":0,"bay":2,"p":46},{"n":"九尾狐 U8","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":240,"bay":2,"p":48},{"n":"九尾狐 T8 海景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":48},{"n":"巧美 ITX 立卧两用","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":49},{"n":"巧美 Q36 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":50},{"n":"积至 机遇007","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":50},{"n":"迅钛 玄武 MINI 海景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":50},{"n":"九尾狐 H6","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":50},{"n":"九尾狐 V200","ff":["ATX","MATX","ITX"],"mg":340,"mc":165,"rad":240,"bay":2,"p":53},{"n":"九尾狐 T13","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":53},{"n":"巧美 A4 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":56},{"n":"巧美 冰激凌 ITX","ff":["ITX"],"mg":185,"mc":47,"rad":0,"bay":1,"p":56},{"n":"硕一 麻雀 V200","ff":["MATX","ITX"],"mg":280,"mc":160,"rad":0,"bay":2,"p":57},{"n":"巧美 卧室 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":57},{"n":"巧美 ITX 1U 立式","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":57},{"n":"巧美 巴掌大 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":59},{"n":"九尾狐 T4","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":59},{"n":"九尾狐 海景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":59},{"n":"九尾狐 T07","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":59},{"n":"大水牛 商悦 ATX","ff":["ATX","MATX"],"mg":280,"mc":155,"rad":240,"bay":2,"p":60},{"n":"迅钛 玄武 MINI 全景房","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":60},{"n":"迅钛 平头哥 M5","ff":["MATX","ITX"],"mg":300,"mc":165,"rad":0,"bay":2,"p":60},{"n":"积至 黑骑士","ff":["ATX","MATX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":60},{"n":"巧美 小冰块 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":62},{"n":"迅钛 问境 M2","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":0,"bay":2,"p":64},{"n":"硕一 麻雀 V5 Pro","ff":["MATX","ITX"],"mg":280,"mc":160,"rad":0,"bay":2,"p":65},{"n":"迅钛 商睿","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":0,"bay":2,"p":65},{"n":"巧美 185mm 独显 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":65},{"n":"鱼巢 M240 海景房","ff":["MATX","ITX"],"mg":320,"mc":160,"rad":240,"bay":2,"p":67},{"n":"巧美 核显办公 ITX","ff":["ITX"],"mg":0,"mc":47,"rad":0,"bay":1,"p":68},{"n":"巧美 卧式迷你 ITX","ff":["ITX"],"mg":185,"mc":70,"rad":0,"bay":1,"p":68},{"n":"升技 i29","ff":["ITX","MATX"],"mg":300,"mc":70,"rad":0,"bay":1,"p":69},{"n":"积至 凌至","ff":["ATX","MATX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":69},{"n":"九尾狐 T2","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":69},{"n":"积至 机遇003","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":70},{"n":"积至 扬天 M3","ff":["MATX","ITX"],"mg":300,"mc":150,"rad":0,"bay":2,"p":70},{"n":"迅钛 非凡大师","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":70},{"n":"积至 无立柱全景 mini","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":70},{"n":"迅钛 海景房 360","ff":["MATX","ITX"],"mg":350,"mc":165,"rad":360,"bay":2,"p":70},{"n":"航嘉 暮光","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":70},{"n":"硕一 麻雀 V100","ff":["MATX","ITX"],"mg":280,"mc":160,"rad":0,"bay":1,"p":73},{"n":"巧美 1U 迷你","ff":["ITX"],"mg":200,"mc":60,"rad":0,"bay":1,"p":73},{"n":"AOC CG251B","ff":["MATX","ITX"],"mg":290,"mc":160,"rad":0,"bay":2,"p":79},{"n":"积至 钢铁侠","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":0,"bay":2,"p":80},{"n":"航嘉 S900 沙尘暴","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":80},{"n":"酷鱼 迷你 ITX","ff":["ITX"],"mg":220,"mc":60,"rad":0,"bay":1,"p":84},{"n":"积至 坦克 侧透","ff":["ATX","MATX","ITX"],"mg":340,"mc":165,"rad":240,"bay":2,"p":89},{"n":"九尾狐 H6 高配版","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":92},{"n":"九尾狐 T15","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":92},{"n":"硕一 M1/M5 手提","ff":["MATX","ITX"],"mg":260,"mc":160,"rad":0,"bay":1,"p":97},{"n":"航嘉 星越","ff":["ATX","MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":101},{"n":"京特尔 G100 ITX","ff":["ITX"],"mg":200,"mc":60,"rad":0,"bay":1,"p":101},{"n":"航嘉 S900 全景版","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":102},{"n":"航嘉 GS400C","ff":["ATX","MATX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":103},{"n":"乔思伯 D31 MESH","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":105},{"n":"巧美 NAS 三盘位","ff":["ITX"],"mg":200,"mc":70,"rad":0,"bay":3,"p":107},{"n":"巧美 小方块 Pro 14L","ff":["ITX"],"mg":330,"mc":135,"rad":0,"bay":2,"p":107},{"n":"华南金牌 双路海景房","ff":["EATX","ATX","MATX"],"mg":420,"mc":170,"rad":240,"bay":3,"p":108},{"n":"爱国者 V60","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"金河田 预见 FM01","ff":["ATX","MATX","ITX"],"mg":340,"mc":165,"rad":240,"bay":2,"p":109},{"n":"金河田 简誉 墨屿","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"航嘉 超越","ff":["MATX","ITX"],"mg":320,"mc":165,"rad":240,"bay":2,"p":109},{"n":"Sahara 太空舱 3 Pro","ff":["ATX","MATX","ITX"],"mg":360,"mc":170,"rad":240,"bay":3,"p":109},{"n":"航嘉 赛亚人 S3","ff":["ATX","MATX"],"mg":350,"mc":170,"rad":240,"bay":3,"p":109},{"n":"百盛 T600","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":360,"bay":2,"p":109},{"n":"酷冷魔神 X70 Pro","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"酷玩者 Mesh","ff":["MATX","ITX"],"mg":325,"mc":160,"rad":240,"bay":2,"p":109},{"n":"Tt 启航者 S5 mini","ff":["ATX","MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"AOC CG391","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":109},{"n":"机械大叔 G40 K39","ff":["ITX"],"mg":195,"mc":55,"rad":0,"bay":1,"p":109},{"n":"巧美 小立方 8.8L","ff":["ITX","MATX"],"mg":220,"mc":135,"rad":0,"bay":1,"p":111},{"n":"鑫谷 无尽 Pro+","ff":["EATX","ATX","MATX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":111},{"n":"先马 小朱雀","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":112},{"n":"巧美 小方块 ITX 侧透","ff":["ITX"],"mg":240,"mc":135,"rad":240,"bay":1,"p":112},{"n":"航嘉 G5","ff":["ATX","MATX","ITX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":115},{"n":"爱国者 A15","ff":["ATX","MATX","ITX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":117},{"n":"爱国者 JV13","ff":["MATX","ITX"],"mg":320,"mc":165,"rad":240,"bay":2,"p":118},{"n":"航嘉 S960","ff":["ATX","MATX","ITX"],"mg":360,"mc":170,"rad":240,"bay":3,"p":117},{"n":"雷利酷 旷野 M3","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":117},{"n":"航嘉 BU420","ff":["MATX","ITX"],"mg":300,"mc":160,"rad":0,"bay":2,"p":117},{"n":"Tt 金刚 Mini","ff":["ITX"],"mg":280,"mc":70,"rad":0,"bay":1,"p":118},{"n":"硕一 U300","ff":["MATX","ITX"],"mg":310,"mc":135,"rad":0,"bay":1,"p":119},{"n":"SUMTAX 迅钛 VP500","ff":["MATX","ITX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":119},{"n":"金河田 简誉 昊","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":119},{"n":"酷冷魔神 X80","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":119},{"n":"航嘉 BU550","ff":["ATX","MATX"],"mg":340,"mc":170,"rad":240,"bay":2,"p":124},{"n":"九尾狐 C3","ff":["ATX","MATX","ITX"],"mg":350,"mc":170,"rad":240,"bay":3,"p":137},{"n":"航嘉 S920 暴风雪","ff":["ATX","MATX","ITX"],"mg":360,"mc":170,"rad":240,"bay":3,"p":148},{"n":"AOC CG261","ff":["ATX","MATX","ITX"],"mg":295,"mc":165,"rad":240,"bay":2,"p":149},{"n":"先马 平头哥 M1","ff":["MATX","ITX"],"mg":375,"mc":165,"rad":240,"bay":2,"p":150},{"n":"积至 全景海景房","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":360,"bay":2,"p":150},{"n":"固而美 ITX 迷你铝","ff":["ITX"],"mg":180,"mc":60,"rad":0,"bay":1,"p":175},{"n":"金河田 简誉 极","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":184},{"n":"RealDiy 无尽G+ 橘影橙","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":256},{"n":"巧美 大旋风 N3 12盘","ff":["ITX","MATX"],"mg":280,"mc":145,"rad":0,"bay":12,"p":266},{"n":"4盘位热插拔 NAS","ff":["ITX","MATX"],"mg":250,"mc":145,"rad":0,"bay":4,"p":269},{"n":"Sahara 太空舱 3","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":279},{"n":"玩嘉 孤勇者 雪","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":240,"bay":2,"p":599},{"n":"酷冷至尊 MF400 Mesh","ff":["MATX","ITX"],"mg":380,"mc":170,"rad":240,"bay":2,"p":722},{"n":"酷冷至尊 MF500 Mesh","ff":["EATX","ATX","MATX"],"mg":420,"mc":180,"rad":360,"bay":4,"p":930},{"n":"爱国者 YOGO T21 ATX","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":239},{"n":"航嘉 S980 海景房","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":239},{"n":"先马 黑洞PRO 黑洞X","ff":["ATX","MATX"],"mg":380,"mc":170,"rad":240,"bay":3,"p":249},{"n":"硕一 鲲鹏 CH+ 曲面玻璃","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":240},{"n":"硕一 V930 全景","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":240},{"n":"硕一 鲲鹏 CH8+ 8N","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":250},{"n":"巧美 M3 mini 侧透","ff":["ITX","MATX"],"mg":330,"mc":160,"rad":240,"bay":2,"p":245},{"n":"九尾狐 D1","ff":["ATX","MATX"],"mg":380,"mc":170,"rad":240,"bay":3,"p":247},{"n":"航嘉 BU450 商用箱","ff":["MATX","ITX"],"mg":330,"mc":165,"rad":0,"bay":2,"p":246},{"n":"巧美 NAS 12 盘位","ff":["ITX","MATX"],"mg":280,"mc":145,"rad":0,"bay":12,"p":259},{"n":"硕一 鲲鹏 CH9L","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":254},{"n":"X 游戏帝国 F36","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":254},{"n":"酷冷至尊 ELITE450","ff":["MATX","ITX"],"mg":360,"mc":165,"rad":360,"bay":2,"p":256},{"n":"金河田 逐风 360 水冷","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":255},{"n":"九尾狐 T10 高配","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":267},{"n":"九尾狐 T12","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":240,"bay":3,"p":268},{"n":"九尾狐 T16","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":240,"bay":3,"p":267},{"n":"动力火车 御浪 EATX","ff":["EATX","ATX","MATX"],"mg":430,"mc":180,"rad":360,"bay":4,"p":268},{"n":"联力 L216 中塔","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":269},{"n":"迅钛 玄武 MINI 海景房 高配","ff":["MATX","ITX"],"mg":350,"mc":165,"rad":240,"bay":2,"p":270},{"n":"闪鳞 G380 手提","ff":["MATX","ITX"],"mg":365,"mc":165,"rad":240,"bay":2,"p":276},{"n":"鱼巢 S5MAX-V20","ff":["MATX","ITX"],"mg":338,"mc":135,"rad":240,"bay":2,"p":288},{"n":"爱国者 星璨 岚/小岚","ff":["MATX","ITX"],"mg":370,"mc":165,"rad":240,"bay":2,"p":289},{"n":"爱国者 星璨霄 Air","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":289},{"n":"鱼巢 S5 PRO 背线","ff":["MATX","ITX"],"mg":350,"mc":160,"rad":240,"bay":2,"p":293},{"n":"金河田 极 Pro","ff":["ATX","MATX"],"mg":400,"mc":170,"rad":240,"bay":3,"p":295},{"n":"联力 飒 01 行政箱","ff":["ATX","MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":299},{"n":"瓦尔基里 VK03 触屏","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":299},{"n":"AOC CG420B","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":299},{"n":"金河田 幻屿 海景房","ff":["MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":304},{"n":"航嘉 BU550 商务版","ff":["ATX","MATX"],"mg":350,"mc":175,"rad":0,"bay":3,"p":306},{"n":"瓦尔基里 VK03M 曲面","ff":["MATX","ITX"],"mg":400,"mc":170,"rad":360,"bay":3,"p":319},{"n":"九尾狐 星耀 PRO","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":324},{"n":"银欣 SG02 HTPC 卧式","ff":["MATX","ITX"],"mg":300,"mc":120,"rad":0,"bay":1,"p":356},{"n":"爱国者 扶摇千里","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":409},{"n":"硕一 鲲鹏 CH1+","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":409},{"n":"动力火车 臻界 G3","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":414},{"n":"微星 碉堡 海景房","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":423},{"n":"先马 平头哥 M9","ff":["MATX","ITX"],"mg":400,"mc":165,"rad":360,"bay":3,"p":428},{"n":"联力 VISION M 包豪斯","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":429},{"n":"联力 O11D MINI V2","ff":["ATX","MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":449},{"n":"乔思伯 D300 海景房","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":455},{"n":"技嘉 C103G 中塔","ff":["ATX","MATX"],"mg":420,"mc":180,"rad":360,"bay":4,"p":460},{"n":"超频三 创界 C3N300","ff":["MATX","ITX"],"mg":380,"mc":170,"rad":360,"bay":3,"p":463},{"n":"航嘉 GX750A 宽体","ff":["ATX","MATX"],"mg":415,"mc":165,"rad":360,"bay":3,"p":465},{"n":"利民 A70 V2","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":479},{"n":"先马 颜之神 Mesh","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":479},{"n":"华硕 PA602 创梦","ff":["ATX","MATX"],"mg":450,"mc":185,"rad":420,"bay":4,"p":489},{"n":"爱国者 星璨霄 背插","ff":["ATX","MATX"],"mg":450,"mc":185,"rad":360,"bay":4,"p":489},{"n":"微星 300R/L PZ 悬浮","ff":["ATX","MATX"],"mg":420,"mc":180,"rad":360,"bay":4,"p":508},{"n":"乔思伯 D33 玻璃侧透","ff":["MATX","ITX"],"mg":420,"mc":175,"rad":360,"bay":3,"p":572},{"n":"航嘉 S980 暴风雪","ff":["ATX","MATX"],"mg":440,"mc":180,"rad":360,"bay":4,"p":568},{"n":"分形工艺 Epoch","ff":["ATX","MATX"],"mg":430,"mc":180,"rad":360,"bay":4,"p":599},{"n":"追风者 XT523","ff":["ATX","MATX"],"mg":420,"mc":175,"rad":360,"bay":4,"p":649},{"n":"爱国者 御风 F90","ff":["ATX","MATX"],"mg":450,"mc":185,"rad":360,"bay":4,"p":699}];
+const REAL_CASES=[{"n": "九尾狐 3号机箱", "ff": ["MATX", "ITX"], "mg": 300, "mc": 155, "rad": 0, "bay": 2, "p": 27, "u": 15},{"n": "九尾狐 T8 海景房", "ff": ["MATX", "ITX"], "mg": 330, "mc": 160, "rad": 240, "bay": 2, "p": 48, "u": 20},{"n": "巧美 mini ITX 17×17", "ff": ["ITX"], "mg": 185, "mc": 70, "rad": 0, "bay": 1, "p": 44, "u": 19},{"n": "航嘉 暮光", "ff": ["MATX", "ITX"], "mg": 330, "mc": 165, "rad": 240, "bay": 2, "p": 70, "u": 30},{"n": "航嘉 S980 海景房", "ff": ["ATX", "MATX", "ITX"], "mg": 420, "mc": 175, "rad": 360, "bay": 4, "p": 239, "u": 101},{"n": "积至 家悦X1", "ff": ["MATX", "ITX"], "mg": 300, "mc": 155, "rad": 0, "bay": 2, "p": 34, "u": 16},{"n": "积至 坦克 侧透", "ff": ["ATX", "MATX", "ITX"], "mg": 340, "mc": 165, "rad": 240, "bay": 2, "p": 89, "u": 45},{"n": "硕一 麻雀 V200", "ff": ["MATX", "ITX"], "mg": 280, "mc": 160, "rad": 0, "bay": 2, "p": 57, "u": 25},{"n": "硕一 鲲鹏 CH9L", "ff": ["ATX", "MATX"], "mg": 420, "mc": 175, "rad": 360, "bay": 4, "p": 254, "u": 134},{"n": "爱国者 YOGO T21 ATX", "ff": ["ATX", "MATX", "ITX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 239, "u": 106},{"n": "爱国者 星璨 岚/小岚", "ff": ["MATX", "ITX"], "mg": 370, "mc": 165, "rad": 240, "bay": 2, "p": 289, "u": 145},{"n": "迅钛 玄武 MINI 海景房", "ff": ["MATX", "ITX"], "mg": 330, "mc": 160, "rad": 240, "bay": 2, "p": 50, "u": 24},{"n": "迅钛 问境 M2", "ff": ["MATX", "ITX"], "mg": 300, "mc": 160, "rad": 0, "bay": 2, "p": 64, "u": 28},{"n": "金河田 预见 FM01", "ff": ["ATX", "MATX", "ITX"], "mg": 340, "mc": 165, "rad": 240, "bay": 2, "p": 109, "u": 46},{"n": "金河田 幻屿 海景房", "ff": ["MATX", "ITX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 304, "u": 143},{"n": "先马 黑洞PRO 黑洞X", "ff": ["ATX", "MATX"], "mg": 380, "mc": 170, "rad": 240, "bay": 3, "p": 249, "u": 118},{"n": "先马 平头哥 M9", "ff": ["MATX", "ITX"], "mg": 400, "mc": 165, "rad": 360, "bay": 3, "p": 428, "u": 223},{"n": "联力 L216 中塔", "ff": ["ATX", "MATX", "ITX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 269, "u": 147},{"n": "联力 O11D MINI V2", "ff": ["ATX", "MATX", "ITX"], "mg": 420, "mc": 175, "rad": 360, "bay": 4, "p": 449, "u": 248},{"n": "乔思伯 D300 海景房", "ff": ["MATX", "ITX"], "mg": 420, "mc": 175, "rad": 360, "bay": 3, "p": 455, "u": 233},{"n": "酷冷至尊 MF400 Mesh", "ff": ["MATX", "ITX"], "mg": 380, "mc": 170, "rad": 240, "bay": 2, "p": 722, "u": 360},{"n": "瓦尔基里 VK03 触屏", "ff": ["ATX", "MATX"], "mg": 420, "mc": 175, "rad": 360, "bay": 3, "p": 299, "u": 136},{"n": "瓦尔基里 VK03M 曲面", "ff": ["MATX", "ITX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 319, "u": 170},{"n": "微星 碉堡 海景房", "ff": ["MATX", "ITX"], "mg": 420, "mc": 175, "rad": 360, "bay": 3, "p": 423, "u": 180},{"n": "微星 300R/L PZ 悬浮", "ff": ["ATX", "MATX"], "mg": 420, "mc": 180, "rad": 360, "bay": 4, "p": 508, "u": 250},{"n": "华硕 PA602 创梦", "ff": ["ATX", "MATX"], "mg": 450, "mc": 185, "rad": 420, "bay": 4, "p": 489, "u": 232},{"n": "分形工艺 Epoch", "ff": ["ATX", "MATX"], "mg": 430, "mc": 180, "rad": 360, "bay": 4, "p": 599, "u": 301},{"n": "追风者 XT523", "ff": ["ATX", "MATX"], "mg": 420, "mc": 175, "rad": 360, "bay": 4, "p": 649, "u": 347},{"n": "银欣 SG02 HTPC 卧式", "ff": ["MATX", "ITX"], "mg": 300, "mc": 155, "rad": 0, "bay": 1, "p": 356, "u": 161},{"n": "超频三 创界 C3N300", "ff": ["MATX", "ITX"], "mg": 380, "mc": 170, "rad": 360, "bay": 3, "p": 463, "u": 203},{"n": "利民 A70 V2", "ff": ["ATX", "MATX"], "mg": 420, "mc": 175, "rad": 360, "bay": 4, "p": 479, "u": 246},{"n": "鑫谷 无尽 Pro+", "ff": ["EATX", "ATX", "MATX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 111, "u": 59},{"n": "Tt 启航者 S5 mini", "ff": ["ATX", "MATX", "ITX"], "mg": 330, "mc": 165, "rad": 240, "bay": 2, "p": 109, "u": 55},{"n": "大水牛 商悦 ATX", "ff": ["ATX", "MATX"], "mg": 280, "mc": 155, "rad": 240, "bay": 2, "p": 60, "u": 33},{"n": "华南金牌 双路海景房", "ff": ["EATX", "ATX", "MATX"], "mg": 420, "mc": 170, "rad": 240, "bay": 3, "p": 108, "u": 46},{"n": "玩嘉 孤勇者 雪", "ff": ["MATX", "ITX"], "mg": 330, "mc": 165, "rad": 240, "bay": 2, "p": 599, "u": 259},{"n": "鱼巢 S5MAX-V20", "ff": ["MATX", "ITX"], "mg": 338, "mc": 155, "rad": 240, "bay": 2, "p": 288, "u": 132},{"n": "Sahara 太空舱 3", "ff": ["MATX", "ITX"], "mg": 330, "mc": 165, "rad": 240, "bay": 2, "p": 279, "u": 155},{"n": "动力火车 御浪 EATX", "ff": ["EATX", "ATX", "MATX"], "mg": 430, "mc": 180, "rad": 360, "bay": 4, "p": 268, "u": 133},{"n": "酷冷至尊 Q300L", "ff": ["MATX", "ITX"], "mg": 360, "mc": 157, "rad": 240, "bay": 1, "p": 299, "u": 80},{"n": "酷冷至尊 MB400L", "ff": ["MATX", "ITX"], "mg": 360, "mc": 160, "rad": 240, "bay": 2, "p": 119, "u": 49},{"n": "酷冷至尊 TD500 Mesh", "ff": ["EATX", "ATX", "MATX", "ITX"], "mg": 410, "mc": 165, "rad": 360, "bay": 2, "p": 298, "u": 99},{"n": "先马 平头哥M2", "ff": ["MATX", "ITX"], "mg": 330, "mc": 160, "rad": 240, "bay": 2, "p": 109, "u": 35},{"n": "先马 趣造", "ff": ["MATX", "ITX"], "mg": 330, "mc": 160, "rad": 240, "bay": 2, "p": 84, "u": 45},{"n": "先马 黑洞5", "ff": ["ATX", "MATX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 175, "u": 96},{"n": "先马 鲁班1", "ff": ["ATX", "MATX", "ITX"], "mg": 350, "mc": 165, "rad": 240, "bay": 2, "p": 140, "u": 50},{"n": "爱国者 星璨", "ff": ["MATX", "ITX"], "mg": 370, "mc": 165, "rad": 240, "bay": 2, "p": 57, "u": 52},{"n": "爱国者 破晓X", "ff": ["ATX", "MATX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 121, "u": 100},{"n": "爱国者 YOGO M2", "ff": ["ATX", "MATX"], "mg": 330, "mc": 160, "rad": 240, "bay": 2, "p": 130, "u": 50},{"n": "乔思伯 D31", "ff": ["ATX", "MATX", "ITX"], "mg": 400, "mc": 168, "rad": 360, "bay": 1, "p": 283, "u": 80},{"n": "乔思伯 C6", "ff": ["MATX", "ITX"], "mg": 330, "mc": 165, "rad": 240, "bay": 2, "p": 145, "u": 92},{"n": "乔思伯 A4", "ff": ["ITX"], "mg": 325, "mc": 55, "rad": 0, "bay": 1, "p": 354, "u": 194},{"n": "乔思伯 U4", "ff": ["ATX", "MATX"], "mg": 350, "mc": 170, "rad": 240, "bay": 2, "p": 140, "u": 94},{"n": "联力 216", "ff": ["ATX", "MATX", "ITX"], "mg": 400, "mc": 170, "rad": 360, "bay": 3, "p": 391, "u": 229},{"n": "联力 O11 Dynamic", "ff": ["EATX", "ATX", "MATX"], "mg": 420, "mc": 175, "rad": 360, "bay": 4, "p": 547, "u": 301},{"n": "长城 阿基米德KM-1", "ff": ["ATX", "MATX", "ITX"], "mg": 350, "mc": 165, "rad": 240, "bay": 2, "p": 109, "u": 60},{"n": "鑫谷 拉克斯", "ff": ["ATX", "MATX"], "mg": 330, "mc": 160, "rad": 240, "bay": 2, "p": 106, "u": 62},{"n": "银欣 FARA R1", "ff": ["ATX", "MATX"], "mg": 355, "mc": 165, "rad": 240, "bay": 2, "p": 499, "u": 275},{"n": "安钛克 NX200M", "ff": ["MATX", "ITX"], "mg": 290, "mc": 165, "rad": 0, "bay": 2, "p": 312, "u": 172},{"n": "航嘉 S920", "ff": ["ATX", "MATX", "ITX"], "mg": 360, "mc": 170, "rad": 240, "bay": 3, "p": 128, "u": 42},{"n": "大水牛 追风者", "ff": ["ATX", "MATX"], "mg": 330, "mc": 160, "rad": 240, "bay": 2, "p": 77, "u": 20},{"n": "海盗船 4000D", "ff": ["ATX", "MATX", "ITX"], "mg": 360, "mc": 170, "rad": 360, "bay": 2, "p": 191, "u": 174},{"n": "乔思伯 N3 NAS", "ff": ["ITX"], "mg": 250, "mc": 130, "rad": 0, "bay": 8, "p": 583, "u": 233},{"n": "追风者 NV5", "ff": ["EATX", "ATX", "MATX", "ITX"], "mg": 415, "mc": 184, "rad": 360, "bay": 2, "p": 221, "u": 128},{"n": "分形工艺 North", "ff": ["ATX", "MATX", "ITX"], "mg": 355, "mc": 170, "rad": 360, "bay": 2, "p": 899, "u": 560},{"n": "NAS 8 盘位机箱", "ff": ["ITX", "MATX"], "mg": 250, "mc": 145, "rad": 0, "bay": 8, "p": 279, "u": 173},{"n": "NAS 12 盘位机箱", "ff": ["ITX", "MATX"], "mg": 280, "mc": 145, "rad": 0, "bay": 12, "p": 484, "u": 300},{"n": "8 盘位工作站塔", "ff": ["EATX", "ATX", "MATX"], "mg": 400, "mc": 170, "rad": 360, "bay": 8, "p": 523, "u": 324},{"n": "NZXT H5 Flow", "ff": ["ATX", "MATX", "ITX"], "mg": 365, "mc": 165, "rad": 240, "bay": 1, "p": 349}];
 const REAL_COOLS=[{"n":"原装散热 Intel 下压","cap":65,"h":50,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200"],"p":25,"u":10},{"n":"AMD 原装幽灵散热","cap":65,"h":55,"rad":0,"s":["AM4","AM5"],"p":35,"u":15},{"n":"超频三 青鸟四","cap":95,"h":125,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","AM4"],"p":35,"u":12},{"n":"九州风神 冰凌MINI","cap":95,"h":130,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","AM4"],"p":40,"u":16},{"n":"酷冷至尊 T400i","cap":150,"h":155,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","LGA1851","AM4","AM5"],"p":89,"u":53},{"n":"利民 AX120 R SE","cap":160,"h":155,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","LGA1851","AM4","AM5"],"p":79,"u":47},{"n":"利民 AK120","cap":180,"h":155,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":129,"u":77},{"n":"利民 PA120","cap":220,"h":157,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":199,"u":119},{"n":"利民 FC140","cap":265,"h":158,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":299,"u":179},{"n":"九州风神 玄冰400","cap":130,"h":158,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","LGA1851","AM4"],"p":69,"u":41},{"n":"九州风神 大霜塔V5","cap":250,"h":158,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":229,"u":137},{"n":"九州风神 AK620","cap":240,"h":160,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":249,"u":149},{"n":"超频三 红海H4","cap":120,"h":145,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","AM4"],"p":49,"u":29},{"n":"超频三 蜂鸟H3","cap":160,"h":150,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":89,"u":53},{"n":"乔思伯 CR-1000","cap":130,"h":150,"rad":0,"s":["LGA1155","LGA1150","LGA1151","LGA1200","LGA1700","LGA1851","AM4"],"p":79,"u":47},{"n":"乔思伯 CR-2000","cap":200,"h":160,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":159,"u":95},{"n":"猫头鹰 NH-D15","cap":250,"h":165,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":749,"u":449},{"n":"猫头鹰 NH-U12S","cap":180,"h":158,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":549,"u":329},{"n":"雅浚 B3","cap":160,"h":153,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":89,"u":53},{"n":"采融 风神AQ","cap":200,"h":155,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":129,"u":77},{"n":"大镰刀 无限5","cap":240,"h":158,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":199,"u":119},{"n":"ID-COOLING SE-224","cap":180,"h":154,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":99,"u":59},{"n":"利民 水冷 240","cap":250,"h":55,"rad":240,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":299,"u":179},{"n":"利民 水冷 360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":469,"u":281},{"n":"九州风神 冰堡垒360","cap":320,"h":55,"rad":360,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":799,"u":479},{"n":"瓦尔基里 E360","cap":350,"h":55,"rad":360,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":999,"u":599},{"n":"恩杰 Kraken 240","cap":280,"h":55,"rad":240,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":999,"u":599},{"n":"酷冷至尊 ML240L","cap":250,"h":55,"rad":240,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":449,"u":269},{"n":"超频三 巨浪360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":399,"u":239},{"n":"乔思伯 HX6250","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":599,"u":359},{"n":"先马 XW240","cap":250,"h":55,"rad":240,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":299,"u":179},{"n":"追风者 冰灵360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":699,"u":419},{"n":"几何未来 M360","cap":300,"h":55,"rad":360,"s":["LGA1700","LGA1851","LGA1200","AM4","AM5"],"p":599,"u":359},{"n":"酷冷至尊 暴雪T520","cap":180,"h":158,"rad":0,"s":["LGA1700","LGA1851","LGA1200","AM4"],"p":169,"u":101}];
 const REAL_COOLS_EXTRA=[{"n":"服务器风冷 SP3","cap":400,"h":120,"rad":0,"s":["SP3","SP5","LGA2011","LGA2011-3"],"p":400,"u":300},{"n":"服务器风冷 SP5","cap":450,"h":125,"rad":0,"s":["SP3","SP5"],"p":600,"u":450},{"n":"LGA2011 专用风冷","cap":300,"h":140,"rad":0,"s":["LGA2011","LGA2011-3"],"p":300,"u":225}];
 K.length=0;REAL_CASES.forEach(x=>K.push(x));
@@ -3080,7 +3091,7 @@ function repSideBusiness(){
 })();
 
 /* 抓不到实价的冷门机箱/散热：从游戏里删掉（名单见 PRUNE_UNPRICED） */
-const PRUNE_UNPRICED=["乔思伯 CR-2000","先马 趣造","先马 鲁班1","先马 黑洞5","几何未来 M360","大水牛 追风者","大镰刀 无限5","恩杰 Kraken 240","爱国者 星璨","爱国者 破晓X","超频三 蜂鸟H3","采融 风神AQ","鑫谷 拉克斯","银欣 FARA R1"];
+const PRUNE_UNPRICED=[];  /* 这些型号的价格已经补上，不再剔除 */
 (function pruneUnpriced(){const dead=new Set(PRUNE_UNPRICED);
   [K,H].forEach(arr=>{for(let i=arr.length-1;i>=0;i--){if(dead.has(arr[i].n))arr.splice(i,1);}});
 })();
@@ -3290,7 +3301,7 @@ C.forEach(x=>{if(x.n==='Intel Core i9-9900K')x.u=980;});
 /* 校准收尾：二手价上调后，全新价不得低于二手价（原 67 条倒挂） */
 [G,C,B,M,P,H,ST,K].forEach(arr=>arr.forEach(x=>{if(x.p!=null&&x.u!=null&&x.p<x.u*1.15)x.p=Math.round(x.u*1.15);}));
 /* ===== 淘宝实价校准（2026-10-28 抓取，样本≥5 且偏差<80% 才采用） ===== */
-const REAL_PRICES={"Intel Core i5-10400":{"u":383},"Intel Core i5-10400F":{"u":383},"Intel Core i5-12400":{"u":700},"Intel Core i5-12400F":{"u":700},"Intel Core i5-13400":{"u":719},"Intel Core i5-13400F":{"u":719},"Intel Core Ultra 5 245K":{"u":1772},"Intel Core Ultra 5 245KF":{"u":1772},"Intel Core Ultra 7 265K":{"u":1659},"Intel Core Ultra 7 265KF":{"u":1659},"Intel Core Ultra 9 285K":{"u":3224},"Intel Xeon E5-2666 v3":{"u":116},"AMD Ryzen 5 2600":{"u":277},"AMD Ryzen 5 5600":{"u":679},"AMD Ryzen 5 5600G":{"u":679},"AMD Ryzen 5 5600X":{"u":679},"AMD Ryzen 5 5600GT":{"u":679},"AMD Ryzen 9 7950X":{"u":2251},"AMD Ryzen 9 9950X":{"u":3976},"Intel Core i3-2100":{"u":17},"Intel Core i5-4590":{"u":105},"Intel Core i7-4790":{"u":162},"Intel Core i7-4790K":{"u":162},"Intel Core i5-7500":{"u":100},"Intel Core i5-8400":{"u":280},"Intel Core i9-9900K":{"u":938},"Intel Core i3-10100":{"u":236},"Intel Core i7-10700":{"u":834},"Intel Core i7-10700K":{"u":834},"Intel Core i5-11400":{"u":630},"Intel Core i5-11400F":{"u":630},"Intel Core i3-12100":{"u":525},"Intel Core i3-12100F":{"u":525},"Intel Core i9-14900K":{"u":614},"金士顿 DDR5 6000 16G 单条":{"p":456,"u":283},"金士顿 DDR5 6000 32G 单条":{"p":880,"u":546},"金士顿 DDR3 1600 8G 单条":{"u":70},"威刚 DDR4 3600 16G 单条":{"p":272,"u":169},"威刚 DDR5 6000 32G 单条":{"p":845,"u":524},"威刚 DDR3 1600 8G 单条":{"u":67},"海盗船 DDR5 6000 16G 单条":{"p":483,"u":299},"海盗船 DDR5 6000 32G 单条":{"p":933,"u":578},"海盗船 DDR3 1600 8G 单条":{"u":74},"光威 DDR4 3200 16G 单条":{"p":249,"u":154},"光威 DDR4 3600 16G 单条":{"p":261,"u":162},"光威 DDR3 1600 8G 单条":{"u":64},"金百达 DDR4 3200 16G 单条":{"p":254,"u":157},"金百达 DDR4 3600 16G 单条":{"p":266,"u":165},"金百达 DDR5 6000 16G 单条":{"p":428,"u":265},"金百达 DDR5 6000 32G 单条":{"p":827,"u":513},"金百达 DDR3 1600 8G 单条":{"u":66},"海韵 PRIME 650W":{"p":373},"振华 卓凌 550W":{"p":184},"振华 卓凌 650W":{"p":436},"振华 卓凌 750W":{"p":368},"全汉 MEGA 650W":{"p":154},"全汉 MEGA 750W":{"p":188},"酷冷至尊 MWE 550W":{"p":142},"酷冷至尊 MWE 650W":{"p":119},"酷冷至尊 MWE 750W":{"p":279},"长城 GX+ 650W":{"p":189},"长城 GX+ 750W":{"p":266},"航嘉 MVP 650W":{"p":158},"航嘉 MVP 750W":{"p":159},"鑫谷 昆仑 550W":{"p":199},"鑫谷 昆仑 650W":{"p":190},"先马 XP 550W":{"p":158},"先马 XP 650W":{"p":167},"先马 XP 750W":{"p":199},"安钛克 NE 550W":{"p":85},"安钛克 NE 650W":{"p":129},"安钛克 NE 750W":{"p":129},"微星 MAG 550W":{"p":119},"微星 MAG 650W":{"p":279},"微星 MAG 750W":{"p":279},"NVIDIA GeForce GTX 1050 Ti":{"u":488},"NVIDIA GeForce GTX 1060 3G":{"u":418},"NVIDIA GeForce GTX 1060 5G":{"u":550},"NVIDIA GeForce GTX 1070":{"u":686},"NVIDIA GeForce GTX 1070 Ti":{"u":735},"NVIDIA GeForce GTX 1080":{"u":700},"NVIDIA GeForce GTX 1080 Ti":{"u":899},"NVIDIA GeForce GTX 1630":{"u":380},"NVIDIA Titan V":{"u":1304},"NVIDIA Titan Xp":{"u":950},"NVIDIA Titan X (Pascal)":{"u":868},"Intel Arc A750":{"u":1216},"Intel Arc B580":{"u":2399},"NVIDIA GeForce GTX 1650 Super":{"u":639},"NVIDIA GeForce GTX 1660 Ti":{"u":938},"AMD Radeon HD 4350":{"u":35},"AMD Radeon HD 4650":{"u":35},"AMD Radeon HD 4670":{"u":32},"AMD Radeon HD 5450":{"u":39},"AMD Radeon HD 5550":{"u":50},"AMD Radeon HD 5570":{"u":39},"AMD Radeon HD 5750":{"u":40},"AMD Radeon HD 5870":{"u":80},"AMD Radeon HD 6450":{"u":45},"AMD Radeon HD 6570":{"u":42},"AMD Radeon HD 6670":{"u":50},"AMD Radeon HD 6750":{"u":46},"AMD Radeon HD 6770":{"u":50},"AMD Radeon HD 6790":{"u":55},"AMD Radeon HD 6850":{"u":55},"AMD Radeon HD 6950":{"u":70},"AMD Radeon HD 6970":{"u":110},"AMD Radeon HD 7750":{"u":90},"AMD Radeon HD 7770":{"u":76},"AMD Radeon HD 7850":{"u":88},"AMD Radeon HD 7870":{"u":110},"AMD Radeon R5 230":{"u":48},"AMD Radeon R7 240":{"u":65},"AMD Radeon R7 250":{"u":85},"AMD Radeon R7 260X":{"u":90},"AMD Radeon R7 350":{"u":100},"AMD Radeon R7 360":{"u":118},"AMD Radeon R9 270":{"u":118},"AMD Radeon R9 270X":{"u":120},"AMD Radeon R9 280X":{"u":135},"AMD Radeon R9 290":{"u":225},"AMD Radeon R9 290X":{"u":275},"AMD Radeon R9 380":{"u":199},"AMD Radeon R9 380X":{"u":254},"AMD Radeon R9 390":{"u":316},"AMD Radeon R9 390X":{"u":388},"NVIDIA GeForce RTX 2060 Super":{"u":1218},"NVIDIA GeForce RTX 2070":{"u":1050},"NVIDIA GeForce RTX 2070 Super":{"u":1219},"NVIDIA GeForce RTX 2080":{"u":1234},"NVIDIA GeForce RTX 2080 Ti":{"u":1764},"NVIDIA GeForce RTX 3050 6G":{"u":1699},"NVIDIA GeForce RTX 3060 12G":{"u":2046},"NVIDIA GeForce RTX 3060 Ti":{"u":2150},"NVIDIA GeForce RTX 3060 Ti G6X":{"u":2100},"NVIDIA GeForce RTX 3070 Ti":{"u":2799},"NVIDIA GeForce RTX 3080 12G":{"u":3499},"NVIDIA GeForce RTX 3080 Ti":{"u":2450},"NVIDIA GeForce RTX 3090 Ti":{"u":9199},"NVIDIA GeForce RTX 4060 Ti 16G":{"u":3200},"NVIDIA GeForce RTX 4060 Ti 8G":{"u":2890},"NVIDIA GeForce RTX 4070 Super":{"u":4538},"NVIDIA GeForce RTX 4070 Ti":{"u":5788},"NVIDIA GeForce RTX 4070 Ti SUPER":{"u":3899},"NVIDIA GeForce RTX 4080":{"u":9450},"NVIDIA GeForce RTX 4080 Super":{"u":7829},"NVIDIA GeForce RTX 5050":{"u":2950},"NVIDIA GeForce RTX 5060":{"u":4107},"NVIDIA GeForce RTX 5060 Ti":{"u":4899},"NVIDIA GeForce RTX 5070":{"u":6999},"NVIDIA GeForce RTX 5070 Ti":{"u":9666},"AMD Radeon RX 470":{"u":359},"AMD Radeon RX 480":{"u":369},"AMD Radeon RX 550":{"u":350},"AMD Radeon RX 5500":{"u":579},"AMD Radeon RX 560":{"u":333},"AMD Radeon RX 5600":{"u":680},"AMD Radeon RX 5600 XT":{"u":699},"AMD Radeon RX 570":{"u":328},"AMD Radeon RX 5700":{"u":780},"AMD Radeon RX 590":{"u":540},"AMD Radeon RX 6400":{"u":624},"AMD Radeon RX 6500 XT":{"u":650},"AMD Radeon RX 6600 XT":{"u":1299},"AMD Radeon RX 6650 XT":{"u":1399},"AMD Radeon RX 6700":{"u":1650},"AMD Radeon RX 6700 XT":{"u":1650},"AMD Radeon RX 6750 GRE 12G":{"u":1980},"AMD Radeon RX 6750 XT":{"u":1850},"AMD Radeon RX 6800":{"u":2299},"AMD Radeon RX 6800 XT":{"u":2200},"AMD Radeon RX 6950 XT":{"u":3200},"AMD Radeon RX 7600":{"u":1650},"AMD Radeon RX 7600 XT":{"u":2199},"AMD Radeon RX 7700 XT":{"u":2800},"AMD Radeon RX 7800 XT":{"u":3499},"AMD Radeon RX 7900 GRE":{"u":3368},"AMD Radeon RX 7900 XT":{"u":6000},"AMD Radeon RX 7900 XTX":{"u":6099},"AMD Radeon RX 9060 XT":{"u":2800},"AMD Radeon RX 9070":{"u":5900},"AMD Radeon RX 9070 XT":{"u":6000},"NVIDIA GeForce GT 220":{"u":45},"NVIDIA GeForce GT 240":{"u":35},"NVIDIA GeForce GT 610":{"u":60},"NVIDIA GeForce GT 620":{"u":65},"NVIDIA GeForce GT 630":{"u":88},"NVIDIA GeForce GT 640":{"u":75},"NVIDIA GeForce GT 705":{"u":75},"NVIDIA GeForce GT 730":{"u":110},"NVIDIA GeForce GT 740":{"u":100},"NVIDIA GeForce GT 1030":{"u":240},"NVIDIA GeForce GTX 260":{"u":50},"NVIDIA GeForce GTX 275":{"u":80},"NVIDIA GeForce GTX 280":{"u":70},"NVIDIA GeForce GTX 285":{"u":69},"NVIDIA GeForce GTX 295":{"u":180},"NVIDIA GeForce GTX 460":{"u":308},"NVIDIA GeForce GTX 550 Ti":{"u":80},"NVIDIA GeForce GTX 560":{"u":58},"NVIDIA GeForce GTX 560 Ti":{"u":59},"NVIDIA GeForce GTX 580":{"u":98},"NVIDIA GeForce GTX 650":{"u":92},"NVIDIA GeForce GTX 650 Ti":{"u":90},"NVIDIA GeForce GTX 650 Ti Boost":{"u":100},"NVIDIA GeForce GTX 660":{"u":148},"NVIDIA GeForce GTX 680":{"u":300},"NVIDIA GeForce GTX 690":{"u":767},"NVIDIA GeForce GTX 745":{"u":197},"NVIDIA GeForce GTX 750":{"u":160},"NVIDIA GeForce GTX 750 Ti":{"u":209},"NVIDIA GeForce GTX 760":{"u":175},"NVIDIA GeForce GTX 770":{"u":353},"NVIDIA GeForce GTX 950":{"u":230},"NVIDIA GeForce GTX 960":{"u":298},"NVIDIA GeForce GTX 970":{"u":400},"NVIDIA GeForce GTX 980":{"u":675},"NVIDIA GeForce GTX 980 Ti":{"u":994},"NVIDIA GeForce GTX 1050":{"u":300},"NVIDIA GeForce GTX 1060 6G":{"u":620},"NVIDIA GeForce GTX 1650":{"u":620},"NVIDIA GeForce GTX 1660 Super":{"u":850},"NVIDIA GeForce RTX 2060":{"u":1099},"NVIDIA GeForce RTX 2080 Super":{"u":1349},"NVIDIA GeForce RTX 3070":{"u":1950},"NVIDIA GeForce RTX 3080 10G":{"u":3049},"NVIDIA GeForce RTX 3090":{"u":4954},"NVIDIA GeForce RTX 4060":{"u":2864},"NVIDIA GeForce RTX 4070":{"u":3878},"NVIDIA GeForce RTX 4090":{"u":16360},"Intel Core i7-2600":{"u":128},"Intel Core i9-13900K":{"u":974},"酷冷至尊 Q300L":{"p":299,"u":80},"酷冷至尊 MB400L":{"p":119,"u":49},"酷冷至尊 TD500 Mesh":{"p":298,"u":99},"先马 平头哥M2":{"p":109,"u":35},"先马 趣造":{"p":84,"u":45},"先马 黑洞5":{"p":175,"u":96},"先马 鲁班1":{"p":140,"u":50},"爱国者 星璨":{"p":57,"u":52},"爱国者 破晓X":{"p":121,"u":100},"爱国者 YOGO M2":{"p":130,"u":50},"乔思伯 D31":{"p":283,"u":80},"乔思伯 C6":{"p":145,"u":92},"乔思伯 A4":{"p":354,"u":194},"乔思伯 U4":{"p":140,"u":94},"联力 216":{"p":391,"u":229},"联力 O11 Dynamic":{"p":547,"u":301},"长城 阿基米德KM-1":{"p":109,"u":60},"鑫谷 拉克斯":{"p":106,"u":62},"银欣 FARA R1":{"p":499,"u":275},"安钛克 NX200M":{"p":312,"u":172},"航嘉 S920":{"p":128,"u":42},"大水牛 追风者":{"p":77,"u":20},"海盗船 4000D":{"p":191,"u":174},"乔思伯 N3 NAS":{"p":583,"u":233},"铭瑄 B660":{"u":391},"昂达 B660PRO":{"u":450},"索泰 B660M":{"u":462},"梅捷 B660GAMING":{"u":506},"精粤 B660PLUS":{"u":372},"超微 B660WIFI":{"u":425},"七彩虹 B660MAX":{"u":564},"昂达 B760":{"u":166},"映泰 B760PRO":{"u":122},"映泰 B760M":{"u":119},"索泰 B760GAMING":{"u":160},"翔升 B760PLUS":{"u":144},"泰安 B760WIFI":{"u":167},"ASRock 华擎 B760MAX":{"u":160},"ASUS 华硕 B450":{"u":132},"影驰 B450PRO":{"u":179},"影驰 B450M":{"u":138},"影驰 B450GAMING":{"u":126},"泰安 B450PLUS":{"u":146},"超微 B450WIFI":{"u":131},"MSI 微星 B450MAX":{"u":145},"铭瑄 B550":{"u":230},"影驰 B550PRO":{"u":250},"蓝宝石 B550M":{"u":227},"索泰 B550GAMING":{"u":278},"泰安 B550PLUS":{"u":254},"MSI 微星 B550WIFI":{"u":274},"泰安 B550MAX":{"u":187},"ASRock 华擎 B650":{"u":364},"影驰 B650PRO":{"u":269},"影驰 B650M":{"u":338},"翔升 B650GAMING":{"u":247},"顶星 B650PLUS":{"u":270},"磐正 B650WIFI":{"u":244},"信步 B650MAX":{"u":307},"三星 NVMe 1T":{"p":822,"u":650},"西部数据 NVMe 1T":{"p":842,"u":650},"致态 NVMe 1T":{"p":808,"u":650},"铠侠 NVMe 1T":{"p":785,"u":650},"金士顿 NVMe 1T":{"p":784,"u":650},"英睿达 NVMe 1T":{"p":806,"u":650},"光威 NVMe 1T":{"p":815,"u":650},"雷克沙 NVMe 1T":{"p":827,"u":650},"西部数据 HDD 4T":{"p":1137,"u":589},"希捷 HDD 4T":{"p":1157,"u":589},"东芝 HDD 4T":{"p":1136,"u":589},"NVIDIA GeForce GTX 1660":{"u":722},"NVIDIA GeForce GTX 1050 3G":{"u":240},"NVIDIA GeForce GTX 1650 GDDR6":{"u":620},"金士顿 DDR3 1333 4G 单条":{"u":38},"金士顿 DDR3 1600 4G 单条":{"u":38},"金士顿 DDR3 1600 16G 单条":{"u":135},"金士顿 DDR4 2666 8G 单条":{"p":125,"u":78},"金士顿 DDR4 3000 8G 单条":{"p":130,"u":81},"金士顿 DDR4 3200 8G 单条":{"p":135,"u":84},"金士顿 DDR4 3000 16G 单条":{"p":260,"u":161},"金士顿 DDR4 3200 16G 单条":{"p":270,"u":167},"金士顿 DDR4 3200 32G 单条":{"p":520,"u":322},"金士顿 DDR4 3600 32G 单条":{"p":545,"u":338},"金士顿 DDR5 4800 16G 单条":{"p":404,"u":250},"金士顿 DDR5 5600 16G 单条":{"p":430,"u":267},"金士顿 DDR5 5600 32G 单条":{"p":830,"u":515},"金士顿 DDR5 6000 64G 单条":{"p":1696,"u":1052},"威刚 DDR3 1333 4G 单条":{"u":36},"威刚 DDR3 1600 4G 单条":{"u":36},"威刚 DDR3 1600 16G 单条":{"u":130},"威刚 DDR4 2666 8G 单条":{"p":120,"u":74},"威刚 DDR4 3000 8G 单条":{"p":125,"u":78},"威刚 DDR4 3200 8G 单条":{"p":130,"u":81},"威刚 DDR4 3000 16G 单条":{"p":250,"u":155},"威刚 DDR4 3200 16G 单条":{"p":260,"u":161},"威刚 DDR4 3200 32G 单条":{"p":499,"u":309},"威刚 DDR4 3600 32G 单条":{"p":523,"u":324},"威刚 DDR5 4800 16G 单条":{"p":388,"u":241},"威刚 DDR5 5600 16G 单条":{"p":413,"u":256},"威刚 DDR5 6000 16G 单条":{"p":438,"u":272},"威刚 DDR5 5600 32G 单条":{"p":797,"u":494},"威刚 DDR5 6000 64G 单条":{"p":1628,"u":1009},"海盗船 DDR3 1333 4G 单条":{"u":40},"海盗船 DDR3 1600 4G 单条":{"u":40},"海盗船 DDR3 1600 16G 单条":{"u":143},"海盗船 DDR4 2666 8G 单条":{"p":132,"u":82},"海盗船 DDR4 3000 8G 单条":{"p":138,"u":86},"海盗船 DDR4 3200 8G 单条":{"p":143,"u":89},"海盗船 DDR4 3000 16G 单条":{"p":276,"u":171},"海盗船 DDR4 3200 16G 单条":{"p":287,"u":178},"海盗船 DDR4 3200 32G 单条":{"p":551,"u":342},"海盗船 DDR4 3600 32G 单条":{"p":578,"u":358},"海盗船 DDR5 4800 16G 单条":{"p":428,"u":265},"海盗船 DDR5 5600 16G 单条":{"p":456,"u":283},"海盗船 DDR5 5600 32G 单条":{"p":880,"u":546},"海盗船 DDR5 6000 64G 单条":{"p":1798,"u":1115},"芝奇 DDR3 1333 4G 单条":{"u":39},"芝奇 DDR3 1600 4G 单条":{"u":39},"芝奇 DDR3 1600 8G 单条":{"u":71},"芝奇 DDR3 1600 16G 单条":{"u":138},"芝奇 DDR4 2666 8G 单条":{"p":127,"u":79},"芝奇 DDR4 3000 8G 单条":{"p":133,"u":82},"芝奇 DDR4 3200 8G 单条":{"p":138,"u":86},"芝奇 DDR4 3000 16G 单条":{"p":265,"u":164},"芝奇 DDR4 3200 16G 单条":{"p":276,"u":171},"芝奇 DDR4 3200 32G 单条":{"p":530,"u":329},"芝奇 DDR4 3600 32G 单条":{"p":556,"u":345},"芝奇 DDR5 4800 16G 单条":{"p":412,"u":255},"芝奇 DDR5 5600 16G 单条":{"p":439,"u":272},"芝奇 DDR5 6000 16G 单条":{"p":465,"u":288},"芝奇 DDR5 5600 32G 单条":{"p":847,"u":525},"芝奇 DDR5 6000 32G 单条":{"p":897,"u":556},"芝奇 DDR5 6000 64G 单条":{"p":1730,"u":1073},"光威 DDR3 1333 4G 单条":{"u":35},"光威 DDR3 1600 4G 单条":{"u":35},"光威 DDR3 1600 16G 单条":{"u":124},"光威 DDR4 2666 8G 单条":{"p":115,"u":71},"光威 DDR4 3000 8G 单条":{"p":120,"u":74},"光威 DDR4 3200 8G 单条":{"p":124,"u":77},"光威 DDR4 3000 16G 单条":{"p":239,"u":148},"光威 DDR4 3200 32G 单条":{"p":478,"u":296},"光威 DDR4 3600 32G 单条":{"p":501,"u":311},"光威 DDR5 4800 16G 单条":{"p":372,"u":231},"光威 DDR5 5600 16G 单条":{"p":396,"u":246},"光威 DDR5 6000 16G 单条":{"p":419,"u":260},"光威 DDR5 5600 32G 单条":{"p":764,"u":474},"光威 DDR5 6000 32G 单条":{"p":809,"u":502},"光威 DDR5 6000 64G 单条":{"p":1560,"u":967},"英睿达 DDR3 1333 4G 单条":{"u":37},"英睿达 DDR3 1600 4G 单条":{"u":37},"英睿达 DDR3 1600 8G 单条":{"u":69},"英睿达 DDR3 1600 16G 单条":{"u":132},"英睿达 DDR4 2666 8G 单条":{"p":122,"u":76},"英睿达 DDR4 3000 8G 单条":{"p":127,"u":79},"英睿达 DDR4 3200 8G 单条":{"p":132,"u":82},"英睿达 DDR4 3000 16G 单条":{"p":255,"u":158},"英睿达 DDR4 3200 16G 单条":{"p":265,"u":164},"英睿达 DDR4 3200 32G 单条":{"p":510,"u":316},"英睿达 DDR4 3600 32G 单条":{"p":534,"u":331},"英睿达 DDR5 4800 16G 单条":{"p":396,"u":246},"英睿达 DDR5 5600 16G 单条":{"p":421,"u":261},"英睿达 DDR5 6000 16G 单条":{"p":447,"u":277},"英睿达 DDR5 5600 32G 单条":{"p":813,"u":504},"英睿达 DDR5 6000 32G 单条":{"p":862,"u":534},"英睿达 DDR5 6000 64G 单条":{"p":1662,"u":1030},"金百达 DDR3 1333 4G 单条":{"u":36},"金百达 DDR3 1600 4G 单条":{"u":36},"金百达 DDR3 1600 16G 单条":{"u":127},"金百达 DDR4 2666 8G 单条":{"p":117,"u":73},"金百达 DDR4 3000 8G 单条":{"p":122,"u":76},"金百达 DDR4 3200 8G 单条":{"p":127,"u":79},"金百达 DDR4 3000 16G 单条":{"p":244,"u":151},"金百达 DDR4 3200 32G 单条":{"p":489,"u":303},"金百达 DDR4 3600 32G 单条":{"p":512,"u":317},"金百达 DDR5 4800 16G 单条":{"p":380,"u":236},"金百达 DDR5 5600 16G 单条":{"p":404,"u":250},"金百达 DDR5 5600 32G 单条":{"p":780,"u":484},"金百达 DDR5 6000 64G 单条":{"p":1594,"u":988},"影驰 DDR3 1333 4G 单条":{"u":35},"影驰 DDR3 1600 4G 单条":{"u":35},"影驰 DDR3 1600 8G 单条":{"u":65},"影驰 DDR3 1600 16G 单条":{"u":126},"影驰 DDR4 2666 8G 单条":{"p":116,"u":72},"影驰 DDR4 3000 8G 单条":{"p":121,"u":75},"影驰 DDR4 3200 8G 单条":{"p":126,"u":78},"影驰 DDR4 3000 16G 单条":{"p":242,"u":150},"影驰 DDR4 3200 16G 单条":{"p":251,"u":156},"影驰 DDR4 3200 32G 单条":{"p":484,"u":300},"影驰 DDR4 3600 32G 单条":{"p":507,"u":314},"影驰 DDR5 4800 16G 单条":{"p":376,"u":233},"影驰 DDR5 5600 16G 单条":{"p":400,"u":248},"影驰 DDR5 6000 16G 单条":{"p":424,"u":263},"影驰 DDR5 5600 32G 单条":{"p":772,"u":479},"影驰 DDR5 6000 32G 单条":{"p":818,"u":507},"影驰 DDR5 6000 64G 单条":{"p":1577,"u":978},"宇瞻 DDR3 1333 4G 单条":{"u":38},"宇瞻 DDR3 1600 4G 单条":{"u":38},"宇瞻 DDR3 1600 8G 单条":{"u":70},"宇瞻 DDR3 1600 16G 单条":{"u":135},"宇瞻 DDR4 2666 8G 单条":{"p":125,"u":78},"宇瞻 DDR4 3000 8G 单条":{"p":130,"u":81},"宇瞻 DDR4 3200 8G 单条":{"p":135,"u":84},"宇瞻 DDR4 3000 16G 单条":{"p":260,"u":161},"宇瞻 DDR4 3200 16G 单条":{"p":270,"u":167},"宇瞻 DDR4 3200 32G 单条":{"p":520,"u":322},"宇瞻 DDR4 3600 32G 单条":{"p":545,"u":338},"宇瞻 DDR5 4800 16G 单条":{"p":404,"u":250},"宇瞻 DDR5 5600 16G 单条":{"p":430,"u":267},"宇瞻 DDR5 6000 16G 单条":{"p":456,"u":283},"宇瞻 DDR5 5600 32G 单条":{"p":830,"u":515},"宇瞻 DDR5 6000 32G 单条":{"p":880,"u":546},"宇瞻 DDR5 6000 64G 单条":{"p":1696,"u":1052},"十铨 DDR3 1333 4G 单条":{"u":36},"十铨 DDR3 1600 4G 单条":{"u":36},"十铨 DDR3 1600 8G 单条":{"u":67},"十铨 DDR3 1600 16G 单条":{"u":130},"十铨 DDR4 2666 8G 单条":{"p":120,"u":74},"十铨 DDR4 3000 8G 单条":{"p":125,"u":78},"十铨 DDR4 3200 8G 单条":{"p":130,"u":81},"十铨 DDR4 3000 16G 单条":{"p":250,"u":155},"十铨 DDR4 3200 16G 单条":{"p":260,"u":161},"十铨 DDR4 3200 32G 单条":{"p":499,"u":309},"十铨 DDR4 3600 32G 单条":{"p":523,"u":324},"十铨 DDR5 4800 16G 单条":{"p":388,"u":241},"十铨 DDR5 5600 16G 单条":{"p":413,"u":256},"十铨 DDR5 6000 16G 单条":{"p":438,"u":272},"十铨 DDR5 5600 32G 单条":{"p":797,"u":494},"十铨 DDR5 6000 32G 单条":{"p":845,"u":524},"十铨 DDR5 6000 64G 单条":{"p":1628,"u":1009},"阿斯加特 DDR3 1333 4G 单条":{"u":38},"阿斯加特 DDR3 1600 4G 单条":{"u":38},"阿斯加特 DDR3 1600 8G 单条":{"u":70},"阿斯加特 DDR3 1600 16G 单条":{"u":135},"阿斯加特 DDR4 2666 8G 单条":{"p":125,"u":78},"阿斯加特 DDR4 3000 8G 单条":{"p":130,"u":81},"阿斯加特 DDR4 3200 8G 单条":{"p":135,"u":84},"阿斯加特 DDR4 3000 16G 单条":{"p":260,"u":161},"阿斯加特 DDR4 3200 16G 单条":{"p":270,"u":167},"阿斯加特 DDR4 3200 32G 单条":{"p":520,"u":322},"阿斯加特 DDR4 3600 32G 单条":{"p":545,"u":338},"阿斯加特 DDR5 4800 16G 单条":{"p":404,"u":250},"阿斯加特 DDR5 5600 16G 单条":{"p":430,"u":267},"阿斯加特 DDR5 6000 16G 单条":{"p":456,"u":283},"阿斯加特 DDR5 5600 32G 单条":{"p":830,"u":515},"阿斯加特 DDR5 6000 32G 单条":{"p":880,"u":546},"阿斯加特 DDR5 6000 64G 单条":{"p":1696,"u":1052},"朗科 DDR3 1333 4G 单条":{"u":33},"朗科 DDR3 1600 4G 单条":{"u":33},"朗科 DDR3 1600 8G 单条":{"u":62},"朗科 DDR3 1600 16G 单条":{"u":119},"朗科 DDR4 2666 8G 单条":{"p":110,"u":68},"朗科 DDR4 3000 8G 单条":{"p":114,"u":71},"朗科 DDR4 3200 8G 单条":{"p":119,"u":74},"朗科 DDR4 3000 16G 单条":{"p":229,"u":142},"朗科 DDR4 3200 16G 单条":{"p":238,"u":148},"朗科 DDR4 3200 32G 单条":{"p":458,"u":284},"朗科 DDR4 3600 32G 单条":{"p":480,"u":298},"朗科 DDR5 4800 16G 单条":{"p":356,"u":221},"朗科 DDR5 5600 16G 单条":{"p":378,"u":234},"朗科 DDR5 6000 16G 单条":{"p":401,"u":249},"朗科 DDR5 5600 32G 单条":{"p":730,"u":453},"朗科 DDR5 6000 32G 单条":{"p":774,"u":480},"朗科 DDR5 6000 64G 单条":{"p":1492,"u":925},"玖合 DDR3 1333 4G 单条":{"u":38},"玖合 DDR3 1600 4G 单条":{"u":38},"玖合 DDR3 1600 8G 单条":{"u":70},"玖合 DDR3 1600 16G 单条":{"u":135},"玖合 DDR4 2666 8G 单条":{"p":125,"u":78},"玖合 DDR4 3000 8G 单条":{"p":130,"u":81},"玖合 DDR4 3200 8G 单条":{"p":135,"u":84},"玖合 DDR4 3000 16G 单条":{"p":260,"u":161},"玖合 DDR4 3200 16G 单条":{"p":270,"u":167},"玖合 DDR4 3200 32G 单条":{"p":520,"u":322},"玖合 DDR4 3600 32G 单条":{"p":545,"u":338},"玖合 DDR5 4800 16G 单条":{"p":404,"u":250},"玖合 DDR5 5600 16G 单条":{"p":430,"u":267},"玖合 DDR5 6000 16G 单条":{"p":456,"u":283},"玖合 DDR5 5600 32G 单条":{"p":830,"u":515},"玖合 DDR5 6000 32G 单条":{"p":880,"u":546},"玖合 DDR5 6000 64G 单条":{"p":1696,"u":1052},"金泰克 DDR3 1333 4G 单条":{"u":34},"金泰克 DDR3 1600 4G 单条":{"u":34},"金泰克 DDR3 1600 8G 单条":{"u":63},"金泰克 DDR3 1600 16G 单条":{"u":122},"金泰克 DDR4 2666 8G 单条":{"p":112,"u":69},"金泰克 DDR4 3000 8G 单条":{"p":117,"u":73},"金泰克 DDR4 3200 8G 单条":{"p":122,"u":76},"金泰克 DDR4 3000 16G 单条":{"p":234,"u":145},"金泰克 DDR4 3200 16G 单条":{"p":243,"u":151},"金泰克 DDR4 3200 32G 单条":{"p":468,"u":290},"金泰克 DDR4 3600 32G 单条":{"p":491,"u":304},"金泰克 DDR5 4800 16G 单条":{"p":364,"u":226},"金泰克 DDR5 5600 16G 单条":{"p":387,"u":240},"金泰克 DDR5 6000 16G 单条":{"p":410,"u":254},"金泰克 DDR5 5600 32G 单条":{"p":747,"u":463},"金泰克 DDR5 6000 32G 单条":{"p":792,"u":491},"金泰克 DDR5 6000 64G 单条":{"p":1526,"u":946},"宏想 DDR3 1333 4G 单条":{"u":38},"宏想 DDR3 1600 4G 单条":{"u":38},"宏想 DDR3 1600 8G 单条":{"u":70},"宏想 DDR3 1600 16G 单条":{"u":135},"宏想 DDR4 2666 8G 单条":{"p":125,"u":78},"宏想 DDR4 3000 8G 单条":{"p":130,"u":81},"宏想 DDR4 3200 8G 单条":{"p":135,"u":84},"宏想 DDR4 3000 16G 单条":{"p":260,"u":161},"宏想 DDR4 3200 16G 单条":{"p":270,"u":167},"宏想 DDR4 3200 32G 单条":{"p":520,"u":322},"宏想 DDR4 3600 32G 单条":{"p":545,"u":338},"宏想 DDR5 4800 16G 单条":{"p":404,"u":250},"宏想 DDR5 5600 16G 单条":{"p":430,"u":267},"宏想 DDR5 6000 16G 单条":{"p":456,"u":283},"宏想 DDR5 5600 32G 单条":{"p":830,"u":515},"宏想 DDR5 6000 32G 单条":{"p":880,"u":546},"宏想 DDR5 6000 64G 单条":{"p":1696,"u":1052},"协德 DDR3 1333 4G 单条":{"u":32},"协德 DDR3 1600 4G 单条":{"u":32},"协德 DDR3 1600 8G 单条":{"u":60},"协德 DDR3 1600 16G 单条":{"u":115},"协德 DDR4 2666 8G 单条":{"p":106,"u":66},"协德 DDR4 3000 8G 单条":{"p":110,"u":68},"协德 DDR4 3200 8G 单条":{"p":115,"u":71},"协德 DDR4 3000 16G 单条":{"p":221,"u":137},"协德 DDR4 3200 16G 单条":{"p":230,"u":143},"协德 DDR4 3200 32G 单条":{"p":442,"u":274},"协德 DDR4 3600 32G 单条":{"p":463,"u":287},"协德 DDR5 4800 16G 单条":{"p":344,"u":213},"协德 DDR5 5600 16G 单条":{"p":366,"u":227},"协德 DDR5 6000 16G 单条":{"p":387,"u":240},"协德 DDR5 5600 32G 单条":{"p":706,"u":438},"协德 DDR5 6000 32G 单条":{"p":748,"u":464},"协德 DDR5 6000 64G 单条":{"p":1442,"u":894},"金士顿 DDR4 3600 16G 单条":{"p":283,"u":175},"海盗船 DDR4 3600 16G 单条":{"p":300,"u":186},"芝奇 DDR4 3600 16G 单条":{"p":289,"u":179},"英睿达 DDR4 3600 16G 单条":{"p":278,"u":172},"影驰 DDR4 3600 16G 单条":{"p":264,"u":164},"宇瞻 DDR4 3600 16G 单条":{"p":283,"u":175},"十铨 DDR4 3600 16G 单条":{"p":272,"u":169},"阿斯加特 DDR4 3600 16G 单条":{"p":283,"u":175},"朗科 DDR4 3600 16G 单条":{"p":249,"u":154},"玖合 DDR4 3600 16G 单条":{"p":283,"u":175},"金泰克 DDR4 3600 16G 单条":{"p":255,"u":158},"宏想 DDR4 3600 16G 单条":{"p":283,"u":175},"协德 DDR4 3600 16G 单条":{"p":241,"u":149},"金士顿 DDR5 6400 32G 单条":{"p":930,"u":577},"威刚 DDR5 6400 32G 单条":{"p":892,"u":553},"海盗船 DDR5 6400 32G 单条":{"p":985,"u":611},"芝奇 DDR5 6400 32G 单条":{"p":948,"u":588},"光威 DDR5 6400 32G 单条":{"p":855,"u":530},"英睿达 DDR5 6400 32G 单条":{"p":911,"u":565},"金百达 DDR5 6400 32G 单条":{"p":874,"u":542},"影驰 DDR5 6400 32G 单条":{"p":865,"u":536},"宇瞻 DDR5 6400 32G 单条":{"p":930,"u":577},"十铨 DDR5 6400 32G 单条":{"p":892,"u":553},"阿斯加特 DDR5 6400 32G 单条":{"p":930,"u":577},"朗科 DDR5 6400 32G 单条":{"p":818,"u":507},"玖合 DDR5 6400 32G 单条":{"p":930,"u":577},"金泰克 DDR5 6400 32G 单条":{"p":837,"u":519},"宏想 DDR5 6400 32G 单条":{"p":930,"u":577},"协德 DDR5 6400 32G 单条":{"p":790,"u":490},"酷冷至尊 T400i":{"p":84,"u":28},"利民 AX120 R SE":{"p":59,"u":45},"利民 AK120":{"p":82,"u":45},"利民 PA120":{"p":132,"u":60},"利民 FC140":{"p":291,"u":152},"九州风神 玄冰400":{"p":35,"u":32},"九州风神 AK620":{"p":299,"u":144},"猫头鹰 NH-D15":{"p":606,"u":214},"猫头鹰 NH-U12S":{"p":530,"u":100},"雅浚 B3":{"p":83,"u":30},"利民 水冷 360":{"p":315,"u":195},"九州风神 冰堡垒360":{"p":382,"u":347},"瓦尔基里 E360":{"p":829,"u":514},"恩杰 Kraken 240":{"p":1198,"u":743},"先马 XW240":{"p":378,"u":234},"服务器风冷 SP3":{"p":194,"u":109},"超频三 红海H4":{"p":55,"u":45},"ID-COOLING SE-224":{"p":114,"u":71},"利民 水冷 240":{"p":218,"u":94},"超频三 巨浪360":{"p":283,"u":175},"服务器风冷 SP5":{"p":199,"u":158},"九州风神 大霜塔V5":{"u":68},"酷冷至尊 ML240L":{"u":189,"p":300},"酷冷至尊 暴雪T520":{"u":59},"追风者 NV5":{"u":128,"p":221},"分形工艺 North":{"u":560,"p":899},"乔思伯 HX6250":{"u":149},"乔思伯 CR-1000":{"p":58},"NZXT H5 Flow":{"p":349},"NAS 8 盘位机箱":{"p":279,"u":173},"NAS 12 盘位机箱":{"p":484,"u":300},"4U 服务器机箱":{"p":188,"u":117},"8 盘位工作站塔":{"p":523,"u":324}};
+const REAL_PRICES={"Intel Core i5-10400":{"u":383},"Intel Core i5-10400F":{"u":383},"Intel Core i5-12400":{"u":700},"Intel Core i5-12400F":{"u":700},"Intel Core i5-13400":{"u":719},"Intel Core i5-13400F":{"u":719},"Intel Core Ultra 5 245K":{"u":1772},"Intel Core Ultra 5 245KF":{"u":1772},"Intel Core Ultra 7 265K":{"u":1659},"Intel Core Ultra 7 265KF":{"u":1659},"Intel Core Ultra 9 285K":{"u":3224},"Intel Xeon E5-2666 v3":{"u":116},"AMD Ryzen 5 2600":{"u":277},"AMD Ryzen 5 5600":{"u":679},"AMD Ryzen 5 5600G":{"u":679},"AMD Ryzen 5 5600X":{"u":679},"AMD Ryzen 5 5600GT":{"u":679},"AMD Ryzen 9 7950X":{"u":2251},"AMD Ryzen 9 9950X":{"u":3976},"Intel Core i3-2100":{"u":17},"Intel Core i5-4590":{"u":105},"Intel Core i7-4790":{"u":162},"Intel Core i7-4790K":{"u":162},"Intel Core i5-7500":{"u":100},"Intel Core i5-8400":{"u":280},"Intel Core i9-9900K":{"u":938},"Intel Core i3-10100":{"u":236},"Intel Core i7-10700":{"u":834},"Intel Core i7-10700K":{"u":834},"Intel Core i5-11400":{"u":630},"Intel Core i5-11400F":{"u":630},"Intel Core i3-12100":{"u":525},"Intel Core i3-12100F":{"u":525},"Intel Core i9-14900K":{"u":614},"金士顿 DDR5 6000 16G 单条":{"p":456,"u":283},"金士顿 DDR5 6000 32G 单条":{"p":880,"u":546},"金士顿 DDR3 1600 8G 单条":{"u":70},"威刚 DDR4 3600 16G 单条":{"p":272,"u":169},"威刚 DDR5 6000 32G 单条":{"p":845,"u":524},"威刚 DDR3 1600 8G 单条":{"u":67},"海盗船 DDR5 6000 16G 单条":{"p":483,"u":299},"海盗船 DDR5 6000 32G 单条":{"p":933,"u":578},"海盗船 DDR3 1600 8G 单条":{"u":74},"光威 DDR4 3200 16G 单条":{"p":249,"u":154},"光威 DDR4 3600 16G 单条":{"p":261,"u":162},"光威 DDR3 1600 8G 单条":{"u":64},"金百达 DDR4 3200 16G 单条":{"p":254,"u":157},"金百达 DDR4 3600 16G 单条":{"p":266,"u":165},"金百达 DDR5 6000 16G 单条":{"p":428,"u":265},"金百达 DDR5 6000 32G 单条":{"p":827,"u":513},"金百达 DDR3 1600 8G 单条":{"u":66},"海韵 PRIME 650W":{"p":373},"振华 卓凌 550W":{"p":184},"振华 卓凌 650W":{"p":436},"振华 卓凌 750W":{"p":368},"全汉 MEGA 650W":{"p":154},"全汉 MEGA 750W":{"p":188},"酷冷至尊 MWE 550W":{"p":142},"酷冷至尊 MWE 650W":{"p":119},"酷冷至尊 MWE 750W":{"p":279},"长城 GX+ 650W":{"p":189},"长城 GX+ 750W":{"p":266},"航嘉 MVP 650W":{"p":158},"航嘉 MVP 750W":{"p":159},"鑫谷 昆仑 550W":{"p":199},"鑫谷 昆仑 650W":{"p":190},"先马 XP 550W":{"p":158},"先马 XP 650W":{"p":167},"先马 XP 750W":{"p":199},"安钛克 NE 550W":{"p":85},"安钛克 NE 650W":{"p":129},"安钛克 NE 750W":{"p":129},"微星 MAG 550W":{"p":119},"微星 MAG 650W":{"p":279},"微星 MAG 750W":{"p":279},"NVIDIA GeForce GTX 1050 Ti":{"u":488},"NVIDIA GeForce GTX 1060 3G":{"u":418},"NVIDIA GeForce GTX 1060 5G":{"u":550},"NVIDIA GeForce GTX 1070":{"u":686},"NVIDIA GeForce GTX 1070 Ti":{"u":735},"NVIDIA GeForce GTX 1080":{"u":700},"NVIDIA GeForce GTX 1080 Ti":{"u":899},"NVIDIA GeForce GTX 1630":{"u":380},"NVIDIA Titan V":{"u":1304},"NVIDIA Titan Xp":{"u":950},"NVIDIA Titan X (Pascal)":{"u":868},"Intel Arc A750":{"u":1216},"Intel Arc B580":{"u":2399},"NVIDIA GeForce GTX 1650 Super":{"u":639},"NVIDIA GeForce GTX 1660 Ti":{"u":938},"AMD Radeon HD 4350":{"u":35},"AMD Radeon HD 4650":{"u":35},"AMD Radeon HD 4670":{"u":32},"AMD Radeon HD 5450":{"u":39},"AMD Radeon HD 5550":{"u":50},"AMD Radeon HD 5570":{"u":39},"AMD Radeon HD 5750":{"u":40},"AMD Radeon HD 5870":{"u":80},"AMD Radeon HD 6450":{"u":45},"AMD Radeon HD 6570":{"u":42},"AMD Radeon HD 6670":{"u":50},"AMD Radeon HD 6750":{"u":46},"AMD Radeon HD 6770":{"u":50},"AMD Radeon HD 6790":{"u":55},"AMD Radeon HD 6850":{"u":55},"AMD Radeon HD 6950":{"u":70},"AMD Radeon HD 6970":{"u":110},"AMD Radeon HD 7750":{"u":90},"AMD Radeon HD 7770":{"u":76},"AMD Radeon HD 7850":{"u":88},"AMD Radeon HD 7870":{"u":110},"AMD Radeon R5 230":{"u":48},"AMD Radeon R7 240":{"u":65},"AMD Radeon R7 250":{"u":85},"AMD Radeon R7 260X":{"u":90},"AMD Radeon R7 350":{"u":100},"AMD Radeon R7 360":{"u":118},"AMD Radeon R9 270":{"u":118},"AMD Radeon R9 270X":{"u":120},"AMD Radeon R9 280X":{"u":135},"AMD Radeon R9 290":{"u":225},"AMD Radeon R9 290X":{"u":275},"AMD Radeon R9 380":{"u":199},"AMD Radeon R9 380X":{"u":254},"AMD Radeon R9 390":{"u":316},"AMD Radeon R9 390X":{"u":388},"NVIDIA GeForce RTX 2060 Super":{"u":1218},"NVIDIA GeForce RTX 2070":{"u":1050},"NVIDIA GeForce RTX 2070 Super":{"u":1219},"NVIDIA GeForce RTX 2080":{"u":1234},"NVIDIA GeForce RTX 2080 Ti":{"u":1764},"NVIDIA GeForce RTX 3050 6G":{"u":1699},"NVIDIA GeForce RTX 3060 12G":{"u":2046},"NVIDIA GeForce RTX 3060 Ti":{"u":2150},"NVIDIA GeForce RTX 3060 Ti G6X":{"u":2100},"NVIDIA GeForce RTX 3070 Ti":{"u":2799},"NVIDIA GeForce RTX 3080 12G":{"u":3499},"NVIDIA GeForce RTX 3080 Ti":{"u":2450},"NVIDIA GeForce RTX 3090 Ti":{"u":9199},"NVIDIA GeForce RTX 4060 Ti 16G":{"u":3200},"NVIDIA GeForce RTX 4060 Ti 8G":{"u":2890},"NVIDIA GeForce RTX 4070 Super":{"u":4538},"NVIDIA GeForce RTX 4070 Ti":{"u":5788},"NVIDIA GeForce RTX 4070 Ti SUPER":{"u":3899},"NVIDIA GeForce RTX 4080":{"u":9450},"NVIDIA GeForce RTX 4080 Super":{"u":7829},"NVIDIA GeForce RTX 5050":{"u":2950},"NVIDIA GeForce RTX 5060":{"u":4107},"NVIDIA GeForce RTX 5060 Ti":{"u":4899},"NVIDIA GeForce RTX 5070":{"u":6999},"NVIDIA GeForce RTX 5070 Ti":{"u":9666},"AMD Radeon RX 470":{"u":359},"AMD Radeon RX 480":{"u":369},"AMD Radeon RX 550":{"u":350},"AMD Radeon RX 5500":{"u":579},"AMD Radeon RX 560":{"u":333},"AMD Radeon RX 5600":{"u":680},"AMD Radeon RX 5600 XT":{"u":699},"AMD Radeon RX 570":{"u":328},"AMD Radeon RX 5700":{"u":780},"AMD Radeon RX 590":{"u":540},"AMD Radeon RX 6400":{"u":624},"AMD Radeon RX 6500 XT":{"u":650},"AMD Radeon RX 6600 XT":{"u":1299},"AMD Radeon RX 6650 XT":{"u":1399},"AMD Radeon RX 6700":{"u":1650},"AMD Radeon RX 6700 XT":{"u":1650},"AMD Radeon RX 6750 GRE 12G":{"u":1980},"AMD Radeon RX 6750 XT":{"u":1850},"AMD Radeon RX 6800":{"u":2299},"AMD Radeon RX 6800 XT":{"u":2200},"AMD Radeon RX 6950 XT":{"u":3200},"AMD Radeon RX 7600":{"u":1650},"AMD Radeon RX 7600 XT":{"u":2199},"AMD Radeon RX 7700 XT":{"u":2800},"AMD Radeon RX 7800 XT":{"u":3499},"AMD Radeon RX 7900 GRE":{"u":3368},"AMD Radeon RX 7900 XT":{"u":6000},"AMD Radeon RX 7900 XTX":{"u":6099},"AMD Radeon RX 9060 XT":{"u":2800},"AMD Radeon RX 9070":{"u":5900},"AMD Radeon RX 9070 XT":{"u":6000},"NVIDIA GeForce GT 220":{"u":45},"NVIDIA GeForce GT 240":{"u":35},"NVIDIA GeForce GT 610":{"u":60},"NVIDIA GeForce GT 620":{"u":65},"NVIDIA GeForce GT 630":{"u":88},"NVIDIA GeForce GT 640":{"u":75},"NVIDIA GeForce GT 705":{"u":75},"NVIDIA GeForce GT 730":{"u":110},"NVIDIA GeForce GT 740":{"u":100},"NVIDIA GeForce GT 1030":{"u":240},"NVIDIA GeForce GTX 260":{"u":50},"NVIDIA GeForce GTX 275":{"u":80},"NVIDIA GeForce GTX 280":{"u":70},"NVIDIA GeForce GTX 285":{"u":69},"NVIDIA GeForce GTX 295":{"u":180},"NVIDIA GeForce GTX 460":{"u":308},"NVIDIA GeForce GTX 550 Ti":{"u":80},"NVIDIA GeForce GTX 560":{"u":58},"NVIDIA GeForce GTX 560 Ti":{"u":59},"NVIDIA GeForce GTX 580":{"u":98},"NVIDIA GeForce GTX 650":{"u":92},"NVIDIA GeForce GTX 650 Ti":{"u":90},"NVIDIA GeForce GTX 650 Ti Boost":{"u":100},"NVIDIA GeForce GTX 660":{"u":148},"NVIDIA GeForce GTX 680":{"u":300},"NVIDIA GeForce GTX 690":{"u":767},"NVIDIA GeForce GTX 745":{"u":197},"NVIDIA GeForce GTX 750":{"u":160},"NVIDIA GeForce GTX 750 Ti":{"u":209},"NVIDIA GeForce GTX 760":{"u":175},"NVIDIA GeForce GTX 770":{"u":353},"NVIDIA GeForce GTX 950":{"u":230},"NVIDIA GeForce GTX 960":{"u":298},"NVIDIA GeForce GTX 970":{"u":400},"NVIDIA GeForce GTX 980":{"u":675},"NVIDIA GeForce GTX 980 Ti":{"u":994},"NVIDIA GeForce GTX 1050":{"u":300},"NVIDIA GeForce GTX 1060 6G":{"u":620},"NVIDIA GeForce GTX 1650":{"u":620},"NVIDIA GeForce GTX 1660 Super":{"u":850},"NVIDIA GeForce RTX 2060":{"u":1099},"NVIDIA GeForce RTX 2080 Super":{"u":1349},"NVIDIA GeForce RTX 3070":{"u":1950},"NVIDIA GeForce RTX 3080 10G":{"u":3049},"NVIDIA GeForce RTX 3090":{"u":4954},"NVIDIA GeForce RTX 4060":{"u":2864},"NVIDIA GeForce RTX 4070":{"u":3878},"NVIDIA GeForce RTX 4090":{"u":16360},"Intel Core i7-2600":{"u":128},"Intel Core i9-13900K":{"u":974},"酷冷至尊 Q300L":{"p":299,"u":80},"酷冷至尊 MB400L":{"p":119,"u":49},"酷冷至尊 TD500 Mesh":{"p":298,"u":99},"先马 平头哥M2":{"p":109,"u":35},"先马 趣造":{"p":84,"u":45},"先马 黑洞5":{"p":175,"u":96},"先马 鲁班1":{"p":140,"u":50},"爱国者 星璨":{"p":57,"u":52},"爱国者 破晓X":{"p":121,"u":100},"爱国者 YOGO M2":{"p":130,"u":50},"乔思伯 D31":{"p":283,"u":80},"乔思伯 C6":{"p":145,"u":92},"乔思伯 A4":{"p":354,"u":194},"乔思伯 U4":{"p":140,"u":94},"联力 216":{"p":391,"u":229},"联力 O11 Dynamic":{"p":547,"u":301},"长城 阿基米德KM-1":{"p":109,"u":60},"鑫谷 拉克斯":{"p":106,"u":62},"银欣 FARA R1":{"p":499,"u":275},"安钛克 NX200M":{"p":312,"u":172},"航嘉 S920":{"p":128,"u":42},"大水牛 追风者":{"p":77,"u":20},"海盗船 4000D":{"p":191,"u":174},"乔思伯 N3 NAS":{"p":583,"u":233},"铭瑄 B660":{"u":391},"昂达 B660PRO":{"u":450},"索泰 B660M":{"u":462},"梅捷 B660GAMING":{"u":506},"精粤 B660PLUS":{"u":372},"超微 B660WIFI":{"u":425},"七彩虹 B660MAX":{"u":564},"昂达 B760":{"u":166},"映泰 B760PRO":{"u":122},"映泰 B760M":{"u":119},"索泰 B760GAMING":{"u":160},"翔升 B760PLUS":{"u":144},"泰安 B760WIFI":{"u":167},"ASRock 华擎 B760MAX":{"u":160},"ASUS 华硕 B450":{"u":132},"影驰 B450PRO":{"u":179},"影驰 B450M":{"u":138},"影驰 B450GAMING":{"u":126},"泰安 B450PLUS":{"u":146},"超微 B450WIFI":{"u":131},"MSI 微星 B450MAX":{"u":145},"铭瑄 B550":{"u":230},"影驰 B550PRO":{"u":250},"蓝宝石 B550M":{"u":227},"索泰 B550GAMING":{"u":278},"泰安 B550PLUS":{"u":254},"MSI 微星 B550WIFI":{"u":274},"泰安 B550MAX":{"u":187},"ASRock 华擎 B650":{"u":364},"影驰 B650PRO":{"u":269},"影驰 B650M":{"u":338},"翔升 B650GAMING":{"u":247},"顶星 B650PLUS":{"u":270},"磐正 B650WIFI":{"u":244},"信步 B650MAX":{"u":307},"三星 NVMe 1T":{"p":822,"u":650},"西部数据 NVMe 1T":{"p":842,"u":650},"致态 NVMe 1T":{"p":808,"u":650},"铠侠 NVMe 1T":{"p":785,"u":650},"金士顿 NVMe 1T":{"p":784,"u":650},"英睿达 NVMe 1T":{"p":806,"u":650},"光威 NVMe 1T":{"p":815,"u":650},"雷克沙 NVMe 1T":{"p":827,"u":650},"西部数据 HDD 4T":{"p":1137,"u":589},"希捷 HDD 4T":{"p":1157,"u":589},"东芝 HDD 4T":{"p":1136,"u":589},"NVIDIA GeForce GTX 1660":{"u":722},"NVIDIA GeForce GTX 1050 3G":{"u":240},"NVIDIA GeForce GTX 1650 GDDR6":{"u":620},"金士顿 DDR3 1333 4G 单条":{"u":20},"金士顿 DDR3 1600 4G 单条":{"u":21},"金士顿 DDR3 1600 16G 单条":{"u":135},"金士顿 DDR4 2666 8G 单条":{"p":125,"u":78},"金士顿 DDR4 3000 8G 单条":{"p":130,"u":81},"金士顿 DDR4 3200 8G 单条":{"p":135,"u":84},"金士顿 DDR4 3000 16G 单条":{"p":260,"u":161},"金士顿 DDR4 3200 16G 单条":{"p":270,"u":167},"金士顿 DDR4 3200 32G 单条":{"p":520,"u":322},"金士顿 DDR4 3600 32G 单条":{"p":545,"u":338},"金士顿 DDR5 4800 16G 单条":{"p":404,"u":250},"金士顿 DDR5 5600 16G 单条":{"p":430,"u":267},"金士顿 DDR5 5600 32G 单条":{"p":830,"u":515},"金士顿 DDR5 6000 64G 单条":{"p":1696,"u":1052},"威刚 DDR3 1333 4G 单条":{"u":20},"威刚 DDR3 1600 4G 单条":{"u":21},"威刚 DDR3 1600 16G 单条":{"u":130},"威刚 DDR4 2666 8G 单条":{"p":120,"u":74},"威刚 DDR4 3000 8G 单条":{"p":125,"u":78},"威刚 DDR4 3200 8G 单条":{"p":130,"u":81},"威刚 DDR4 3000 16G 单条":{"p":250,"u":155},"威刚 DDR4 3200 16G 单条":{"p":260,"u":161},"威刚 DDR4 3200 32G 单条":{"p":499,"u":309},"威刚 DDR4 3600 32G 单条":{"p":523,"u":324},"威刚 DDR5 4800 16G 单条":{"p":388,"u":241},"威刚 DDR5 5600 16G 单条":{"p":413,"u":256},"威刚 DDR5 6000 16G 单条":{"p":438,"u":272},"威刚 DDR5 5600 32G 单条":{"p":797,"u":494},"威刚 DDR5 6000 64G 单条":{"p":1628,"u":1009},"海盗船 DDR3 1333 4G 单条":{"u":21},"海盗船 DDR3 1600 4G 单条":{"u":22},"海盗船 DDR3 1600 16G 单条":{"u":143},"海盗船 DDR4 2666 8G 单条":{"p":132,"u":82},"海盗船 DDR4 3000 8G 单条":{"p":138,"u":86},"海盗船 DDR4 3200 8G 单条":{"p":143,"u":89},"海盗船 DDR4 3000 16G 单条":{"p":276,"u":171},"海盗船 DDR4 3200 16G 单条":{"p":287,"u":178},"海盗船 DDR4 3200 32G 单条":{"p":551,"u":342},"海盗船 DDR4 3600 32G 单条":{"p":578,"u":358},"海盗船 DDR5 4800 16G 单条":{"p":428,"u":265},"海盗船 DDR5 5600 16G 单条":{"p":456,"u":283},"海盗船 DDR5 5600 32G 单条":{"p":880,"u":546},"海盗船 DDR5 6000 64G 单条":{"p":1798,"u":1115},"芝奇 DDR3 1333 4G 单条":{"u":21},"芝奇 DDR3 1600 4G 单条":{"u":22},"芝奇 DDR3 1600 8G 单条":{"u":71},"芝奇 DDR3 1600 16G 单条":{"u":138},"芝奇 DDR4 2666 8G 单条":{"p":127,"u":79},"芝奇 DDR4 3000 8G 单条":{"p":133,"u":82},"芝奇 DDR4 3200 8G 单条":{"p":138,"u":86},"芝奇 DDR4 3000 16G 单条":{"p":265,"u":164},"芝奇 DDR4 3200 16G 单条":{"p":276,"u":171},"芝奇 DDR4 3200 32G 单条":{"p":530,"u":329},"芝奇 DDR4 3600 32G 单条":{"p":556,"u":345},"芝奇 DDR5 4800 16G 单条":{"p":412,"u":255},"芝奇 DDR5 5600 16G 单条":{"p":439,"u":272},"芝奇 DDR5 6000 16G 单条":{"p":465,"u":288},"芝奇 DDR5 5600 32G 单条":{"p":847,"u":525},"芝奇 DDR5 6000 32G 单条":{"p":897,"u":556},"芝奇 DDR5 6000 64G 单条":{"p":1730,"u":1073},"光威 DDR3 1333 4G 单条":{"u":18},"光威 DDR3 1600 4G 单条":{"u":19},"光威 DDR3 1600 16G 单条":{"u":124},"光威 DDR4 2666 8G 单条":{"p":115,"u":71},"光威 DDR4 3000 8G 单条":{"p":120,"u":74},"光威 DDR4 3200 8G 单条":{"p":124,"u":77},"光威 DDR4 3000 16G 单条":{"p":239,"u":148},"光威 DDR4 3200 32G 单条":{"p":478,"u":296},"光威 DDR4 3600 32G 单条":{"p":501,"u":311},"光威 DDR5 4800 16G 单条":{"p":372,"u":231},"光威 DDR5 5600 16G 单条":{"p":396,"u":246},"光威 DDR5 6000 16G 单条":{"p":419,"u":260},"光威 DDR5 5600 32G 单条":{"p":764,"u":474},"光威 DDR5 6000 32G 单条":{"p":809,"u":502},"光威 DDR5 6000 64G 单条":{"p":1560,"u":967},"英睿达 DDR3 1333 4G 单条":{"u":19},"英睿达 DDR3 1600 4G 单条":{"u":20},"英睿达 DDR3 1600 8G 单条":{"u":69},"英睿达 DDR3 1600 16G 单条":{"u":132},"英睿达 DDR4 2666 8G 单条":{"p":122,"u":76},"英睿达 DDR4 3000 8G 单条":{"p":127,"u":79},"英睿达 DDR4 3200 8G 单条":{"p":132,"u":82},"英睿达 DDR4 3000 16G 单条":{"p":255,"u":158},"英睿达 DDR4 3200 16G 单条":{"p":265,"u":164},"英睿达 DDR4 3200 32G 单条":{"p":510,"u":316},"英睿达 DDR4 3600 32G 单条":{"p":534,"u":331},"英睿达 DDR5 4800 16G 单条":{"p":396,"u":246},"英睿达 DDR5 5600 16G 单条":{"p":421,"u":261},"英睿达 DDR5 6000 16G 单条":{"p":447,"u":277},"英睿达 DDR5 5600 32G 单条":{"p":813,"u":504},"英睿达 DDR5 6000 32G 单条":{"p":862,"u":534},"英睿达 DDR5 6000 64G 单条":{"p":1662,"u":1030},"金百达 DDR3 1333 4G 单条":{"u":17},"金百达 DDR3 1600 4G 单条":{"u":18},"金百达 DDR3 1600 16G 单条":{"u":127},"金百达 DDR4 2666 8G 单条":{"p":117,"u":73},"金百达 DDR4 3000 8G 单条":{"p":122,"u":76},"金百达 DDR4 3200 8G 单条":{"p":127,"u":79},"金百达 DDR4 3000 16G 单条":{"p":244,"u":151},"金百达 DDR4 3200 32G 单条":{"p":489,"u":303},"金百达 DDR4 3600 32G 单条":{"p":512,"u":317},"金百达 DDR5 4800 16G 单条":{"p":380,"u":236},"金百达 DDR5 5600 16G 单条":{"p":404,"u":250},"金百达 DDR5 5600 32G 单条":{"p":780,"u":484},"金百达 DDR5 6000 64G 单条":{"p":1594,"u":988},"影驰 DDR3 1333 4G 单条":{"u":18},"影驰 DDR3 1600 4G 单条":{"u":19},"影驰 DDR3 1600 8G 单条":{"u":65},"影驰 DDR3 1600 16G 单条":{"u":126},"影驰 DDR4 2666 8G 单条":{"p":116,"u":72},"影驰 DDR4 3000 8G 单条":{"p":121,"u":75},"影驰 DDR4 3200 8G 单条":{"p":126,"u":78},"影驰 DDR4 3000 16G 单条":{"p":242,"u":150},"影驰 DDR4 3200 16G 单条":{"p":251,"u":156},"影驰 DDR4 3200 32G 单条":{"p":484,"u":300},"影驰 DDR4 3600 32G 单条":{"p":507,"u":314},"影驰 DDR5 4800 16G 单条":{"p":376,"u":233},"影驰 DDR5 5600 16G 单条":{"p":400,"u":248},"影驰 DDR5 6000 16G 单条":{"p":424,"u":263},"影驰 DDR5 5600 32G 单条":{"p":772,"u":479},"影驰 DDR5 6000 32G 单条":{"p":818,"u":507},"影驰 DDR5 6000 64G 单条":{"p":1577,"u":978},"宇瞻 DDR3 1333 4G 单条":{"u":19},"宇瞻 DDR3 1600 4G 单条":{"u":20},"宇瞻 DDR3 1600 8G 单条":{"u":70},"宇瞻 DDR3 1600 16G 单条":{"u":135},"宇瞻 DDR4 2666 8G 单条":{"p":125,"u":78},"宇瞻 DDR4 3000 8G 单条":{"p":130,"u":81},"宇瞻 DDR4 3200 8G 单条":{"p":135,"u":84},"宇瞻 DDR4 3000 16G 单条":{"p":260,"u":161},"宇瞻 DDR4 3200 16G 单条":{"p":270,"u":167},"宇瞻 DDR4 3200 32G 单条":{"p":520,"u":322},"宇瞻 DDR4 3600 32G 单条":{"p":545,"u":338},"宇瞻 DDR5 4800 16G 单条":{"p":404,"u":250},"宇瞻 DDR5 5600 16G 单条":{"p":430,"u":267},"宇瞻 DDR5 6000 16G 单条":{"p":456,"u":283},"宇瞻 DDR5 5600 32G 单条":{"p":830,"u":515},"宇瞻 DDR5 6000 32G 单条":{"p":880,"u":546},"宇瞻 DDR5 6000 64G 单条":{"p":1696,"u":1052},"十铨 DDR3 1333 4G 单条":{"u":18},"十铨 DDR3 1600 4G 单条":{"u":19},"十铨 DDR3 1600 8G 单条":{"u":67},"十铨 DDR3 1600 16G 单条":{"u":130},"十铨 DDR4 2666 8G 单条":{"p":120,"u":74},"十铨 DDR4 3000 8G 单条":{"p":125,"u":78},"十铨 DDR4 3200 8G 单条":{"p":130,"u":81},"十铨 DDR4 3000 16G 单条":{"p":250,"u":155},"十铨 DDR4 3200 16G 单条":{"p":260,"u":161},"十铨 DDR4 3200 32G 单条":{"p":499,"u":309},"十铨 DDR4 3600 32G 单条":{"p":523,"u":324},"十铨 DDR5 4800 16G 单条":{"p":388,"u":241},"十铨 DDR5 5600 16G 单条":{"p":413,"u":256},"十铨 DDR5 6000 16G 单条":{"p":438,"u":272},"十铨 DDR5 5600 32G 单条":{"p":797,"u":494},"十铨 DDR5 6000 32G 单条":{"p":845,"u":524},"十铨 DDR5 6000 64G 单条":{"p":1628,"u":1009},"阿斯加特 DDR3 1333 4G 单条":{"u":19},"阿斯加特 DDR3 1600 4G 单条":{"u":20},"阿斯加特 DDR3 1600 8G 单条":{"u":70},"阿斯加特 DDR3 1600 16G 单条":{"u":135},"阿斯加特 DDR4 2666 8G 单条":{"p":125,"u":78},"阿斯加特 DDR4 3000 8G 单条":{"p":130,"u":81},"阿斯加特 DDR4 3200 8G 单条":{"p":135,"u":84},"阿斯加特 DDR4 3000 16G 单条":{"p":260,"u":161},"阿斯加特 DDR4 3200 16G 单条":{"p":270,"u":167},"阿斯加特 DDR4 3200 32G 单条":{"p":520,"u":322},"阿斯加特 DDR4 3600 32G 单条":{"p":545,"u":338},"阿斯加特 DDR5 4800 16G 单条":{"p":404,"u":250},"阿斯加特 DDR5 5600 16G 单条":{"p":430,"u":267},"阿斯加特 DDR5 6000 16G 单条":{"p":456,"u":283},"阿斯加特 DDR5 5600 32G 单条":{"p":830,"u":515},"阿斯加特 DDR5 6000 32G 单条":{"p":880,"u":546},"阿斯加特 DDR5 6000 64G 单条":{"p":1696,"u":1052},"朗科 DDR3 1333 4G 单条":{"u":16},"朗科 DDR3 1600 4G 单条":{"u":17},"朗科 DDR3 1600 8G 单条":{"u":62},"朗科 DDR3 1600 16G 单条":{"u":119},"朗科 DDR4 2666 8G 单条":{"p":110,"u":68},"朗科 DDR4 3000 8G 单条":{"p":114,"u":71},"朗科 DDR4 3200 8G 单条":{"p":119,"u":74},"朗科 DDR4 3000 16G 单条":{"p":229,"u":142},"朗科 DDR4 3200 16G 单条":{"p":238,"u":148},"朗科 DDR4 3200 32G 单条":{"p":458,"u":284},"朗科 DDR4 3600 32G 单条":{"p":480,"u":298},"朗科 DDR5 4800 16G 单条":{"p":356,"u":221},"朗科 DDR5 5600 16G 单条":{"p":378,"u":234},"朗科 DDR5 6000 16G 单条":{"p":401,"u":249},"朗科 DDR5 5600 32G 单条":{"p":730,"u":453},"朗科 DDR5 6000 32G 单条":{"p":774,"u":480},"朗科 DDR5 6000 64G 单条":{"p":1492,"u":925},"玖合 DDR3 1333 4G 单条":{"u":17},"玖合 DDR3 1600 4G 单条":{"u":18},"玖合 DDR3 1600 8G 单条":{"u":70},"玖合 DDR3 1600 16G 单条":{"u":135},"玖合 DDR4 2666 8G 单条":{"p":125,"u":78},"玖合 DDR4 3000 8G 单条":{"p":130,"u":81},"玖合 DDR4 3200 8G 单条":{"p":135,"u":84},"玖合 DDR4 3000 16G 单条":{"p":260,"u":161},"玖合 DDR4 3200 16G 单条":{"p":270,"u":167},"玖合 DDR4 3200 32G 单条":{"p":520,"u":322},"玖合 DDR4 3600 32G 单条":{"p":545,"u":338},"玖合 DDR5 4800 16G 单条":{"p":404,"u":250},"玖合 DDR5 5600 16G 单条":{"p":430,"u":267},"玖合 DDR5 6000 16G 单条":{"p":456,"u":283},"玖合 DDR5 5600 32G 单条":{"p":830,"u":515},"玖合 DDR5 6000 32G 单条":{"p":880,"u":546},"玖合 DDR5 6000 64G 单条":{"p":1696,"u":1052},"金泰克 DDR3 1333 4G 单条":{"u":16},"金泰克 DDR3 1600 4G 单条":{"u":17},"金泰克 DDR3 1600 8G 单条":{"u":63},"金泰克 DDR3 1600 16G 单条":{"u":122},"金泰克 DDR4 2666 8G 单条":{"p":112,"u":69},"金泰克 DDR4 3000 8G 单条":{"p":117,"u":73},"金泰克 DDR4 3200 8G 单条":{"p":122,"u":76},"金泰克 DDR4 3000 16G 单条":{"p":234,"u":145},"金泰克 DDR4 3200 16G 单条":{"p":243,"u":151},"金泰克 DDR4 3200 32G 单条":{"p":468,"u":290},"金泰克 DDR4 3600 32G 单条":{"p":491,"u":304},"金泰克 DDR5 4800 16G 单条":{"p":364,"u":226},"金泰克 DDR5 5600 16G 单条":{"p":387,"u":240},"金泰克 DDR5 6000 16G 单条":{"p":410,"u":254},"金泰克 DDR5 5600 32G 单条":{"p":747,"u":463},"金泰克 DDR5 6000 32G 单条":{"p":792,"u":491},"金泰克 DDR5 6000 64G 单条":{"p":1526,"u":946},"宏想 DDR3 1333 4G 单条":{"u":16},"宏想 DDR3 1600 4G 单条":{"u":17},"宏想 DDR3 1600 8G 单条":{"u":70},"宏想 DDR3 1600 16G 单条":{"u":135},"宏想 DDR4 2666 8G 单条":{"p":125,"u":78},"宏想 DDR4 3000 8G 单条":{"p":130,"u":81},"宏想 DDR4 3200 8G 单条":{"p":135,"u":84},"宏想 DDR4 3000 16G 单条":{"p":260,"u":161},"宏想 DDR4 3200 16G 单条":{"p":270,"u":167},"宏想 DDR4 3200 32G 单条":{"p":520,"u":322},"宏想 DDR4 3600 32G 单条":{"p":545,"u":338},"宏想 DDR5 4800 16G 单条":{"p":404,"u":250},"宏想 DDR5 5600 16G 单条":{"p":430,"u":267},"宏想 DDR5 6000 16G 单条":{"p":456,"u":283},"宏想 DDR5 5600 32G 单条":{"p":830,"u":515},"宏想 DDR5 6000 32G 单条":{"p":880,"u":546},"宏想 DDR5 6000 64G 单条":{"p":1696,"u":1052},"协德 DDR3 1333 4G 单条":{"u":16},"协德 DDR3 1600 4G 单条":{"u":17},"协德 DDR3 1600 8G 单条":{"u":60},"协德 DDR3 1600 16G 单条":{"u":115},"协德 DDR4 2666 8G 单条":{"p":106,"u":66},"协德 DDR4 3000 8G 单条":{"p":110,"u":68},"协德 DDR4 3200 8G 单条":{"p":115,"u":71},"协德 DDR4 3000 16G 单条":{"p":221,"u":137},"协德 DDR4 3200 16G 单条":{"p":230,"u":143},"协德 DDR4 3200 32G 单条":{"p":442,"u":274},"协德 DDR4 3600 32G 单条":{"p":463,"u":287},"协德 DDR5 4800 16G 单条":{"p":344,"u":213},"协德 DDR5 5600 16G 单条":{"p":366,"u":227},"协德 DDR5 6000 16G 单条":{"p":387,"u":240},"协德 DDR5 5600 32G 单条":{"p":706,"u":438},"协德 DDR5 6000 32G 单条":{"p":748,"u":464},"协德 DDR5 6000 64G 单条":{"p":1442,"u":894},"金士顿 DDR4 3600 16G 单条":{"p":283,"u":175},"海盗船 DDR4 3600 16G 单条":{"p":300,"u":186},"芝奇 DDR4 3600 16G 单条":{"p":289,"u":179},"英睿达 DDR4 3600 16G 单条":{"p":278,"u":172},"影驰 DDR4 3600 16G 单条":{"p":264,"u":164},"宇瞻 DDR4 3600 16G 单条":{"p":283,"u":175},"十铨 DDR4 3600 16G 单条":{"p":272,"u":169},"阿斯加特 DDR4 3600 16G 单条":{"p":283,"u":175},"朗科 DDR4 3600 16G 单条":{"p":249,"u":154},"玖合 DDR4 3600 16G 单条":{"p":283,"u":175},"金泰克 DDR4 3600 16G 单条":{"p":255,"u":158},"宏想 DDR4 3600 16G 单条":{"p":283,"u":175},"协德 DDR4 3600 16G 单条":{"p":241,"u":149},"金士顿 DDR5 6400 32G 单条":{"p":930,"u":577},"威刚 DDR5 6400 32G 单条":{"p":892,"u":553},"海盗船 DDR5 6400 32G 单条":{"p":985,"u":611},"芝奇 DDR5 6400 32G 单条":{"p":948,"u":588},"光威 DDR5 6400 32G 单条":{"p":855,"u":530},"英睿达 DDR5 6400 32G 单条":{"p":911,"u":565},"金百达 DDR5 6400 32G 单条":{"p":874,"u":542},"影驰 DDR5 6400 32G 单条":{"p":865,"u":536},"宇瞻 DDR5 6400 32G 单条":{"p":930,"u":577},"十铨 DDR5 6400 32G 单条":{"p":892,"u":553},"阿斯加特 DDR5 6400 32G 单条":{"p":930,"u":577},"朗科 DDR5 6400 32G 单条":{"p":818,"u":507},"玖合 DDR5 6400 32G 单条":{"p":930,"u":577},"金泰克 DDR5 6400 32G 单条":{"p":837,"u":519},"宏想 DDR5 6400 32G 单条":{"p":930,"u":577},"协德 DDR5 6400 32G 单条":{"p":790,"u":490},"酷冷至尊 T400i":{"p":84,"u":28},"利民 AX120 R SE":{"p":59,"u":45},"利民 AK120":{"p":82,"u":45},"利民 PA120":{"p":132,"u":60},"利民 FC140":{"p":291,"u":152},"九州风神 玄冰400":{"p":35,"u":32},"九州风神 AK620":{"p":299,"u":144},"猫头鹰 NH-D15":{"p":606,"u":214},"猫头鹰 NH-U12S":{"p":530,"u":100},"雅浚 B3":{"p":83,"u":30},"利民 水冷 360":{"p":315,"u":195},"九州风神 冰堡垒360":{"p":382,"u":347},"瓦尔基里 E360":{"p":829,"u":514},"恩杰 Kraken 240":{"p":1198,"u":743},"先马 XW240":{"p":378,"u":234},"服务器风冷 SP3":{"p":194,"u":109},"超频三 红海H4":{"p":55,"u":45},"ID-COOLING SE-224":{"p":114,"u":71},"利民 水冷 240":{"p":218,"u":94},"超频三 巨浪360":{"p":283,"u":175},"服务器风冷 SP5":{"p":199,"u":158},"九州风神 大霜塔V5":{"u":68},"酷冷至尊 ML240L":{"u":189,"p":300},"酷冷至尊 暴雪T520":{"u":59},"追风者 NV5":{"u":128,"p":221},"分形工艺 North":{"u":560,"p":899},"乔思伯 HX6250":{"u":149},"乔思伯 CR-1000":{"p":58},"NZXT H5 Flow":{"p":349},"NAS 8 盘位机箱":{"p":279,"u":173},"NAS 12 盘位机箱":{"p":484,"u":300},"4U 服务器机箱":{"p":188,"u":117},"8 盘位工作站塔":{"p":523,"u":324}};
 Object.entries(REAL_PRICES).forEach(([n,o])=>{const p=catOf.size&&[...catOf.keys()].find(x=>x.n===n);if(!p)return;if(o.p!=null)p.p=o.p;if(o.u!=null)p.u=o.u;});
 /* CPU 实价修正（2026-10 闲鱼/京东） */
 const CPU_PRICE_FIX2={'Intel Core i7-7800X':[null,180],'Intel Core i7-7820X':[null,200],'Intel Core i9-7900X':[null,480],'Intel Core i9-7940X':[null,600],'Intel Core i9-9980XE':[null,1600],'Intel Core i9-10980XE':[null,2500],'AMD Threadripper 1900X':[null,380],'AMD Threadripper 1920X':[null,620],'AMD Threadripper 1950X':[null,480],'AMD Threadripper 2920X':[null,800],'AMD Threadripper 2950X':[null,1400],'AMD Threadripper 2990WX':[null,2400],'AMD Threadripper 3970X':[null,3600],'AMD Threadripper 3990X':[null,9500],'AMD Threadripper 7960X':[8599,8200],'AMD Threadripper 7970X':[11299,10500],'AMD Threadripper 7980X':[21599,16700],'AMD Threadripper 7995WX':[38000,32000],'AMD EPYC 7702':[null,2200],'AMD EPYC 7763':[null,5200],'AMD EPYC 9654':[null,21500]};
@@ -3320,6 +3331,54 @@ C.forEach(c=>{const f=CPU_PRICE_FIX2[c.n];if(f){c.p=f[0];c.u=f[1];}});
      value = [全新价, 二手价]，null 表示这个渠道没有货（停产 / 只走二手）
    覆盖发生在所有整族系数之后，写多少就是多少，不再被缩放。
    注意：这是数据层的东西，游戏里没有入口，玩家看不到也改不了。 */
+
+/* ===== 内存实拍校准（2026-10-30 用户淘宝截图）=====
+   分清两类来源：
+   · 卖 DDR3 拆机的那家二手店，其 DDR4 挂价是【二手拆机价】→ 写 u
+   · 光威/金百达/雷克沙/阿斯加特/铭瑄/瓦尔基里 旗舰店的是【全新价】→ 写 p
+   二手按品牌档次拉开差距，全新按规格档位走（旗舰店同规格各品牌差得不多）。 */
+const RAM_U_RATE={'金士顿':1.0,'海盗船':1.05,'芝奇':0.90,'英睿达':0.96,'宇瞻':0.94,'阿斯加特':0.93,
+  '威刚':0.88,'十铨':0.88,'光威':0.85,'影驰':0.86,'金百达':0.84,'金泰克':0.875,'玖合':0.82,'宏想':0.80,'协德':0.78,'朗科':0.82};
+/* 二手 DDR4 基准（金士顿，二手店拆机实拍） */
+const RAM_U_BASE={'DDR4 2133 8G':205,'DDR4 2400 8G':224,'DDR4 2666 8G':249,'DDR4 3000 8G':265,'DDR4 3200 8G':280,
+  'DDR4 2133 16G':430,'DDR4 2400 16G':490,'DDR4 2666 16G':549,'DDR4 3000 16G':575,'DDR4 3200 16G':599,'DDR4 3600 16G':700,
+  'DDR4 3200 32G':1150,'DDR4 3600 32G':1250};
+/* 全新 DDR4 基准（旗舰店实拍：8G 379~397、16G 679~788、32G 1398~1833） */
+const RAM_P_BASE={'DDR4 2133 8G':290,'DDR4 2400 8G':310,'DDR4 2666 8G':330,'DDR4 3000 8G':360,'DDR4 3200 8G':395,
+  'DDR4 2133 16G':560,'DDR4 2400 16G':600,'DDR4 2666 16G':640,'DDR4 3000 16G':680,'DDR4 3200 16G':700,'DDR4 3600 16G':800,
+  'DDR4 3200 32G':1500,'DDR4 3600 32G':1650};
+const DDR3_OBS_U={'金士顿':[21,23,67],'威刚':[20,22,65],'芝奇':[23,23,63],'海盗船':[23,27,79],
+  '宇瞻':[21,23,67],'金泰克':[21,23,67],'十铨':[21,23,67],'阿斯加特':[21,23,67],
+  '光威':[19,20,64],'影驰':[19,20,65],'金百达':[18,19,66],'朗科':[16,17,62],'玖合':[17,18,70],'宏想':[16,17,70],'协德':[16,17,60]};
+M.forEach(m=>{
+  const br=m.n.split(' ')[0];
+  if(m.m==='DDR4'){
+    const key=m.m+' '+m.mhz+' '+m.cap+'G';
+    const pbase=RAM_P_BASE[key], ubase=RAM_U_BASE[key];
+    if(pbase!=null)m.p=pbase;
+    if(ubase!=null)m.u=Math.round(ubase*(RAM_U_RATE[br]||0.86)/5)*5;
+    return;
+  }
+  if(m.m==='DDR3'){
+    const arr=DDR3_OBS_U[br];
+    if(arr){
+      if(m.cap===4&&m.mhz===1333)m.u=arr[0];
+      else if(m.cap===4&&m.mhz===1600)m.u=arr[1];
+      else if(m.cap===8&&m.mhz===1600)m.u=arr[2];
+      else if(m.cap===16&&m.mhz===1600)m.u=Math.round(arr[2]*2.05);
+    }
+    return;
+  }
+  if(m.m==='DDR5'){
+    /* 2026-10-28 淘宝抓价（16G 1538~1799、32G 2569）清洗后取：16G 6000=1700、32G=2700。
+       明显被低价件污染的样本不用（威刚 16G ¥95、光威 32G ¥100、金士顿 32G 1434 倒挂）。 */
+    const baseF=m.cap===16?1700:(m.cap===32?2700:5400);
+    const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
+    const pr=Math.round(baseF*ff*(RAM_U_RATE[br]||0.86)/5)*5;
+    m.p=pr;m.u=Math.round(pr*0.62/5)*5;
+  }
+});
+
 const PRICE_PATCH={
   /* 下面几条只做一件事：把被 ×1.4 缩放和手工覆盖搞乱的二手价拉回单调，
      不然会出现「更强的卡更便宜」的套利。数值仍待真实行情校准。 */
@@ -3722,6 +3781,27 @@ function allParts(){return [].concat(C,G,B,M,P,K,H,ST);}
     if(v[1]===null||typeof v[1]==='number')t.u=v[1];
   });
 })(PRICE_PATCH);
+/* ===== 抓价值回灌（2026-10-28 淘宝/闲鱼中位数，已剔除脏值）=====
+   只装「能一一对应到库内型号」的：显卡按型号、电源按品牌+瓦数（该组合库内只有 1 款时）。
+   散热/机箱的抓取是「品牌级中位数」，对不上具体型号，故不覆盖。 */
+const GPU_CRAWL_U={"NVIDIA GeForce GT 1030":240,"NVIDIA GeForce GT 220":45,"NVIDIA GeForce GT 240":35,"NVIDIA GeForce GT 610":60,"NVIDIA GeForce GT 620":65,"NVIDIA GeForce GT 630":88,"NVIDIA GeForce GT 640":75,"NVIDIA GeForce GT 705":75,"NVIDIA GeForce GT 730":110,"NVIDIA GeForce GT 740":100,"NVIDIA GeForce GTX 1050":300,"NVIDIA GeForce GTX 1050 Ti":488,"NVIDIA GeForce GTX 1060 3G":418,"NVIDIA GeForce GTX 1060 5G":550,"NVIDIA GeForce GTX 1060 6G":620,"NVIDIA GeForce GTX 1070":686,"NVIDIA GeForce GTX 1070 Ti":735,"NVIDIA GeForce GTX 1080":700,"NVIDIA GeForce GTX 1080 Ti":899,"NVIDIA GeForce GTX 1630":380,"NVIDIA GeForce GTX 1650":620,"NVIDIA GeForce GTX 1650 Super":639,"NVIDIA GeForce GTX 1660 Super":850,"NVIDIA GeForce GTX 260":50,"NVIDIA GeForce GTX 275":80,"NVIDIA GeForce GTX 280":70,"NVIDIA GeForce GTX 285":69,"NVIDIA GeForce GTX 295":180,"NVIDIA GeForce GTX 460":308,"NVIDIA GeForce GTX 550 Ti":80,"NVIDIA GeForce GTX 560":58.37,"NVIDIA GeForce GTX 560 Ti":58.8,"NVIDIA GeForce GTX 580":98,"NVIDIA GeForce GTX 650":92,"NVIDIA GeForce GTX 650 Ti":90,"NVIDIA GeForce GTX 650 Ti Boost":99.99};
+const PSU_CRAWL_P={"全汉 MEGA 550W":103,"全汉 MEGA 650W":154,"微星 MAG 550W":119,"全汉 MEGA 750W":188,"酷冷至尊 MWE 550W":142,"酷冷至尊 MWE 750W":279,"安钛克 NE 550W":85,"安钛克 NE 650W":129,"安钛克 NE 750W":129,"微星 MAG 750W":279,"振华 卓凌 550W":184,"振华 卓凌 750W":368,"微星 MAG 650W":279,"振华 卓凌 650W":436,"酷冷至尊 MWE 650W":119};
+const D5_ANCHOR={'金士顿':1799,'海盗船':1538,'金百达':1690};
+G.forEach(g=>{const v=GPU_CRAWL_U[g.n];if(v!=null){g.u=v;if(g.p!=null&&g.p<g.u*1.15)g.p=Math.round(g.u*1.2);}});
+P.forEach(q=>{const v=PSU_CRAWL_P[q.n];if(v!=null){q.p=v;if(q.u!=null)q.u=Math.round(v*0.72);}});
+M.forEach(m=>{
+  if(m.m!=='DDR5')return;
+  const br=m.n.split(' ')[0];
+  const a=D5_ANCHOR[br]||Math.round(1700*(RAM_U_RATE[br]||0.86));
+  const base=m.cap===16?a:(m.cap===32?Math.round(a*1.65):Math.round(a*3.1));
+  const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
+  const pr=Math.round(base*ff/5)*5;
+  m.p=pr;m.u=Math.round(pr*0.62/5)*5;
+});
+
+
+[G,C,B,M,P,H,ST,K].forEach(arr=>arr.forEach(x=>{if(x.p!=null&&x.u!=null&&x.p<x.u*1.15)x.p=Math.round(x.u*1.15);}));
+
 
 /* 2026-10-31 跑分按 topcpu.net 全量校准（Cinebench R23 多核） */
 const CPU_TC_SCORE={"AMD Ryzen 3 1200":3010,
@@ -4150,10 +4230,10 @@ STORY[13]={day:13,id:'c3d1',who:'陈默',role:'高中同学',av:'陈',col:'#5b8c
 STORY[14]={day:14,id:'c3d2',who:'苏姐',role:'自媒体工作室',av:'苏',col:'#ff9ac7',
     lines:[
          '我们做账号矩阵，现在四个人抢两台机器，交片老超时。',
-         '要三台一模一样的，配置别差一分，以后坏了我好备件。',
+         '先给我装一台打样的，配置齐整、别拿杂牌凑；这台行，剩下两台也交给你。',
          '发票要开，走公司账，别给我开成二手。',
         ],
-  tip:'批量单：三台同配（本作一单只装一台），但要求全新件、配置齐整——别拿杂牌凑。',
+  tip:'打样单：先做一台，全新件、配置齐整，做好了后面还有两台。',
   job:{cat:'工作机',tier:2,name:'批量单 · 工作室的三台同配剪辑机',
     sw:'Premiere 多轨 4K 剪辑',level:'m',
     target:{ts:4000,cs:8000,ram:16},newOnly:true,tight:false,
@@ -4183,7 +4263,7 @@ STORY[15]={day:15,id:'c3d3',who:'小吴',role:'刚毕业',av:'吴',col:'#7de0a8'
 
 STORY[16]={day:16,id:'c3d4',who:'网吧老板',role:'镇上的网吧',av:'网',col:'#7de0a8',
     lines:[
-         '我那十台机器，学生现在都嫌卡，跑不动新的射击游戏。',
+         '我那十台机器，学生现在都嫌卡，跑不动新的射击游戏。先拿一台出来改，改好了其余的照做。',
          '一台一台换整机我换不起，你把该换的换了，能再顶两年就行。',
          '我停业一天损失好几百，你抓紧。',
         ],
@@ -4198,7 +4278,7 @@ STORY[16]={day:16,id:'c3d4',who:'网吧老板',role:'镇上的网吧',av:'网',c
 
 STORY[17]={day:17,id:'c3d5',who:'教务处主任',role:'镇中学',av:'教',col:'#ffcb6b',
     lines:[
-         '机房三十台老机器，上课一半开不了机，老师都不敢排课了。',
+         '机房三十台老机器，上课一半开不了机。先按一台样机走采购流程，成了再补齐剩下的。',
          '这次走采购流程：全新、要有保修、开票，学生用别出安全事故。',
          '预算不多，但你得给我一个能撑五年的方案。',
         ],
@@ -4475,7 +4555,8 @@ function makeJobs(dateStr,day){
     const pad=newOnly?(1.20+rand()*0.20):(1.24+rand()*0.28);
     const tight=!newOnly&&pad<1.4;
     const _budgetBase=cost*pad*bonus;
-    const labor=Math.max(200,R2(cost*(0.05+rand()*0.05),10));
+    const _laborRate=((state.day||1)>=10?0.045:0.05)+rand()*((state.day||1)>=10?0.04:0.05);
+    const labor=Math.max(200,R2(cost*_laborRate,10));
     const key=({'办公机':'0','游戏机':'1','工作机':'2'})[cat]+'-'+tier;
     const idxs=POOL[key],best=scoreOf(ref.cpu,ref.gpu),ramCap=ref.ram?ref.ram.cap:0;
     /* 10% 的单子明写跑分，其余只看「软件能不能跑」 */
@@ -4532,7 +4613,9 @@ function makeJobs(dateStr,day){
     /* 预算跟着「客户真正的门槛」走：参考机分数比要求高一大截时，别按参考机成本给钱，
        否则门槛降下来了、预算没降，一单白赚几千。向上取整到 50，避免算出 302 给 300。 */
     const _tightK=Math.min(1,(need.ts>0&&best.ts>0)?need.ts/best.ts:1);
-    const _budgetAdj=Math.max(0.55,0.55+0.45*_tightK);
+    /* 难度曲线：前 3 天宽松一点（新手期），25 天以后开始收紧 */
+    const _bpDay=(state.day||1)<=3?0.06:((state.day||1)>=25?-0.05:0);
+    const _budgetAdj=Math.min(1.0,Math.max(0.55+_bpDay,0.55+0.45*_tightK+_bpDay));
     let partBudget=Math.ceil(_budgetBase*_budgetAdj/50)*50;
     /* 兜底：如果这单的软件门槛参考机根本达不到，预算按「最低可装成本 ×1.15」抬起来。
        否则玩家按门槛配机必然倒贴（审计里 16/269 单属于这种）。 */
@@ -4586,7 +4669,8 @@ function newBuild(){
           rams:[null,null,null,null],m2:[null,null,null,null],sata:[null,null,null,null,null,null]};
 }
 let state=null,build=newBuild(),curCat='cpu';
-let filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};
+function defaultFilt(){return {price:[],extra:[],ig:'all',mem:[],cap:[],mhz:[],sort:'usedAsc',minPerf:0,q:''};}
+let filt=defaultFilt();
 let swOpen={};
 function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function save(){try{localStorage.setItem(SAVE,JSON.stringify({v:3,ts:Date.now(),state,build}));}catch(e){}}
@@ -4621,7 +4705,7 @@ function applyState(st,bd){
   if(!state.dayTotal)state.dayTotal=state.jobs.length;
   if(!state.panel||state.panel==='taobao'||state.panel==='xianyu')state.panel='jobs';
   uidSeq=1;state.inv.forEach(x=>{const n=+String(x.uid).slice(1);if(n>=uidSeq)uidSeq=n+1;});
-  filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};
+  filt=defaultFilt();
   const r=document.getElementById('result');if(r){r.className='';r.innerHTML='';}
 }
 function newGame(silent){const d=today();
@@ -5104,27 +5188,33 @@ document.getElementById('btnNewGame').onclick=()=>{
 
 /* ================= 筛选 ================= */
 const PRICE_OPTS=[['all','全部'],['a','≤300'],['b','300–800'],['c','800–2000'],['d','2000–5000'],['e','5000–15000'],['f','>15000']];
-function inPrice(v,key){
-  if(key==='all')return true;
-  if(key==='a')return v<=300;if(key==='b')return v>300&&v<=800;if(key==='c')return v>800&&v<=2000;
-  if(key==='d')return v>2000&&v<=5000;if(key==='e')return v>5000&&v<=15000;return v>15000;
+function inPrice(v,keys){
+  /* 多选：数组里任意一个区间命中就算过；空数组 / 'all' = 不限 */
+  if(!keys||keys==='all'||!keys.length)return true;
+  const arr=Array.isArray(keys)?keys:[keys];
+  return arr.some(k=>{
+    if(k==='a')return v<=300;if(k==='b')return v>300&&v<=800;if(k==='c')return v>800&&v<=2000;
+    if(k==='d')return v>2000&&v<=5000;if(k==='e')return v>5000&&v<=15000;if(k==='f')return v>15000;
+    return true;});
 }
 const SOCKETS=['LGA1155','LGA1150','LGA1151','LGA1151V2','LGA1200','LGA1700','LGA1851','LGA2011-3','AM3+','AM4','AM5','TRX40','SP3','SP5'];
 const EXTRA_FILTERS={
- cpu:[['all','全部',()=>true],...SOCKETS.map(s=>[s,s,x=>x.s===s])],
- mb:[['all','全部',()=>true],...SOCKETS.map(s=>[s,s,x=>x.s===s]),['d4','4内存槽',x=>x.dimm>=4],
-     ['m2','有M.2',x=>x.m2>=1],['pcie','双x16',x=>x.pcie>=2]],
- ram:[['all','全部',()=>true]],
- gpu:[['all','全部',()=>true],['n','NVIDIA',x=>isNVIDIA(x)],['a','AMD',x=>isAMD(x)],
-      ['s10','10系',x=>x.series==='10系'],['s16','16系',x=>x.series==='16系'],['s20','20系',x=>x.series==='20系'],
-      ['s30','30系',x=>x.series==='30系'],['s40','40系',x=>x.series==='40系'],['s50','50系',x=>x.series==='50系']],
- cooler:[['all','全部',()=>true],['w','水冷',x=>x.rad>0],['a','风冷',x=>x.rad===0],['c','≤70元',x=>x.p!=null&&x.p<=70]],
- psu:[['all','全部',()=>true],['a','200–400W',x=>x.w<=400],['b','450–650W',x=>x.w>=450&&x.w<=650],
-      ['c','750–850W',x=>x.w>=750&&x.w<=850],['d','≥1000W',x=>x.w>=1000]],
- case:[['all','全部',()=>true],['itx','支持ITX',x=>x.ff.includes('ITX')],['atx','支持ATX',x=>x.ff.includes('ATX')],
-       ['gpu','显卡≥380mm',x=>x.mg>=380],['bay','盘位≥6',x=>x.bay>=6],['cheap','≤150元',x=>x.p!=null&&x.p<=150]],
- disk:[['all','全部',()=>true],['m2','NVMe',x=>x.kind==='m2'],['sata','SATA SSD',x=>x.kind==='sata'],['hdd','机械',x=>x.kind==='hdd'],
-       ['a','≥1T',x=>x.cap>=1000],['b','≥4T',x=>x.cap>=4000]]
+ cpu:[...SOCKETS.map(s=>[s,s,x=>x.s===s,'sock'])],
+ mb:[...SOCKETS.map(s=>[s,s,x=>x.s===s,'sock']),
+     ['d4','4内存槽',x=>x.dimm>=4,'feat'],['m2','有M.2',x=>x.m2>=1,'feat'],['pcie','双x16',x=>x.pcie>=2,'feat'],
+     ['DDR3','DDR3',x=>x.m==='DDR3','mem'],['DDR4','DDR4',x=>x.m==='DDR4','mem'],['DDR5','DDR5',x=>x.m==='DDR5','mem']],
+ ram:[],
+ gpu:[['n','NVIDIA',x=>isNVIDIA(x),'brand'],['a','AMD',x=>isAMD(x),'brand'],
+      ['s10','10系',x=>x.series==='10系','series'],['s16','16系',x=>x.series==='16系','series'],
+      ['s20','20系',x=>x.series==='20系','series'],['s30','30系',x=>x.series==='30系','series'],
+      ['s40','40系',x=>x.series==='40系','series'],['s50','50系',x=>x.series==='50系','series']],
+ cooler:[['w','水冷',x=>x.rad>0,'type'],['a','风冷',x=>x.rad===0,'type'],['c','≤70元',x=>x.p!=null&&x.p<=70,'price']],
+ psu:[['a','200–400W',x=>x.w<=400,'watt'],['b','450–650W',x=>x.w>=450&&x.w<=650,'watt'],
+      ['c','750–850W',x=>x.w>=750&&x.w<=850,'watt'],['d','≥1000W',x=>x.w>=1000,'watt']],
+ case:[['itx','支持ITX',x=>x.ff.includes('ITX'),'ff'],['atx','支持ATX',x=>x.ff.includes('ATX'),'ff'],
+       ['gpu','显卡≥380mm',x=>x.mg>=380,'feat'],['bay','盘位≥6',x=>x.bay>=6,'feat'],['cheap','≤150元',x=>x.p!=null&&x.p<=150,'price']],
+ disk:[['m2','NVMe',x=>x.kind==='m2','kind'],['sata','SATA SSD',x=>x.kind==='sata','kind'],['hdd','机械',x=>x.kind==='hdd','kind'],
+       ['a','≥1T',x=>x.cap>=1000,'cap'],['b','≥4T',x=>x.cap>=4000,'cap']]
 };
 const IG_OPTS=[['all','全部'],['ig','带核显'],['no','无核显']];
 /* 内存筛选拆成两组：代际 / 容量（频率有单独一行，按实际在售频率生成） */
@@ -6005,7 +6095,7 @@ function renderBenchDOM(){
         const cat=go.dataset.cat||slotCat(s.dataset.k)||curCat;
         const toShop=go.dataset.go==='shop';
         state.panel=toShop?'shop':'inv';curCat=cat;
-        filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};
+        filt=defaultFilt();
         forceDocsView();save();renderAll();scrollLeftTop();
         toast((toShop?'商店':'仓库')+' · '+(CNAME[cat]||cat));
         return;
@@ -6019,7 +6109,7 @@ function renderBenchDOM(){
       const cat=slotCat(k);
       if(!cat){toast('这个槽位暂时不能装');return;}
       state.panel='inv';curCat=cat;
-      filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};
+      filt=defaultFilt();
       save();renderAll();scrollLeftTop();toast('仓库 · '+CNAME[cat]);
     };
   });
@@ -6162,7 +6252,7 @@ function renderModes(){
     if(state.panel===_k){try{renderAll();}catch(err){showFatal(String(err&&err.stack||err));}return;}
     const _box=document.getElementById('leftBody')||document.querySelector('main');
     const _swap=()=>{
-      state.panel=_k;filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};save();
+      state.panel=_k;filt=defaultFilt();save();
       try{renderAll();}catch(err){showFatal(String(err&&err.stack||err));}
       try{if(_box){_box.classList.remove('panelOut');}}catch(e){}
       scrollLeftTop();
@@ -6685,7 +6775,7 @@ function coachGo(step){
   }else if(k.indexOf('buy:')===0||k==='cpu_ig'||k==='cpu_slider'){
     if(state.panel!=='shop'){state.panel='shop';changed=true;}
     if(step.cat&&curCat!==step.cat){curCat=step.cat;shopLimit=40;
-      filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};changed=true;}
+      filt=defaultFilt();changed=true;}
     /* 引导要走「带核显 / 性能滑块」时，把折叠的筛选区展开 */
     if((k==='cpu_ig'||k==='cpu_slider')&&!shopFilterState()){
       shopFilterOpen[_filterKey()]=true;changed=true;
@@ -6698,9 +6788,9 @@ function coachGo(step){
         if(filt.minPerf){filt.minPerf=0;changed=true;}
         if(filt.ig!=='all'){filt.ig='all';changed=true;}
       }
-      if(filt.price!=='all'){filt.price='all';changed=true;}
-      if(filt.extra!=='all'){filt.extra='all';changed=true;}
-      if(filt.mhz!=='all'){filt.mhz='all';changed=true;}
+      if(filt.price.length){filt.price=[];changed=true;}
+      if(filt.extra.length){filt.extra=[];changed=true;}
+      if(filt.mhz.length){filt.mhz=[];changed=true;}
       const q=tutBuyQuery(cat);
       if((filt.q||'')!==q){filt.q=q;changed=true;}
       shopLimit=Math.max(shopLimit,40);
@@ -6938,7 +7028,7 @@ function jobsHTML(){
   const bn=chapterBanner();if(bn)html+=bn;
   const sd=storyToday();
   if(sd)html+=chatHTML(sd);
-  const remain=state.jobs.filter(j=>j.status==='open').length;
+  const remain=state.jobs.filter(j=>j.status==='open'||j.status==='taken').length;
   const takenN=state.jobs.filter(j=>j.status==='taken').length;
   html+=`<h3>今日工单（剩 ${remain} 单 / 共 ${state.dayTotal||state.jobs.length} 单）</h3>`;
   if(!state.jobs.length){
@@ -7150,12 +7240,27 @@ function shopHTML(){
     <div class="fpanel" id="fpBody"${fOpen?'':' style="display:none"'}>`;
   html+=`<div class="frow"><div class="lab">搜索（品牌 / 型号 / 接口）</div>
     <input type="text" id="qInput" placeholder="如 3060、AM4、DDR5、海韵…" value="${(filt.q||'').replace(/"/g,'&quot;')}"></div>`;
-  html+=`<div class="frow"><div class="lab">价格</div><div class="fchips">${
-    PRICE_OPTS.map(([k,n])=>`<span class="chip ${filt.price===k?'on':''}" data-price="${k}">${n}</span>`).join('')}</div></div>`;
-  /* 只有「全部」一项的品类（内存）就别再单开一行规格了，省得占地方 */
-  if(EXTRA_FILTERS[curCat].length>1){
-    html+=`<div class="frow"><div class="lab">规格</div><div class="fchips">${
-      EXTRA_FILTERS[curCat].map(([k,n])=>`<span class="chip ${filt.extra===k?'on':''}" data-extra="${k}">${n}</span>`).join('')}</div></div>`;
+  const _selP=Array.isArray(filt.price)?filt.price:[];
+  html+=`<div class="frow"><div class="lab">价格 <span class="slval">可多选</span></div><div class="fchips">${
+    PRICE_OPTS.map(([k,n])=>`<span class="chip ${(k==='all'?(!_selP.length):_selP.includes(k))?'on':''}" data-price="${k}">${n}</span>`).join('')}</div></div>`;
+  /* 规格 / 内存类型两行都可多选：同维度取「或」，跨维度取「与」 */
+  const _ef=EXTRA_FILTERS[curCat]||[];
+  const _selE=Array.isArray(filt.extra)?filt.extra:[];
+  const _mem=_ef.filter(o=>o[3]==='mem');
+  const _specItems=_ef.filter(o=>o[3]!=='mem');
+  const _specDims=[...new Set(_specItems.map(o=>o[3]||'x'))];
+  const _rowChip=(o,on)=>`<span class="chip ${on?'on':''}" data-extra="${o[0]}">${o[1]}</span>`;
+  if(_specItems.length){
+    const none=_selE.filter(k=>_specItems.some(o=>o[0]===k)).length===0;
+    html+=`<div class="frow"><div class="lab">规格 <span class="slval">可多选</span></div><div class="fchips">`+
+      `<span class="chip ${none?'on':''}" data-xall="${_specDims.join(',')}">全部</span>`+
+      _specItems.map(o=>_rowChip(o,_selE.includes(o[0]))).join('')+`</div></div>`;
+  }
+  if(_mem.length){
+    const none=_selE.filter(k=>_mem.some(o=>o[0]===k)).length===0;
+    html+=`<div class="frow"><div class="lab">内存类型 <span class="slval">可多选</span></div><div class="fchips">`+
+      `<span class="chip ${none?'on':''}" data-xall="mem">全部</span>`+
+      _mem.map(o=>_rowChip(o,_selE.includes(o[0]))).join('')+`</div></div>`;
   }
   if(curCat==='cpu'){
     html+=`<div class="frow"><div class="lab">核显</div><div class="fchips">${
@@ -7165,13 +7270,13 @@ function shopHTML(){
     /* 内存原来把「代际 / 容量 / 频率」全挤在「规格」一行里，9 个 chip 混着看很乱。
        拆成三行：代际（DDR3/4/5）· 容量（4G…64G）· 频率（1333…MHz），各自单选。 */
     html+=`<div class="frow"><div class="lab">代际</div><div class="fchips">${
-      MEM_OPTS.map(([k,n])=>`<span class="chip ${(filt.mem||'all')===k?'on':''}" data-mem="${k}">${n}</span>`).join('')}</div></div>`;
+      MEM_OPTS.map(([k,n])=>`<span class="chip ${(k==='all'?!filt.mem.length:filt.mem.includes(k))?'on':''}" data-mem="${k}">${n}</span>`).join('')}</div></div>`;
     html+=`<div class="frow"><div class="lab">容量</div><div class="fchips">${
-      CAP_OPTS.map(([k,n])=>`<span class="chip ${(filt.cap||'all')===k?'on':''}" data-cap="${k}">${n}</span>`).join('')}</div></div>`;
+      CAP_OPTS.map(([k,n])=>`<span class="chip ${(k==='all'?!filt.cap.length:filt.cap.includes(k))?'on':''}" data-cap="${k}">${n}</span>`).join('')}</div></div>`;
     const freqs=[...new Set(M.map(x=>x.mhz))].filter(Boolean).sort((a,b)=>a-b);
     html+=`<div class="frow"><div class="lab">频率</div><div class="fchips">${
       [['all','全部']].concat(freqs.map(f=>[String(f),f+'MHz']))
-        .map(([k,n])=>`<span class="chip ${(filt.mhz||'all')===k?'on':''}" data-mhz="${k}">${n}</span>`).join('')}</div></div>`;
+        .map(([k,n])=>`<span class="chip ${(k==='all'?!filt.mhz.length:filt.mhz.includes(String(k)))?'on':''}" data-mhz="${k}">${n}</span>`).join('')}</div></div>`;
   }
   const _tutCpu=(state.day===1&&state.tut&&!state.tut.guideOff&&curCat==='cpu');
   html+=`<div class="frow"><div class="lab">${pm.label} <span class="slval" id="slVal">${filt.minPerf?pm.fmt(filt.minPerf):'不限'}</span></div>
@@ -7202,13 +7307,15 @@ function shopFilterState(){
 function filterSummary(){
   const bits=[];
   if(filt.q)bits.push('搜「'+filt.q+'」');
-  const pr=PRICE_OPTS.find(x=>x[0]===filt.price);if(pr&&filt.price!=='all')bits.push('价 '+pr[1]);
-  const ex=EXTRA_FILTERS[curCat]&&EXTRA_FILTERS[curCat].find(x=>x[0]===filt.extra);
-  if(ex&&filt.extra!=='all')bits.push(ex[1]);
+  const psel=Array.isArray(filt.price)?filt.price:[];
+  if(psel.length)bits.push('价 '+psel.map(k=>{const o=PRICE_OPTS.find(x=>x[0]===k);return o?o[1]:k;}).join('/'));
+  const esel=Array.isArray(filt.extra)?filt.extra:[];
+  if(esel.length){const list=EXTRA_FILTERS[curCat]||[];
+    bits.push(esel.map(k=>{const o=list.find(x=>x[0]===k);return o?o[1]:k;}).join('/'));}
   if(curCat==='cpu'&&filt.ig&&filt.ig!=='all')bits.push(filt.ig==='ig'?'带核显':'无核显');
-  if(curCat==='ram'&&filt.mem&&filt.mem!=='all')bits.push(filt.mem);
-  if(curCat==='ram'&&filt.cap&&filt.cap!=='all')bits.push(filt.cap+'G');
-  if(curCat==='ram'&&filt.mhz&&filt.mhz!=='all')bits.push(filt.mhz+'MHz');
+  if(curCat==='ram'&&filt.mem.length)bits.push(filt.mem.join('/'));
+  if(curCat==='ram'&&filt.cap.length)bits.push(filt.cap.map(c=>c+'G').join('/'));
+  if(curCat==='ram'&&filt.mhz.length)bits.push(filt.mhz.map(m=>m+'MHz').join('/'));
   if(filt.minPerf)bits.push(PERF_META[curCat].label.replace(' ≥','')+'≥'+PERF_META[curCat].fmt(filt.minPerf));
   const so={newAsc:'全新↑',newDesc:'全新↓',usedAsc:'二手↑',usedDesc:'二手↓',perf:'性能↓',perfAsc:'性能↑'}[filt.sort];
   if(so&&filt.sort!=='usedAsc')bits.push(so);
@@ -7261,17 +7368,26 @@ function bindMachines(){
 }
 function bindShop(){
   document.querySelectorAll('#leftBody .tabs button').forEach(b=>b.onclick=()=>{
-    curCat=b.dataset.cat;shopLimit=40;filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};renderLeft();});
+    curCat=b.dataset.cat;shopLimit=40;filt=defaultFilt();renderLeft();});
   bindMachines();
   const fh=document.getElementById('fpHead');
   if(fh)fh.onclick=()=>{shopFilterOpen[_filterKey()]=!shopFilterState();renderLeft();};
-  document.querySelectorAll('[data-price]').forEach(el=>el.onclick=()=>{filt.price=el.dataset.price;renderLeft();});
-  document.querySelectorAll('[data-extra]').forEach(el=>el.onclick=()=>{filt.extra=el.dataset.extra;renderLeft();});
+  const toggle=(arr,k)=>{const a=Array.isArray(arr)?arr.slice():[];
+    if(k==='all')return [];
+    const i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);return a;};
+  document.querySelectorAll('[data-price]').forEach(el=>el.onclick=()=>{filt.price=toggle(filt.price,el.dataset.price);renderLeft();});
+  document.querySelectorAll('[data-extra]').forEach(el=>el.onclick=()=>{filt.extra=toggle(filt.extra,el.dataset.extra);renderLeft();});
+  document.querySelectorAll('[data-xall]').forEach(el=>el.onclick=()=>{
+    const dims=String(el.dataset.xall||'').split(',');
+    const list=EXTRA_FILTERS[curCat]||[];
+    filt.extra=(Array.isArray(filt.extra)?filt.extra:[]).filter(k=>{
+      const o=list.find(x=>x[0]===k);return o&&!dims.includes(o[3]||'x');});
+    renderLeft();});
   document.querySelectorAll('[data-ig]').forEach(el=>el.onclick=()=>{filt.ig=el.dataset.ig;renderLeft();
     setTimeout(()=>{try{coachRefresh();}catch(e){}},40);});
-  document.querySelectorAll('[data-mhz]').forEach(el=>el.onclick=()=>{filt.mhz=el.dataset.mhz;renderLeft();});
-  document.querySelectorAll('[data-mem]').forEach(el=>el.onclick=()=>{filt.mem=el.dataset.mem;renderLeft();});
-  document.querySelectorAll('[data-cap]').forEach(el=>el.onclick=()=>{filt.cap=el.dataset.cap;renderLeft();});
+  document.querySelectorAll('[data-mhz]').forEach(el=>el.onclick=()=>{filt.mhz=toggle(filt.mhz,el.dataset.mhz);renderLeft();});
+  document.querySelectorAll('[data-mem]').forEach(el=>el.onclick=()=>{filt.mem=toggle(filt.mem,el.dataset.mem);renderLeft();});
+  document.querySelectorAll('[data-cap]').forEach(el=>el.onclick=()=>{filt.cap=toggle(filt.cap,el.dataset.cap);renderLeft();});
   const qi=document.getElementById('qInput');
   if(qi)qi.oninput=()=>{
     clearTimeout(qi._t);
@@ -7295,15 +7411,27 @@ function bindShop(){
   if(ss)ss.onchange=()=>{filt.sort=ss.value;renderLeft();};
   renderShopList();bindShopList();
 }
-function extraPred(){const list=EXTRA_FILTERS[curCat],f=list.find(x=>x[0]===filt.extra);
-  return (f&&f[2])||(()=>true);}
+function extraPred(){
+  const list=EXTRA_FILTERS[curCat]||[];
+  const sel=Array.isArray(filt.extra)?filt.extra:[];
+  if(!sel.length)return ()=>true;
+  const dims={};
+  sel.forEach(k=>{const o=list.find(x=>x[0]===k);if(!o)return;
+    const d=o[3]||'x';(dims[d]=dims[d]||[]).push(o[2]);});
+  const groups=Object.values(dims);
+  if(!groups.length)return ()=>true;
+  /* 同一行里的同类选项之间是「或」，不同维度之间是「与」：
+     例：LGA1700 + LGA1200 → 任一；LGA1700 + 有M.2 → 同时满足 */
+  return x=>groups.every(g=>g.some(f=>f(x)));
+}
 const refPrice=x=>x.p??x.u;
 function currentList(){
   const isInv=state.panel==='inv',pred=extraPred(),ip=igPred(),qp=qPred();
-  const mpred=x=>!filt.mhz||filt.mhz==='all'||String(x&&x.mhz)===String(filt.mhz);
+  const inSet=(arr,v)=>!arr||!arr.length||(Array.isArray(arr)?arr:[arr]).some(a=>String(a)===String(v));
+  const mpred=x=>inSet(filt.mhz,x&&x.mhz);
   /* 内存的代际 / 容量两行筛选（别的品类不参与） */
-  const memPred=x=>curCat!=='ram'||!filt.mem||filt.mem==='all'||(x&&x.m)===filt.mem;
-  const capPred=x=>curCat!=='ram'||!filt.cap||filt.cap==='all'||Number(x&&x.cap)===Number(filt.cap);
+  const memPred=x=>curCat!=='ram'||inSet(filt.mem,x&&x.m);
+  const capPred=x=>curCat!=='ram'||inSet(filt.cap,x&&x.cap);
   let arr;
   if(isInv)arr=invList(curCat).filter(x=>x.broken||(inPrice(x.paid,filt.price)&&pred(x.part)&&ip(x.part)&&qp(x.part)&&mpred(x.part)&&memPred(x.part)&&capPred(x.part)&&PERFVAL[curCat](x.part)>=filt.minPerf));
   else arr=MAP[curCat].filter(x=>(x.p!=null||x.u!=null))
@@ -7366,12 +7494,12 @@ function renderShopList(){
       : `<div class="empty">没有符合条件的货<br><span style="font-size:11px">换个关键词，或降低性能要求、放宽价格</span>
          <div class="acts"><button data-reset="1">清空筛选</button></div></div>`;
     const rb=box.querySelector('[data-reset]');
-    if(rb)rb.onclick=()=>{filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};renderLeft();};
+    if(rb)rb.onclick=()=>{filt=defaultFilt();renderLeft();};
     const sb=box.querySelector('[data-toshop]');
     if(sb)sb.onclick=()=>{
       const cat=curCat;
       state.panel='shop';curCat=cat;
-      filt={price:'all',extra:'all',ig:'all',mhz:'all',sort:'usedAsc',minPerf:0,q:''};
+      filt=defaultFilt();
       save();renderAll();scrollLeftTop();
     };
     return;
@@ -7544,7 +7672,9 @@ function placePart(cat,p,paid,shop,owner){
   if(cat==='mb'){if(!cs)return '先装机箱';if(!cs.ff.includes(p.ff))return '机箱不支持 '+p.ff;
     build.mb={part:p,paid,shop,owner:owner||null};return 'ok';}
   if(cat==='cpu'){if(!mb)return '先装主板';
-    const _modBoard=/H110|H310|H311/.test(mb.n)&&['LGA1151','LGA1151V2'].includes(p.s)&&['LGA1151','LGA1151V2'].includes(mb.s);
+    /* 6~9 代酷睿不分 1151 / 1151V2：两个插槽视为同一家族，随便配 */
+    const _fam1151=s=>s==='LGA1151'||s==='LGA1151V2';
+    const _modBoard=_fam1151(mb.s)&&_fam1151(p.s);
     if(mb.s!==p.s&&!_modBoard)return '插槽不匹配：主板 '+mb.s+'，CPU '+p.s;
     build.cpu={part:p,paid,shop,owner:owner||null};return 'ok';}
   if(cat==='cooler'){if(!part('cpu'))return '先装 CPU';if(!p.s.includes(mb.s))return '散热器不支持 '+mb.s;
@@ -7893,6 +8023,7 @@ function backToJobs(){
   const r=document.getElementById('result');
   if(r){r.className='';r.innerHTML='';}
   const open=state.jobs.filter(j=>j.status==='open').length;
+  const taken=state.jobs.filter(j=>j.status==='taken').length;
   if(typeof isMobile==='function'&&isMobile())mViewSet('docs',true);
   save();renderAll();
   try{
@@ -7900,7 +8031,10 @@ function backToJobs(){
     if(pl)pl.scrollTop=0;
     window.scrollTo({top:0,behavior:'smooth'});
   }catch(e){}
-  toast(open?('还有 '+open+' 单没接'):'今天的单都处理完了，可以打烊');
+  /* 只有「没接的单」和「接了没交的单」都清零，才叫处理完 */
+  if(taken>0)toast('还有 '+taken+' 单接了没交付');
+  else if(open>0)toast('还有 '+open+' 单没接');
+  else toast('今天的单都处理完了，可以打烊');
 }
 function playHandover(box,finalHTML,sc,onDone){
   const finish=()=>{
@@ -8443,6 +8577,7 @@ document.getElementById('btnHistory').onclick=openHistory;
 document.getElementById('btnToJobs').onclick=()=>{state.panel='jobs';if(isMobile())mViewSet('docs',true);save();renderAll();};
 document.getElementById('btnClose').onclick=()=>{
   if(state.jobs.some(j=>j.status==='open')){toast('还有工单没处理');return;}
+  if(state.jobs.some(j=>j.status==='taken')){toast('还有 '+state.jobs.filter(j=>j.status==='taken').length+' 单接了没交付，先交付再打烊');return;}
   /* 先记账（这一天的数只在切换前有效），再播结算，最后才真正翻页 */
   /* 5 星附近的额外订单：伙计代做，直接进当日收入 */
   const side=repSideBusiness();
