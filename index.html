@@ -2102,7 +2102,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.2';
+const APP_VER='v0.13.3';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -6551,6 +6551,7 @@ function drawCoach(el,step){
     if(_tx&&_tx.textContent!==step.text)_tx.textContent=step.text;
   }
   c.classList.add('on');_coachKey=step.k;_coachDrawnKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
+  coachScrollGuard();
   coachWatchScroll();
   if(stepChanged){
     setTimeout(()=>{try{coachReposition(step);}catch(e){}},420);
@@ -6711,6 +6712,30 @@ function positionCoach(el){
 }
 
 /* 滚动后高亮位置会偏，跟着挪一下挡板和光圈 */
+/* 引导期间禁止手动滑动页面：只拦手势和滚轮，不加遮罩，
+   所以高亮件照样点得动；引导自己要滚时用 JS scrollIntoView，不受影响。 */
+let _coachScrollGuard=false;
+function coachScrollGuard(){
+  if(_coachScrollGuard)return;
+  _coachScrollGuard=true;
+  const coachOn=()=>{const c=document.getElementById('coach');return !!(c&&c.classList.contains('on'));};
+  const allow=e=>{
+    const t=e.target;
+    if(!t||!t.closest)return false;
+    return !!t.closest('#coachTip');
+  };
+  const block=e=>{
+    if(!coachOn()||allow(e))return;
+    if(e.cancelable)e.preventDefault();
+  };
+  document.addEventListener('touchmove',block,{passive:false});
+  window.addEventListener('wheel',block,{passive:false});
+  document.addEventListener('keydown',e=>{
+    if(!coachOn())return;
+    if(['ArrowDown','ArrowUp','PageDown','PageUp',' ','Spacebar'].indexOf(e.key)>=0)e.preventDefault();
+  },{passive:false});
+}
+
 let _coachScrollBound=false;
 function coachWatchScroll(){
   if(_coachScrollBound)return;
