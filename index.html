@@ -1008,6 +1008,37 @@ button.bad{background:linear-gradient(180deg,#a3554f,#743631);border-color:#c471
 .coachActs{display:flex;gap:8px;justify-content:flex-end;margin-top:11px}
 #coachNext{background:linear-gradient(180deg,#ffc178,#f0952f);color:#241304;border-color:#ffd0a0;font-weight:700}
 .coachActs .mini{font-size:11px;padding:6px 12px}
+
+/* ---------- 剧情播放器：一条一条冒出来的对话 ---------- */
+#plotEvent{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;
+  background:radial-gradient(120% 90% at 50% 26%,rgba(16,13,10,.86),rgba(4,4,4,.96));
+  opacity:0;transition:opacity .28s ease}
+#plotEvent.on{opacity:1}
+#plotEvent .cine-hd{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 8px}
+#plotEvent .cine-hd .who{font-size:12px;color:#ffcf8f;font-weight:700;letter-spacing:.5px}
+#plotEvent .cine-hd .role{font-size:10px;color:#8d7f6c}
+#plotEvent .cine-hd .sp{flex:1}
+#plotEvent .cine-skip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+  color:#b9b0a4;font-size:11px;padding:5px 10px;border-radius:9px}
+#plotEvent .cine-body{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;
+  justify-content:flex-end;gap:9px;padding:8px 14px 14px}
+#plotEvent .cine-line{max-width:88%;padding:11px 14px;border-radius:14px;font-size:13px;line-height:1.7;
+  color:#ecdfcd;background:linear-gradient(180deg,rgba(43,34,24,.96),rgba(26,21,16,.96));
+  border:1px solid rgba(255,220,170,.10);align-self:flex-start;
+  opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+#plotEvent .cine-line.in{opacity:1;transform:none}
+#plotEvent .cine-line.old{opacity:.34;transform:translateY(-6px);transition:opacity 1.6s ease,transform 1.6s ease}
+#plotEvent .cine-line.me{align-self:flex-end;background:linear-gradient(180deg,rgba(94,70,32,.95),rgba(58,44,22,.95));
+  border-color:rgba(255,196,120,.22);color:#ffe9c9}
+#plotEvent .cine-line.nar{align-self:center;max-width:94%;background:none;border:0;padding:2px 8px;
+  text-align:center;font-size:12.5px;color:#b3a493;font-style:normal}
+#plotEvent .cine-ft{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:6px 16px calc(12px + env(safe-area-inset-bottom))}
+#plotEvent .cine-ft .hint{font-size:10.5px;color:#8d7f6c;letter-spacing:.5px}
+#plotEvent .cine-ft .cnt{font-size:10.5px;color:#6f6457;font-variant-numeric:tabular-nums}
+#plotEvent .cine-next{background:linear-gradient(180deg,#ffc178,#f0952f);color:#241304;
+  border:1px solid #ffd0a0;font-weight:700;border-radius:10px;padding:7px 14px;font-size:12.5px;display:none}
+#plotEvent .cine-next.on{display:inline-block}
 /* ---------- 标题页 ---------- */
 .titleScr{
   position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
@@ -2120,7 +2151,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 </script>
 <script>
 /* ================= 基础 ================= */
-const APP_VER='v0.13.18';
+const APP_VER='v0.13.19';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
 const APP_BUILD='00001';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
@@ -4496,16 +4527,68 @@ const PLOT_EVENTS={
 function playPlotEvent(evId,onDone){
   const ev=PLOT_EVENTS[evId];if(!ev)return false;
   if(document.getElementById('plotEvent'))return false;
+  const lines=(ev.lines||[]).slice();
+  if(!lines.length){if(typeof onDone==='function')onDone();return true;}
   const ov=document.createElement('div');
-  ov.className='dayopen static';ov.id='plotEvent';
-  ov.innerHTML='<div style="max-width:560px;width:calc(100% - 28px);padding:0 2px">'+chatHTML(ev)+
-    '<div style="text-align:center;margin-top:10px"><button class="btn primary" id="plotOk">知道了</button></div></div>';
+  ov.id='plotEvent';
+  ov.innerHTML='<div class="cine-hd"><span class="who">'+ev.who+'</span><span class="role">'+(ev.role||'')+
+    '</span><span class="sp"></span><button class="cine-skip" id="cineSkip">跳过</button></div>'+
+    '<div class="cine-body" id="cineBody"></div>'+
+    '<div class="cine-ft"><span class="hint" id="cineHint">点屏幕继续</span>'+
+    '<button class="cine-next" id="cineNext">继续</button>'+
+    '<span class="cnt" id="cineCnt"></span></div>';
   document.body.appendChild(ov);
-  let done=false;
-  const close=()=>{if(done)return;done=true;try{ov.remove();}catch(e){}
-    if(typeof onDone==='function')onDone();};
-  const btn=ov.querySelector('#plotOk');if(btn)btn.onclick=close;
-  ov.onclick=e=>{if(e.target===ov)close();};
+  requestAnimationFrame(()=>{try{ov.classList.add('on');}catch(e){}});
+  const body=ov.querySelector('#cineBody'),hint=ov.querySelector('#cineHint'),
+        cnt=ov.querySelector('#cineCnt'),next=ov.querySelector('#cineNext');
+  let i=0,timer=0,done=false,waiting=false;
+  const close=()=>{if(done)return;done=true;clearTimeout(timer);
+    ov.style.opacity='0';
+    setTimeout(()=>{try{ov.remove();}catch(e){}
+      if(typeof onDone==='function')onDone();},300);};
+  const addLine=(raw)=>{
+    const row=document.createElement('div');
+    let who='other',txt=raw;
+    if(/^我：/.test(raw)){who='me';txt=raw.slice(2);}
+    else if(/^[^：]{1,5}：/.test(raw)){who='other';txt=raw.replace(/^[^：]+：/,'');}
+    else{who='nar';}
+    row.className='cine-line '+(who==='me'?'me':(who==='nar'?'nar':''));
+    row.textContent=txt;
+    const olds=body.querySelectorAll('.cine-line');
+    olds.forEach(el=>el.classList.add('old'));
+    /* 太老的直接移除，别把整屏堆满 */
+    const all=body.querySelectorAll('.cine-line');
+    for(let k=0;k<Math.max(0,all.length-7);k++){try{all[k].remove();}catch(e){}}
+    body.appendChild(row);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{try{row.classList.add('in');}catch(e){}}));
+    try{SFX.pop();}catch(e){}
+    cnt.textContent=(i)+' / '+lines.length;
+  };
+  const step=()=>{
+    if(done)return;
+    if(i>=lines.length){finishAll();return;}
+    i++;
+    addLine(lines[i-1]);
+    if(i>=lines.length){finishAll();return;}
+    const raw=lines[i-1];
+    const dur=/^我：|^[^：]{1,5}：/.test(raw)?1400:1800;
+    timer=setTimeout(step,dur);
+  };
+  const finishAll=()=>{
+    clearTimeout(timer);waiting=true;
+    hint.style.display='none';
+    next.classList.add('on');
+  };
+  next.onclick=(e)=>{e.stopPropagation();close();};
+  const skip=ov.querySelector('#cineSkip');
+  if(skip)skip.onclick=(e)=>{e.stopPropagation();close();};
+  ov.onclick=()=>{
+    if(waiting){close();return;}
+    clearTimeout(timer);
+    if(i>=lines.length){finishAll();return;}
+    step();
+  };
+  setTimeout(step,320);
   return true;
 }
 /* 死党墨桀的几段剧情：第 2 / 6 / 12 / 20 天各来一趟 */
