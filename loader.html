@@ -26,41 +26,49 @@ html,body{margin:0;height:100%;background:#0a0908;color:#f2e9da;font-family:syst
 <script>
 (function(){
   var FILE='game-full.html?v=400';
-  var CHUNK=384*1024;
   var bar=document.getElementById('bar'),pct=document.getElementById('pct'),msg=document.getElementById('msg'),retry=document.getElementById('retry');
   function set(p,t){bar.style.width=p.toFixed(1)+'%';pct.textContent=Math.round(p)+'%';if(t)msg.textContent=t;}
-  function fail(e){msg.textContent='下载失败：'+(e&&e.message?e.message:'网络错误');retry.style.display='inline-block';}
-  async function fetchRange(start,end){
-    for(var i=0;i<4;i++){
-      try{
-        var r=await fetch(FILE,{headers:{Range:'bytes='+start+'-'+end},cache:'no-store'});
-        if(r.status===206||r.status===200){var b=await r.arrayBuffer();return new Uint8Array(b);}
-      }catch(e){}
-      await new Promise(function(s){setTimeout(s,600);});
+  function fail(e){msg.textContent='下载失败：'+(e&&e.message?e.message:'网络错误')+'，点下面重试';retry.style.display='inline-block';}
+  function done(buf){
+    set(100,'下载完成，正在进入…');
+    var url=URL.createObjectURL(new Blob([buf],{type:'text/html'}));
+    setTimeout(function(){location.replace(url);},350);
+  }
+  async function attempt(){
+    retry.style.display='none';
+    var head=await fetch(FILE,{method:'HEAD',cache:'no-store'});
+    var len=parseInt(head.headers.get('content-length')||'0',10);
+    var resp=await fetch(FILE,{cache:'no-store'});
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    if(resp.body&&resp.body.getReader&&len){
+      var reader=resp.body.getReader(),parts=[],got=0;
+      while(true){
+        var r=await reader.read();
+        if(r.done)break;
+        parts.push(r.value);got+=r.value.length;
+        set(Math.min(99,got/len*100),'正在下载游戏… '+(got/1048576).toFixed(1)+' / '+(len/1048576).toFixed(1)+' MB');
+      }
+      var total=parts.reduce(function(a,b){return a+b.length;},0);
+      if(!len||total===len){
+        var out=new Uint8Array(total),off=0;
+        parts.forEach(function(p){out.set(p,off);off+=p.length;});
+        return done(out.buffer);
+      }
+      throw new Error('不完整 '+total+'/'+len);
     }
-    throw new Error('分片下载失败');
+    var buf=await resp.arrayBuffer();
+    if(!len||buf.byteLength===len)return done(buf);
+    throw new Error('不完整 '+buf.byteLength+'/'+len);
   }
   async function run(){
-    retry.style.display='none';
-    try{
-      var head=await fetch(FILE,{method:'HEAD',cache:'no-store'});
-      var len=parseInt(head.headers.get('content-length')||'0',10);
-      if(!len){var full=await (await fetch(FILE,{cache:'no-store'})).arrayBuffer();return done(new Blob([full],{type:'text/html'}));}
-      var parts=[],got=0,idx=0,total=Math.ceil(len/CHUNK);
-      while(got<len){
-        var end=Math.min(len-1,got+CHUNK-1);
-        var chunk=await fetchRange(got,end);
-        if(!chunk.length)throw new Error('空分片');
-        parts.push(chunk);got+=chunk.length;idx++;
-        set(got/len*100,'正在下载游戏… '+idx+'/'+total);
+    for(var i=0;i<3;i++){
+      try{return await attempt();}
+      catch(e){
+        if(i===2)return fail(e);
+        msg.textContent='网络中断，重试中（'+(i+2)+'/3）…';
+        await new Promise(function(s){setTimeout(s,900);});
       }
-      done(new Blob(parts,{type:'text/html'}));
-    }catch(e){fail(e);}
-  }
-  function done(blob){
-    set(100,'下载完成，正在进入…');
-    var url=URL.createObjectURL(blob);
-    setTimeout(function(){location.replace(url);},300);
+    }
   }
   retry.onclick=run;
   run();
