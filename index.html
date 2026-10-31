@@ -2504,6 +2504,17 @@ input[type=range]{accent-color:#ffb463}
     width:clamp(96px,5.2vw,136px)!important;height:clamp(96px,5.2vw,136px)!important}
   #plotEvent .gal-face img{width:100%!important;height:100%!important;object-fit:cover;border-radius:14px}
 }
+
+/* ===== PC 立绘放大 ===== */
+@media (min-width:1041px){
+  /* 之前被 min(52vh,440px) 卡住了，这里放开 */
+  #plotEvent .l2d-wrap img.gal-sprite{height:min(88vh,960px)!important;width:auto!important;
+    max-height:none!important;max-width:none!important}
+  #plotEvent .l2d-wrap{height:auto!important;width:auto!important;align-self:flex-end!important}
+  /* 立绘贴底，脚部自然被对话条压住，形成景深 */
+  #plotEvent .gal{align-items:flex-end!important}
+  #plotEvent .l2d-wrap{margin-bottom:0!important}
+}
 </style>
 </head>
 <body>
