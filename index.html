@@ -2515,6 +2515,45 @@ input[type=range]{accent-color:#ffb463}
   #plotEvent .gal{align-items:flex-end!important}
   #plotEvent .l2d-wrap{margin-bottom:0!important}
 }
+
+/* ===== PC 立绘演出（仅桌面端） ===== */
+@media (min-width:1041px){
+  @keyframes pcEnter{
+    from{opacity:0;transform:translate3d(0,34px,0) scale(.985)}
+    to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+  }
+  #plotEvent .l2d-wrap .l2d-enter{animation:pcEnter .5s cubic-bezier(.2,.8,.3,1) both!important}
+
+  @keyframes pcBreathe{
+    0%,100%{transform:translate3d(0,0,0) scaleY(1)}
+    50%{transform:translate3d(0,-6px,0) scaleY(1.006)}
+  }
+  #plotEvent .l2d-wrap .l2d-breathe{animation:pcBreathe 5.6s ease-in-out infinite!important}
+
+  @keyframes pcSway{
+    0%,100%{transform:rotate(-.7deg)}
+    50%{transform:rotate(.7deg)}
+  }
+  #plotEvent .l2d-wrap .l2d-sway{animation:pcSway 8.5s ease-in-out infinite!important;animation-delay:-2s!important}
+
+  @keyframes pcNod{
+    0%,100%{transform:translate3d(0,0,0)}
+    35%{transform:translate3d(0,-5px,0)}
+    70%{transform:translate3d(0,2px,0)}
+  }
+  #plotEvent .l2d-wrap.is-speaking .l2d-nod{animation:pcNod 1.25s ease-in-out infinite!important}
+
+  /* 立绘落地阴影，拉开与背景的层次 */
+  #plotEvent .l2d-par{filter:drop-shadow(0 16px 28px rgba(0,0,0,.42))}
+  #plotEvent .gal-face{box-shadow:0 6px 18px rgba(0,0,0,.38)}
+}
+
+@media (min-width:1041px) and (prefers-reduced-motion:reduce){
+  #plotEvent .l2d-wrap .l2d-enter,
+  #plotEvent .l2d-wrap .l2d-breathe,
+  #plotEvent .l2d-wrap .l2d-sway,
+  #plotEvent .l2d-wrap.is-speaking .l2d-nod{animation:none!important}
+}
 </style>
 </head>
 <body>
