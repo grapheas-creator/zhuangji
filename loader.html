@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>旺财装机店 · 加载中</title>
+<style>
+html,body{margin:0;height:100%;background:#0a0908;color:#f2e9da;font-family:system-ui,-apple-system,'PingFang SC',sans-serif;overflow:hidden}
+.bg{position:fixed;inset:0;background:radial-gradient(900px 520px at 50% -10%,rgba(255,170,90,.18),transparent 60%),linear-gradient(180deg,#151210,#080706)}
+.wrap{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0 26px;text-align:center}
+.logo{font-size:30px;font-weight:900;letter-spacing:4px;background:linear-gradient(180deg,#fff3d6,#ffc66d 55%,#e3912f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin-top:6px;font-size:10px;letter-spacing:6px;color:#b79a74}
+.bar{margin:30px auto 0;width:min(80vw,340px);height:8px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,210,160,.22);overflow:hidden}
+.bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ffb463,#ffe0ae 60%,#ffb463);box-shadow:0 0 14px rgba(255,170,90,.6);transition:width .25s ease}
+.meta{display:flex;justify-content:space-between;width:min(80vw,340px);margin:10px auto 0;font-size:11.5px;color:#c9b79c}
+.meta b{color:#ffe0ae}
+.tip{margin-top:16px;font-size:10.5px;color:#8f8069;line-height:1.7}
+.retry{margin-top:14px;padding:10px 18px;border-radius:10px;border:1px solid #ffd0a0;background:#ffb463;color:#2a1705;font-weight:800;display:none}
+</style></head><body>
+<div class="bg"></div>
+<div class="wrap">
+  <div class="logo">旺财装机店</div>
+  <div class="sub">WANG CAI PC SHOP</div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="meta"><span id="msg">正在下载游戏…</span><b id="pct">0%</b></div>
+  <div class="tip">首次进入需要完整下载一次（约 5MB）<br>下载完成后就会直接开玩，之后不用再等</div>
+  <button class="retry" id="retry">重新下载</button>
+</div>
+<script>
+(function(){
+  var FILE='game-full.html?v=400';
+  var CHUNK=384*1024;
+  var bar=document.getElementById('bar'),pct=document.getElementById('pct'),msg=document.getElementById('msg'),retry=document.getElementById('retry');
+  function set(p,t){bar.style.width=p.toFixed(1)+'%';pct.textContent=Math.round(p)+'%';if(t)msg.textContent=t;}
+  function fail(e){msg.textContent='下载失败：'+(e&&e.message?e.message:'网络错误');retry.style.display='inline-block';}
+  async function fetchRange(start,end){
+    for(var i=0;i<4;i++){
+      try{
+        var r=await fetch(FILE,{headers:{Range:'bytes='+start+'-'+end},cache:'no-store'});
+        if(r.status===206||r.status===200){var b=await r.arrayBuffer();return new Uint8Array(b);}
+      }catch(e){}
+      await new Promise(function(s){setTimeout(s,600);});
+    }
+    throw new Error('分片下载失败');
+  }
+  async function run(){
+    retry.style.display='none';
+    try{
+      var head=await fetch(FILE,{method:'HEAD',cache:'no-store'});
+      var len=parseInt(head.headers.get('content-length')||'0',10);
+      if(!len){var full=await (await fetch(FILE,{cache:'no-store'})).arrayBuffer();return done(new Blob([full],{type:'text/html'}));}
+      var parts=[],got=0,idx=0,total=Math.ceil(len/CHUNK);
+      while(got<len){
+        var end=Math.min(len-1,got+CHUNK-1);
+        var chunk=await fetchRange(got,end);
+        if(!chunk.length)throw new Error('空分片');
+        parts.push(chunk);got+=chunk.length;idx++;
+        set(got/len*100,'正在下载游戏… '+idx+'/'+total);
+      }
+      done(new Blob(parts,{type:'text/html'}));
+    }catch(e){fail(e);}
+  }
+  function done(blob){
+    set(100,'下载完成，正在进入…');
+    var url=URL.createObjectURL(blob);
+    setTimeout(function(){location.replace(url);},300);
+  }
+  retry.onclick=run;
+  run();
+})();
+</script></body></html>
