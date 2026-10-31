@@ -20,19 +20,24 @@ html,body{margin:0;height:100%;background:#0a0908;color:#f2e9da;font-family:syst
   <div class="sub">WANG CAI PC SHOP</div>
   <div class="bar"><i id="bar"></i></div>
   <div class="meta"><span id="msg">正在下载游戏…</span><b id="pct">0%</b></div>
-  <div class="tip">首次进入需要完整下载一次（约 5MB）<br>下载完成后就会直接开玩，之后不用再等</div>
+  <div class="tip">首次进入需要完整下载一次（约 2.7MB）<br>下载完成后就会直接开玩，之后不用再等</div>
   <button class="retry" id="retry">重新下载</button>
 </div>
 <script>
 (function(){
-  var FILE='game-full.html?v=400';
+  var FILE='game-lite.html?v=402';
   var bar=document.getElementById('bar'),pct=document.getElementById('pct'),msg=document.getElementById('msg'),retry=document.getElementById('retry');
   function set(p,t){bar.style.width=p.toFixed(1)+'%';pct.textContent=Math.round(p)+'%';if(t)msg.textContent=t;}
   function fail(e){msg.textContent='下载失败：'+(e&&e.message?e.message:'网络错误')+'，点下面重试';retry.style.display='inline-block';}
-  function done(buf){
+  function done(htmlText){
     set(100,'下载完成，正在进入…');
-    var url=URL.createObjectURL(new Blob([buf],{type:'text/html'}));
-    setTimeout(function(){location.replace(url);},350);
+    /* 不用 blob：直接 document.write 接管当前页，
+       相对路径仍然按本站解析，脚本也会正常执行 */
+    try{
+      document.open();document.write(htmlText);document.close();
+    }catch(e){
+      fail(e);
+    }
   }
   async function attempt(){
     retry.style.display='none';
@@ -52,12 +57,12 @@ html,body{margin:0;height:100%;background:#0a0908;color:#f2e9da;font-family:syst
       if(!len||total===len){
         var out=new Uint8Array(total),off=0;
         parts.forEach(function(p){out.set(p,off);off+=p.length;});
-        return done(out.buffer);
+        return done(new TextDecoder('utf-8').decode(out));
       }
       throw new Error('不完整 '+total+'/'+len);
     }
     var buf=await resp.arrayBuffer();
-    if(!len||buf.byteLength===len)return done(buf);
+    if(!len||buf.byteLength===len)return done(new TextDecoder('utf-8').decode(buf));
     throw new Error('不完整 '+buf.byteLength+'/'+len);
   }
   async function run(){
