@@ -12238,22 +12238,108 @@ w.Live2Dish={
 try{if(window.__ART&&window.__ART.BLINK&&window.Live2Dish)Live2Dish.registerBlink(window.__ART.BLINK);}catch(e){}
 </script>
 <script>
+/* ===== 素材加载器（带真实下载进度）===== */
 (function(){
-  function msg(t){try{var d=document.getElementById('artMsg');if(!d){d=document.createElement('div');d.id='artMsg';d.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:9999;background:rgba(30,22,14,.95);color:#ffd9a8;border:1px solid rgba(255,200,140,.4);border-radius:10px;padding:9px 14px;font:12px system-ui';document.body.appendChild(d);}d.textContent=t;setTimeout(function(){try{d.remove();}catch(e){}},2600);}catch(e){}}
-  if(window.__ART&&window.__ART.PLOT_CG){window.__ART_READY=true;return;}
-  var files=['art1.js','art2.js'];
-  function next(){
-    if(!files.length){window.__ART_READY=true;try{window.__ART_APPLY&&window.__ART_APPLY();}catch(e){}return;}
-    var f=files.shift(),sc=document.createElement('script');
-    sc.src=f;sc.async=true;
-    sc.onload=function(){try{window.__ART_APPLY&&window.__ART_APPLY();}catch(e){}next();};
-    sc.onerror=function(){msg('素材加载失败，请刷新');next();};
-    document.head.appendChild(sc);
+  var SIZES={"art1.js":1052945,"art2.js":752904,"photos.js":1708519};
+  var ORDER=['art1.js','art2.js','photos.js'];
+  var TOTAL=3514368;
+  var got=0, done=false, bar=null, txt=null, wrap=null;
+
+  function buildUI(){
+    if(wrap) return;
+    wrap=document.createElement('div');
+    wrap.id='artProg';
+    wrap.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:9999;'+
+      'width:min(78vw,340px);background:rgba(28,20,13,.94);border:1px solid rgba(255,200,140,.42);'+
+      'border-radius:12px;padding:11px 13px 10px;box-shadow:0 8px 24px rgba(0,0,0,.45);'+
+      'font:12px/1.5 system-ui,-apple-system,"PingFang SC",sans-serif;color:#ffd9a8';
+    wrap.innerHTML='<div id="artProgTxt" style="margin-bottom:7px">素材加载 0%</div>'+
+      '<div style="height:6px;border-radius:99px;background:rgba(255,220,180,.16);overflow:hidden">'+
+      '<div id="artProgBar" style="height:100%;width:0%;border-radius:99px;'+
+      'background:linear-gradient(90deg,#ffb457,#ff8a3d);transition:width .16s linear"></div></div>';
+    document.body.appendChild(wrap);
+    bar=wrap.querySelector('#artProgBar');
+    txt=wrap.querySelector('#artProgTxt');
   }
-  setTimeout(next,400);
+
+  var t0=Date.now();
+  function paint(){
+    if(!wrap) buildUI();
+    var pct=Math.min(99,Math.round(got/TOTAL*100));
+    if(done) pct=100;
+    bar.style.width=pct+'%';
+    var line=(done?'素材加载完成':('素材加载 '+pct+'%'))+
+      ' · '+(got/1048576).toFixed(2)+' / '+(TOTAL/1048576).toFixed(2)+' MB';
+    var sec=(Date.now()-t0)/1000;
+    if(!done&&sec>1.2&&got>0){
+      var spd=got/sec;
+      var left=(TOTAL-got)/spd;
+      line+=' · '+(spd/1024).toFixed(0)+' KB/s';
+      if(left>0.5&&left<600){
+        line+=' · 还剩 '+(left>=60?('约 '+Math.ceil(left/60)+' 分钟'):(Math.ceil(left)+' 秒'));
+      }
+    }
+    txt.textContent=line;
+  }
+
+  function fail(msg){
+    if(!wrap) buildUI();
+    txt.textContent=msg;
+    bar.style.background='#c0392b';
+  }
+
+  function apply(){ try{window.__ART_APPLY&&window.__ART_APPLY();}catch(e){} }
+
+  function loadByScript(f){
+    return new Promise(function(res){
+      var sc=document.createElement('script');
+      sc.src=f;sc.async=true;
+      sc.onload=function(){got+=SIZES[f]||0;paint();apply();res();};
+      sc.onerror=function(){fail('素材加载失败，请刷新');res();};
+      document.head.appendChild(sc);
+    });
+  }
+
+  async function loadOne(f){
+    // 不支持流式读取时退回 <script>
+    if(!window.fetch||!window.ReadableStream){return loadByScript(f);}
+    try{
+      var res=await fetch(f,{cache:'force-cache'});
+      if(!res.ok) throw new Error(res.status);
+      if(!res.body||!res.body.getReader){var c=await res.text();got+=c.length;paint();(0,eval)(c);apply();return;}
+      var reader=res.body.getReader(), chunks=[], n=0;
+      while(true){
+        var r=await reader.read();
+        if(r.done) break;
+        chunks.push(r.value); n+=r.value.length; got+=r.value.length; paint();
+      }
+      var code=new TextDecoder('utf-8').decode(await new Blob(chunks).arrayBuffer());
+      (0,eval)(code);
+      apply();
+    }catch(e){
+      return loadByScript(f);
+    }
+  }
+
+  async function run(){
+    buildUI(); paint();
+    for(var i=0;i<ORDER.length;i++){ await loadOne(ORDER[i]); }
+    done=true; paint();
+    window.__ART_READY=true; apply();
+    setTimeout(function(){ if(wrap){ wrap.style.transition='opacity .4s'; wrap.style.opacity='0';
+      setTimeout(function(){ try{wrap.remove();wrap=null;}catch(e){} },450);} },700);
+  }
+
+  if(window.__ART&&window.__ART.PLOT_CG){ window.__ART_READY=true; return; }
+  setTimeout(run,300);
+
+  // 素材没到齐前，开始游戏按钮不生效
   document.addEventListener('click',function(e){
     var t=e.target;
-    if(t&&t.id==='tStart'&&!window.__ART_READY){e.preventDefault();e.stopPropagation();window.__pendingStart=true;msg('素材加载中，稍等一下…');}
+    if(t&&(t.id==='tStart'||t.closest&&t.closest('#tStart'))&&!window.__ART_READY){
+      e.preventDefault();e.stopPropagation();
+      if(txt) txt.textContent='素材还在加载，稍等一下… '+Math.round(got/TOTAL*100)+'%';
+    }
   },true);
 })();
 </script>
