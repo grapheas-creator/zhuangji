@@ -2412,6 +2412,26 @@ input[type=range]{accent-color:#ffb463}
 #bootSplash .bs-tip{margin-top:14px;font-size:10.5px;color:#8f8069}
 
 
+
+@media (min-aspect-ratio:1/1){
+  /* 横屏/方屏：标题竖图改为完整显示，避免放大裁切 */
+  #titleScr img{object-fit:contain!important;object-position:center!important}
+  #titleScr{background:#15100c}
+}
+@media (max-aspect-ratio:1/1){
+  #titleScr img{object-position:50% 28%!important}
+}
+
+
+@media (min-aspect-ratio:3/4){
+  /* 横屏/方屏：标题竖图改为完整显示，避免放大裁切 */
+  #titleScr img{object-fit:contain!important;object-position:center!important}
+  #titleScr{background:#15100c}
+}
+@media (max-aspect-ratio:3/4){
+  #titleScr img{object-position:50% 28%!important}
+}
+
 /* ===== 电脑端适配（宽屏） ===== */
 @media (min-width:1041px){
   main{align-items:stretch}
@@ -6657,8 +6677,8 @@ function playPlotEvent(evId,onDone){
   const showSprite=(who)=>{
     if(!spriteEl)return;
     let src=null,side='right';
-    if(who==='墨桀'){src=SPRITES.mojie[PLOT_SPRITE[evId]||'default'];}
-    else if(who==='我'){src=SPRITES.wangcai[PLOT_SPRITE_WC[evId]||'default'];side='left';}
+    if(who==='墨桀'){src=SPRITES.mojie?(SPRITES.mojie[PLOT_SPRITE[evId]||'default']||''):'';}
+    else if(who==='我'){src=SPRITES.wangcai?(SPRITES.wangcai[PLOT_SPRITE_WC[evId]||'default']||''):'';side='left';}
     if(!src){spriteEl.style.display='none';return;}
     const same=(spriteEl.getAttribute('src')===src)&&spriteEl.classList.contains('show');
     if(spriteEl.getAttribute('src')!==src)spriteEl.setAttribute('src',src);
