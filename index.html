@@ -2554,6 +2554,44 @@ input[type=range]{accent-color:#ffb463}
   #plotEvent .l2d-wrap .l2d-sway,
   #plotEvent .l2d-wrap.is-speaking .l2d-nod{animation:none!important}
 }
+
+
+
+/* ===== PC 对话框（大气版） ===== */
+@media (min-width:1041px){
+  #plotEvent .gal-box{
+    width:min(1360px,90vw)!important;
+    max-width:1360px!important;
+    padding:22px 28px 26px!important;
+    min-height:clamp(150px,17vh,210px)!important;
+    border-radius:20px!important;
+  }
+  #plotEvent .gal-body{
+    font-size:clamp(19px,1.5vw,31px)!important;
+    line-height:1.72!important;
+    letter-spacing:.2px!important;
+  }
+  /* 正文真正所在的节点 */
+  #plotEvent .gal-text,
+  #plotEvent .gal-text.nar,
+  #plotEvent .gal-text span{
+    font-size:clamp(19px,1.5vw,31px)!important;
+    line-height:1.72!important;
+    letter-spacing:.2px!important;
+  }
+  #plotEvent .gal-name{
+    font-size:clamp(15px,1vw,21px)!important;
+    font-weight:700!important;
+    letter-spacing:.5px!important;
+  }
+  #plotEvent .gal-hint{
+    font-size:clamp(12px,.68vw,16px)!important;
+  }
+  #plotEvent .gal-face{
+    width:clamp(104px,5.6vw,150px)!important;
+    height:clamp(104px,5.6vw,150px)!important;
+  }
+}
 </style>
 </head>
 <body>
