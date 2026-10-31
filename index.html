@@ -2384,6 +2384,7 @@ input[type=range]{accent-color:#ffb463}
 }
 </style>
 
+<style>
 /* ---------- 首屏加载页 ---------- */
 #bootSplash{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;
   background:#0a0908;transition:opacity .55s ease;overflow:hidden}
@@ -2408,6 +2409,7 @@ input[type=range]{accent-color:#ffb463}
   margin:9px auto 0;font-size:11px;color:#c9b79c}
 #bootSplash .bs-meta b{color:#ffe0ae;font-variant-numeric:tabular-nums}
 #bootSplash .bs-tip{margin-top:14px;font-size:10.5px;color:#8f8069}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -4113,7 +4115,7 @@ root.Case3D = API;
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00389';
+const APP_BUILD='00391';
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
