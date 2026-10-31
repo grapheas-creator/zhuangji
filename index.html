@@ -2481,6 +2481,29 @@ input[type=range]{accent-color:#ffb463}
 .gal-cg-blur{position:absolute;inset:-40px;z-index:0;background-size:cover;background-position:center;
   filter:blur(26px) brightness(.55) saturate(.9);transform:scale(1.06);pointer-events:none}
 @media (max-width:1040px){ .gal-cg-blur{display:none} }
+
+/* ===== PC 对话框字号（视口自适应） ===== */
+@media (min-width:1041px){
+  #plotEvent .gal-box{font-size:clamp(17px,1.18vw,25px)!important}
+  #plotEvent .gal-body{font-size:clamp(17px,1.18vw,25px)!important;line-height:1.62!important}
+  #plotEvent .gal-name{font-size:clamp(14px,.86vw,18px)!important}
+  #plotEvent .gal-hint{font-size:clamp(11px,.6vw,14px)!important}
+  /* 宽屏下对话条别太扁，给正文留呼吸 */
+  #plotEvent .gal-box{min-height:clamp(132px,15vh,190px)!important}
+}
+
+/* ===== PC 立绘/头像缩放 ===== */
+@media (min-width:1041px){
+  /* 立绘：按屏幕高度缩放，宽度自动保持比例 */
+  #plotEvent .l2d-wrap{height:76vh!important;width:auto!important;max-height:none!important}
+  #plotEvent .l2d-wrap .l2d-par{height:100%!important;width:auto!important}
+  #plotEvent .l2d-wrap img,
+  #plotEvent .l2d-wrap canvas{height:100%!important;width:auto!important;max-width:none!important;max-height:none!important}
+  /* 头像：随屏宽放大 */
+  #plotEvent .gal-face{flex:0 0 auto!important;
+    width:clamp(96px,5.2vw,136px)!important;height:clamp(96px,5.2vw,136px)!important}
+  #plotEvent .gal-face img{width:100%!important;height:100%!important;object-fit:cover;border-radius:14px}
+}
 </style>
 </head>
 <body>
