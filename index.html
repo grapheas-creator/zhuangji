@@ -2469,6 +2469,18 @@ input[type=range]{accent-color:#ffb463}
   .item:hover{background:rgba(255,235,210,.05);border-color:rgba(255,222,178,.22)}
   .slot:hover{border-color:rgba(255,196,120,.45)}
 }
+
+/* ===== PC 画面适配 ===== */
+@media (min-width:1041px){
+  /* 对话条：居中 + 限宽 + 贴底 */
+  #plotEvent .gal-box{width:min(1200px,86vw)!important;max-width:1200px!important;
+    margin-left:auto!important;margin-right:auto!important}
+  /* 桌面端 CG 一律完整显示，不再裁切（竖版截图也不会被放大） */
+  #plotEvent #galCg{object-fit:contain!important;object-position:center!important}
+}
+.gal-cg-blur{position:absolute;inset:-40px;z-index:0;background-size:cover;background-position:center;
+  filter:blur(26px) brightness(.55) saturate(.9);transform:scale(1.06);pointer-events:none}
+@media (max-width:1040px){ .gal-cg-blur{display:none} }
 </style>
 </head>
 <body>
@@ -12341,6 +12353,47 @@ try{if(window.__ART&&window.__ART.BLINK&&window.Live2Dish)Live2Dish.registerBlin
       if(txt) txt.textContent='素材还在加载，稍等一下… '+Math.round(got/TOTAL*100)+'%';
     }
   },true);
+})();
+</script>
+
+<script>
+/* PC 适配：CG 模糊背景层 + 宽屏标题扩图 */
+(function(){
+  var wide='title-wide.jpg', wideTried=false;
+
+  function aspect(){ return window.innerWidth/window.innerHeight; }
+
+  /* 1) 标题：宽屏（宽高比 > 1.15）换 16:9 扩图 */
+  function applyTitle(){
+    var img=document.querySelector('#titleScr img');
+    if(!img||wideTried) return;
+    if(aspect()<1.15) return;
+    wideTried=true;
+    var probe=new Image();
+    probe.onload=function(){ img.src=wide; img.style.objectFit='cover'; img.style.objectPosition='center'; };
+    probe.src=wide;
+  }
+
+  /* 2) 剧情 CG：加一层同图的模糊底，超宽屏下 CG 用 contain 不裁切 */
+  function ensureBlur(img){
+    var gal=img.parentNode; if(!gal) return;
+    var layer=gal.querySelector('.gal-cg-blur');
+    if(!layer){ layer=document.createElement('div'); layer.className='gal-cg-blur'; gal.insertBefore(layer,gal.firstChild); }
+    if(layer.getAttribute('data-src')!==img.src){
+      layer.setAttribute('data-src',img.src);
+      layer.style.backgroundImage='url("'+img.src+'")';
+    }
+  }
+
+  function tick(){
+    applyTitle();
+    var cg=document.getElementById('galCg');
+    if(cg&&cg.src&&cg.style.display!=='none') ensureBlur(cg);
+  }
+
+  setInterval(tick,600);
+  document.addEventListener('DOMContentLoaded',tick);
+  window.addEventListener('resize',tick);
 })();
 </script>
 </body>
