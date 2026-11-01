@@ -3390,7 +3390,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00513</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00514</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3572,7 +3572,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00513</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00514</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6572,7 +6572,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00513';
+const APP_BUILD='00514';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -7106,12 +7106,12 @@ setTimeout(function(){
     const cut=(arr,keep)=>{if(!keep)return;for(let i=arr.length-1;i>=0;i--){const x=arr[i];if(!x||!x.n)continue;if(!keep(x))arr.splice(i,1);}};
 
     /* ---------- 电源：7 个品牌 + 每品牌一条线 + 只留常见瓦数 ---------- */
+    /* 品牌收敛，但每个品牌的「旗舰/中端/低端」几条线都要保留 ——
+       否则同一品牌内部就没有档位差异了。只砍瓦数档。 */
     const PSU_BRAND=/^(海韵|振华|长城|鑫谷|先马|航嘉|九州风神|大水牛)/;
-    const PSU_DROP_LINE=/FOCUS GX|猎金|鑫谷 GM|黑钻|航嘉 WD|九州风神 DQ|MWE|MAG |安钛克|超频三|爱国者|利民 |全汉|Tt |酷冷|微星/;
     const PSU_WATTS=new Set([350,450,550,650,750,850,1000,1200,1600]);
     cut(P,function(x){
       if(!PSU_BRAND.test(x.n))return false;
-      if(PSU_DROP_LINE.test(x.n))return false;
       const m=/(\d+)W\b/.exec(x.n);
       if(m&&!PSU_WATTS.has(parseInt(m[1],10)))return false;
       return true;
