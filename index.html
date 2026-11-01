@@ -3293,7 +3293,7 @@ body{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00506</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00507</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3475,7 +3475,7 @@ body{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00506</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00507</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6475,7 +6475,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00506';
+const APP_BUILD='00507';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9452,7 +9452,7 @@ function makeJobs(dateStr,day){
     /* 「整机单」：客户不懂配置，只要能装出一台能开机的机器。
        没有跑分门槛、没有软件要求，检查项就是「槽位齐 + 兼容」。
        以前这类单子全被性能门槛占满，弱硬件根本没活路，这里专门给一条。 */
-    if(rand()<0.26){
+    if(rand()<0.30){
       try{
         const _base=minBuildCost({ts:0,cs:0,ram:8},{});
         if(_base){
@@ -9465,7 +9465,7 @@ function makeJobs(dateStr,day){
             sw:'Office',swList:'Office',level:'m',
             target:{ts:0,cs:0,ram:8},newOnly:false,tight:false,ultra:false,gpuPref:null,
             partBudget:_b,labor:Math.max(150,R2(_base*0.05,10)),
-            extra:['不看跑分，装得出来、开得了机就行','配件齐全、能兼容就算过'],
+            extra:['不看跑分，装得出来、开得了机就行','二手件随便用，能用就收','硅脂该涂还得涂'],
             status:'open',deadline:_dl,dueDay:day+_dl-1,bornDay:day,
             hideScore:true,minMhz:0,assembly:true,grade:'low'});
           continue;
