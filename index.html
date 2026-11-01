@@ -3264,6 +3264,11 @@ body{
 /* 提示语压到底部内侧，别挤正文 */
 #plotEvent .gal-hint{right:30px!important;bottom:18px!important;font-size:11px!important}
 </style>
+<style id="galJobGrade">
+/* 任务档位小标签：旗舰金黄、性价比蓝、低价灰 */
+.mbTgt .tchip:first-child{font-weight:800}
+.mbTgt .tchip:first-child:not(:empty){}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3357,7 +3362,7 @@ body{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00511</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00512</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3539,7 +3544,7 @@ body{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00511</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00512</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6539,7 +6544,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00511';
+const APP_BUILD='00512';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -7068,16 +7073,41 @@ setTimeout(function(){
   /* 电源 / 内存 / 硬盘：只留有代表性的 6~7 个品牌，砍掉同质化长尾。
      规则按品牌名前缀匹配（型号名以品牌开头）。 */
   try{
-    /* 只在手机端收敛品牌：电脑端屏幕大，翻得动，保留全量 */
-    const _mobile=(typeof isMobile==='function')?isMobile():(window.innerWidth<=1159);
-    const kp=_mobile?['海韵','振华','长城','鑫谷','先马','航嘉','安钛克','大水牛']:null;
-    const km=_mobile?['金士顿','威刚','海盗船','光威','金百达','英睿达','芝奇']:null;
-    const kd=_mobile?['三星','西部数据','希捷','铠侠','致态','英睿达','金士顿']:null;
-    const cut=(arr,list)=>{if(!list)return;for(let i=arr.length-1;i>=0;i--){const t=arr[i]&&arr[i].n;if(!t)continue;
-      if(!list.some(b=>t.indexOf(b)===0))arr.splice(i,1);}};
-    try{cut(P,kp);}catch(e){}
-    try{cut(M,km);}catch(e){}
-    try{cut(ST,kd);}catch(e){}
+    /* 手机端目录收敛：先收敛品牌，再在每个品牌里只留一条产品线、砍掉冗余档位。
+       电脑端不裁，保留全量。 */
+    const cut=(arr,keep)=>{if(!keep)return;for(let i=arr.length-1;i>=0;i--){const x=arr[i];if(!x||!x.n)continue;if(!keep(x))arr.splice(i,1);}};
+
+    /* ---------- 电源：7 个品牌 + 每品牌一条线 + 只留常见瓦数 ---------- */
+    const PSU_BRAND=/^(海韵|振华|长城|鑫谷|先马|航嘉|九州风神|大水牛)/;
+    const PSU_DROP_LINE=/FOCUS GX|猎金|鑫谷 GM|黑钻|航嘉 WD|九州风神 DQ|MWE|MAG |安钛克|超频三|爱国者|利民 |全汉|Tt |酷冷|微星/;
+    const PSU_WATTS=new Set([350,450,550,650,750,850,1000,1200,1600]);
+    cut(P,function(x){
+      if(!PSU_BRAND.test(x.n))return false;
+      if(PSU_DROP_LINE.test(x.n))return false;
+      const m=/(\d+)W\b/.exec(x.n);
+      if(m&&!PSU_WATTS.has(parseInt(m[1],10)))return false;
+      return true;
+    });
+
+    /* ---------- 内存：6 个品牌，每品牌只留 6 个主力规格 ---------- */
+    const RAM_BRAND=/^(金士顿|威刚|海盗船|光威|金百达|英睿达)/;
+    const RAM_KEEP=[['DDR3',1600,8],['DDR4',3200,8],['DDR4',3200,16],['DDR4',3600,16],
+                    ['DDR5',6000,16],['DDR5',6000,32]];
+    cut(M,function(x){
+      if(!RAM_BRAND.test(x.n))return false;
+      const g=/(DDR[345])/.exec(x.n), hz=/(\d{4})/.exec(x.n), cap=/(\d+)G\b/.exec(x.n);
+      if(!g||!hz||!cap)return true;
+      const gen=g[1], mhz=parseInt(hz[1],10), c=parseInt(cap[1],10);
+      return RAM_KEEP.some(function(k){return k[0]===gen&&k[1]===mhz&&k[2]===c;});
+    });
+
+    /* ---------- 硬盘：6 个品牌，每品牌留 6 个主容量 ---------- */
+    const DISK_BRAND=/^(三星|西部数据|希捷|铠侠|致态|金士顿)/;
+    const DISK_KEEP=/SATA.*(480G|960G|2T|4T)|NVMe.*(512G|1T|2T|4T)|^(希捷|西部数据).*(2T|4T|8T)/;
+    cut(ST,function(x){
+      if(!DISK_BRAND.test(x.n))return false;
+      return DISK_KEEP.test(x.n);
+    });
   }catch(e){}
   try{const keep2=new Set(["原装散热 Intel 下压", "AMD 原装幽灵散热", "九州风神 玄冰400", "酷冷至尊 T400i", "利民 AX120 R SE", "利民 AK120", "利民 PA120", "九州风神 大霜塔V5", "九州风神 AK620", "利民 FC140", "猫头鹰 NH-D15", "利民 水冷 240", "利民 水冷 360", "九州风神 冰堡垒360", "恩杰 Kraken 240", "服务器风冷 SP3", "服务器风冷 SP5", "LGA2011 专用风冷", "超频三 青鸟四", "九州风神 冰凌MINI", "乔思伯 CR-1000", "超频三 红海H4", "雅浚 B3", "ID-COOLING SE-224", "乔思伯 CR-2000", "超频三 巨浪360", "先马 XW240"]);for(let i=H.length-1;i>=0;i--){if(!keep2.has(H[i].n))H.splice(i,1);}}catch(e){}
 },0);
@@ -11227,6 +11257,12 @@ function lvlName(j){return j&&j.level==='k'?'4K 配置':(j&&j.level==='r'?'推�
 function targetBits(j){
   const t=(j&&j.target)||{},out=[];
   if(!j)return out;
+  /* 任务档位：一眼看出这单是旗舰单还是性价比单 */
+  if(!j.repair&&!j.assembly){
+    if(j.grade==='high')out.push('旗舰单');
+    else if(j.grade==='mid')out.push('性价比单');
+    else if(j.grade==='low')out.push('低价单');
+  }
   if(j.repair){
     out.push('维修');
     (j.repair.clues||[]).slice(0,2).forEach(c=>out.push('现象 '+c));
