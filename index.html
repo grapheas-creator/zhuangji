@@ -3469,7 +3469,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00525</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00526</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3651,7 +3651,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00525</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00526</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6651,7 +6651,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00525';
+const APP_BUILD='00526';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14579,7 +14579,10 @@ function playStoryForToday(onDone){
     }
     const _byDay={1:'chat_chenmo_d1',4:'chat_hanjingli'};
     const _sid=_byDay[state.day];
-    if(_sid&&!state.story.seen['chat_'+_sid]&&typeof playChatScene==='function'){
+    /* 第一天的微信只在「还没开始装机」时弹：已经接了单/装到一半的老存档，
+       不再把开场微信硬插到教程中间 */
+    const _tooLate=(_sid==='chat_chenmo_d1')&&(state.tut&&state.tut.done&&(state.tut.done.accept||state.tut.done.install));
+    if(_sid&&!_tooLate&&!state.story.seen['chat_'+_sid]&&typeof playChatScene==='function'){
       if(playChatScene(_sid,()=>{setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},200);}))return true;
     }
   }catch(e){}
