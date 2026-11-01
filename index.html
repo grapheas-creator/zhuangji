@@ -3469,7 +3469,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00526</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00527</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3651,7 +3651,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00526</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00527</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6651,7 +6651,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00526';
+const APP_BUILD='00527';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -11963,8 +11963,13 @@ function pasteClickEl(){
   return im||document.getElementById('art2d');
 }
 function coachStep(){
+  if(coachStep._gameStamp!==window.__gameNo){
+    coachStep._gameStamp=window.__gameNo;
+    coachStep._tgtAt=0;coachStep._ramReset=0;
+  }
   if(_benchDemoOn&&window._benchDemoAt&&Date.now()-window._benchDemoAt>6000){_benchDemoOn=false;}
-  if(_benchDemoOn)return null;
+  /* 以前这里在「装件动画」的 1.6~2.3 秒里直接返回 null，引导整块消失再重新出现，
+     看起来像闪了一下。现在动画期间照常给步骤，只是不切页。 */
   const t=state.tut||{};
   if(t.guideOff||state.day>1)return null;
   const d=tutDone();
@@ -12028,7 +12033,11 @@ function coachStep(){
       let _need=false;
       if(filt.cap.length||filt.mem.length||filt.mhz.length||filt.price.length||filt.extra.length||filt.q){filt=defaultFilt();_need=true;}
       try{const _k=_filterKey();if(shopFilterOpen[_k]){shopFilterOpen[_k]=false;_need=true;}}catch(e){}
-      if(_need){setTimeout(()=>{try{renderLeft();renderAll();if(typeof coachRefresh==='function')coachRefresh();}catch(e){}},0);}
+      /* 复位筛选后只重画一次，而且放到下一帧，避免在取步骤的过程中打断布局 */
+      if(_need&&!coachStep._ramReset){
+        coachStep._ramReset=1;
+        setTimeout(()=>{coachStep._ramReset=0;try{renderLeft();renderAll();if(typeof coachRefresh==='function')coachRefresh();}catch(e){}},0);
+      }
     }
     if(!p.parts[it.cat]){
       const inv=state.inv.find(x=>x.cat===it.cat&&!x.broken);
@@ -15127,6 +15136,7 @@ renderAll();
       _openingSeq=true;
       setTimeout(()=>{try{_openingSeq=false;coachRefresh();}catch(e){}},12000);
       newGame();
+      try{window.__gameNo=(window.__gameNo||0)+1;}catch(e){}
       /* 引导模式：跟着走 = 全程只能用高亮处的操作；自己玩 = 不弹引导 */
       state.tut=state.tut||{done:{},hidden:false};
       state.tut.guideOff=(mode==='free');
