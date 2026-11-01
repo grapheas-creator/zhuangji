@@ -3293,7 +3293,7 @@ body{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00504</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00505</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3475,7 +3475,7 @@ body{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00504</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00505</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6475,7 +6475,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00504';
+const APP_BUILD='00505';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9518,7 +9518,7 @@ function makeJobs(dateStr,day){
     const swNames=swList.map(x=>x.n).join(' + ');
     /* 明写分数的单子里，一半是客户自己的纯跑分要求：不一定跟软件的分数挂钩，
        比如「我就想跑个 3DMark 8000」，软件可能只要 2000。 */
-    if(_showScore&&rand()<0.18){   /* 分数型要求本来就少：18% 左右 */
+    if(_showScore&&rand()<0.04){   /* 分数型要求很少见：4% 左右 */
       const ts=(best.ts>1200&&rand()<0.65)?R2(best.ts*(0.65+rand()*0.45),100):0;
       const cs=(best.cs>2000&&(!ts||rand()<0.6))?R2(best.cs*(0.70+rand()*0.45),100):0;
       need={ts,cs,ram:need.ram};
