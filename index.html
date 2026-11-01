@@ -3258,7 +3258,7 @@ body{
 #plotEvent .gal-box .gal-body,#plotEvent .gal-box.is-nar .gal-body{padding-right:0!important}
 #plotEvent .gal-text{font-size:22px!important;line-height:1.85!important;letter-spacing:.3px!important}
 #plotEvent .gal-text.nar{font-size:22px!important}
-.tutGal .gal-text{font-size:20px!important;line-height:1.8!important}
+.tutGal .gal-text{font-size:15.5px!important;line-height:1.75!important}
 /* 会话/弹窗正文也跟上 */
 .sp-card .sp-line{font-size:14.5px!important;line-height:1.85!important}
 /* 提示语压到底部内侧，别挤正文 */
@@ -3430,7 +3430,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00520</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00521</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3612,7 +3612,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00520</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00521</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6612,7 +6612,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00520';
+const APP_BUILD='00521';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -12279,6 +12279,7 @@ function drawCoach(el,step){
      同一步骤内的重定位只挪几何，避免每帧重排导致卡顿 */
   const _recentHide=(performance.now()-(_coachHiddenAt||0))<800;
   if(stepChanged){
+    positionCoach._liftN=0;positionCoach._liftT=0;
     const _cn=document.getElementById('coachNext');
     if(_cn)_cn.style.display=(step.k==='cpu_target')?'':'none';
     const _cs=document.getElementById('coachSkip');
@@ -12448,7 +12449,10 @@ function positionCoach(el){
     if(_g&&_g.classList.contains('on')){
       const _gt=_g.getBoundingClientRect().top-16;
       let _rr=el.getBoundingClientRect();
-      if(_rr.bottom>_gt){
+      const _now=Date.now();
+      /* 1.2 秒冷却 + 每步最多顶两次：以前每次刷新都往上顶，表现就是"一直在滑、还滑得慢" */
+      if(_rr.bottom>_gt&&_now-(positionCoach._liftT||0)>1200&&(positionCoach._liftN||0)<2){
+        positionCoach._liftT=_now;positionCoach._liftN=(positionCoach._liftN||0)+1;
         const _d=Math.ceil(_rr.bottom-_gt);
         let _n=el.parentElement,_moved=false;
         while(_n&&_n!==document.body&&_n!==document.documentElement){
@@ -12460,9 +12464,7 @@ function positionCoach(el){
           _n=_n.parentElement;
         }
         if(!_moved){
-          const _smooth=!(document.body&&document.body.classList.contains('no-motion'));
-          try{window.scrollBy({top:_d,left:0,behavior:_smooth?'smooth':'auto'});}
-          catch(e){window.scrollBy(0,_d);}
+          try{window.scrollBy(0,_d);}catch(e){}
         }
         try{r=el.getBoundingClientRect();}catch(e){}
       }
