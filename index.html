@@ -3324,6 +3324,19 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
   border-bottom-right-radius:5px;color:#7c3b49}
 .chatHint{flex:0 0 auto;text-align:right;padding:8px 16px 12px;font-size:11px;color:#b4876f}
 </style>
+<style id="galPage">
+/* 对话框尺寸固定，正文超长在框内翻页（不再撑大对话框） */
+#plotEvent .gal-box{height:212px!important;min-height:212px!important;max-height:212px!important;
+  padding:18px 20px 34px 20px!important;box-sizing:border-box!important;overflow:hidden!important}
+#plotEvent .gal-box .gal-body{display:flex;flex-direction:column;height:100%!important;padding-right:0!important}
+#plotEvent .gal-text{font-size:16.5px!important;line-height:1.8!important;
+  flex:1 1 auto;min-height:0;max-height:none!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
+#plotEvent .gal-text::-webkit-scrollbar{display:none;width:0;height:0}
+#plotEvent .gal-box .gal-hint{position:absolute;right:22px;bottom:12px;font-size:10.5px!important}
+#plotEvent .gal-box{position:relative!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3417,7 +3430,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00519</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00520</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3599,7 +3612,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00519</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00520</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6599,7 +6612,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00519';
+const APP_BUILD='00520';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9338,10 +9351,21 @@ function playPlotEvent(evId,onDone){
     tick();
     try{SFX.pop();}catch(e){}
   };
+  const moreBelow=()=>{
+    try{return textEl.scrollHeight-textEl.scrollTop-textEl.clientHeight>6;}catch(e){return false;}
+  };
   ov.onclick=()=>{
     if(closed)return;
     if(typing){typing=false;textEl.textContent=full;
-      if(idx>=lines.length)hint.innerHTML='轻触结束 <b>▸</b>';return;}
+      if(idx>=lines.length&&!moreBelow())hint.innerHTML='轻触结束 <b>▸</b>';
+      return;}
+    /* 还有没显示完的正文：先翻一页，不换句 */
+    if(moreBelow()){
+      try{textEl.scrollTop=textEl.scrollTop+textEl.clientHeight-12;}
+      catch(e){textEl.scrollTop+=textEl.clientHeight;}
+      if(!moreBelow()&&idx>=lines.length)hint.innerHTML='轻触结束 <b>▸</b>';
+      return;
+    }
     if(idx>=lines.length){close();return;}
     started=true;typeLine();
   };
