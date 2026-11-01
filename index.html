@@ -3293,7 +3293,7 @@ body{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00501</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00504</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3475,7 +3475,7 @@ body{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00501</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00504</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6475,7 +6475,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00501';
+const APP_BUILD='00504';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -7518,16 +7518,36 @@ const PRUNE_UNPRICED=[];  /* 这些型号的价格已经补上，不再剔除 */
 /* ===== 商品档位（旗舰/中端/低端）=====
    按分类内「新品价」分位：前 20% 旗舰、20~60% 中端、其余低端。 */
 function assignTiers(){
+  /* 档位 = 「同一性能/规格档里，贵还是便宜」。
+     —— 这样 5090 也有便宜款（中端）和溢价非公（旗舰），中端单不会无解。 */
+  const keyOf=function(k,x){
+    if(k==='cpu')return 'c'+Math.round(Math.log2(Math.max(x.cs||1,1))*2);
+    if(k==='gpu')return 'g'+Math.round(Math.log2(Math.max(x.ts||1,1))*2);
+    if(k==='ram')return 'r'+String(x.m||'')+String(x.cap||x.size||0);
+    if(k==='disk')return 'd'+String(x.kind||'')+String(x.cap||x.size||0);
+    if(k==='psu')return 'p'+Math.round((x.w||0)/100);
+    if(k==='case')return 'k'+((x.ff||[]).slice().sort().join('')||'');
+    if(k==='cooler')return 'h'+Math.round((x.cap||0)/50);
+    if(k==='mb')return 'm'+String(x.s||'')+String(x.m||'');
+    return 'x';
+  };
   const cats={cpu:C,mb:B,ram:M,gpu:G,psu:P,case:K,cooler:H,disk:ST};
+  const pr=function(x){return (x&&typeof x.p==='number'&&x.p>0)?x.p:((x&&typeof x.u==='number'&&x.u>0)?x.u:0);};
   Object.keys(cats).forEach(function(k){
-    /* 价格取新品价，没有新品价就用二手价（老 U、停产板很多只有二手） */
-    const pr=function(x){return (x&&typeof x.p==='number'&&x.p>0)?x.p:((x&&typeof x.u==='number'&&x.u>0)?x.u:0);};
-    const arr=(cats[k]||[]).filter(function(x){return x&&pr(x)>0;});
-    if(arr.length<3)return;
-    arr.sort(function(a,b){return pr(a)-pr(b);});
-    arr.forEach(function(x,i){
-      const q=arr.length>1?i/(arr.length-1):1;
-      x.tier=(q>=0.8?'flag':(q>=0.4?'mid':'budget'));
+    const groups={};
+    (cats[k]||[]).forEach(function(x){
+      if(!x||pr(x)<=0)return;
+      const g=keyOf(k,x);
+      (groups[g]=groups[g]||[]).push(x);
+    });
+    Object.keys(groups).forEach(function(g){
+      const arr=groups[g];
+      if(arr.length<3){arr.forEach(function(x){x.tier='mid';});return;}
+      arr.sort(function(a,b){return pr(a)-pr(b);});
+      arr.forEach(function(x,i){
+        const q=arr.length>1?i/(arr.length-1):1;
+        x.tier=(q>=0.75?'flag':(q>=0.35?'mid':'budget'));
+      });
     });
     (cats[k]||[]).forEach(function(x){if(x&&!x.tier)x.tier='mid';});
   });
@@ -9498,11 +9518,18 @@ function makeJobs(dateStr,day){
     const swNames=swList.map(x=>x.n).join(' + ');
     /* 明写分数的单子里，一半是客户自己的纯跑分要求：不一定跟软件的分数挂钩，
        比如「我就想跑个 3DMark 8000」，软件可能只要 2000。 */
-    if(_showScore&&rand()<0.5){
+    if(_showScore&&rand()<0.18){   /* 分数型要求本来就少：18% 左右 */
       const ts=(best.ts>1200&&rand()<0.65)?R2(best.ts*(0.65+rand()*0.45),100):0;
       const cs=(best.cs>2000&&(!ts||rand()<0.6))?R2(best.cs*(0.70+rand()*0.45),100):0;
       need={ts,cs,ram:need.ram};
       if(!need.ts&&!need.cs)need={ts:need.ts,cs:need.cs,ram:need.ram};
+    }
+    /* 旗舰单有性能底线：至少 9700X + 9070XT 这个级别。
+       注意：这是「旗舰单的门槛」，不等于「超过这个级别就算旗舰单」——档位仍由预算/类型决定。 */
+    const _grade=(newOnly?'high':(tight?'low':'mid'));
+    if(_grade==='high'){
+      need.cs=Math.max(need.cs||0,19539);
+      need.ts=Math.max(need.ts||0,30445);
     }
     /* 预算跟着「客户真正的门槛」走：参考机分数比要求高一大截时，别按参考机成本给钱，
        否则门槛降下来了、预算没降，一单白赚几千。向上取整到 50，避免算出 302 给 300。 */
@@ -9559,7 +9586,7 @@ function makeJobs(dateStr,day){
       client:CLIENT_NAMES[Math.floor(rand()*CLIENT_NAMES.length)],
       clientRole:CLIENT_ROLES[Math.floor(rand()*CLIENT_ROLES.length)],
       sw:swNames,swList:swNames,level,target,newOnly,tight,ultra,gpuPref:ref.pref,partBudget,
-      grade:(newOnly?'high':(tight?'low':'mid')),labor:_labor,extra:_extra,status:'open',deadline:_dl,dueDay:day+_dl-1,bornDay:day,
+      grade:_grade,labor:_labor,extra:_extra,status:'open',deadline:_dl,dueDay:day+_dl-1,bornDay:day,
       hideScore:!_showScore,minMhz:(cat==="办公机"?0:(cat==="游戏机"?[3200,3600,6000][tier]:3200))};
     if(_job.partBudget<=_cap||tier===0)break;
     _tier=Math.max(0,tier-1);
@@ -9578,8 +9605,8 @@ function makeJobs(dateStr,day){
     }
     if(_job){
       /* 档位要求：高端单要旗舰全新，中端单要性价比（别上旗舰），低端单不限制 */
-      if(_job.grade==='high')_job.extra.push('档次：核心件要旗舰、且全新');
-      else if(_job.grade==='mid')_job.extra.push('档次：核心件走中端/低端就行，别上旗舰');
+      if(_job.grade==='high')_job.extra.push('旗舰单：主板/电源/散热要旗舰件，机箱/显卡/内存/硬盘中端以上，CPU≥9700X、显卡≥9070XT');
+      else if(_job.grade==='mid')_job.extra.push('性价比单：核心件走中端/低端就行，别上旗舰件');
       jobs.push(_job);
     }
   }
@@ -13616,21 +13643,45 @@ function checks(){
   if(b.gpu2&&b.gpu1)add(b.gpu1.n===b.gpu2.n,'双卡同型号');
   if(b.cpu&&!b.cpu.ig&&!b.gpu1)add(false,'该 CPU 无核显，必须装独立显卡');
   if(b.psu&&!repUnlocked())add(b.psu.w>=powerNeed(),'需要 '+powerNeed()+'W / 电源 '+b.psu.w+'W');
-  /* 档位检查：高端单核心件要旗舰且全新；中端单核心件不能上旗舰 */
+  /* 档位检查（旗舰单）：
+       主板/电源/散热 必须是旗舰件；
+       机箱/显卡/内存/硬盘 至少中端；
+       CPU ≥ 9700X(19539)、显卡 ≥ 9070XT(30445)。
+     中端单反过来：核心件别上旗舰件。 */
   try{
     const _gj=state.activeId?job():null;
     if(_gj&&_gj.grade&&!_gj.repair){
-      const _nm={cpu:'CPU',mb:'主板',gpu1:'显卡'};
-      const _core=[['cpu',build.cpu],['mb',build.mb],['gpu1',build.gpu1]]
-        .filter(x=>x[1]&&x[1].part);
+      const _FLAG_MIN={mb:'主板',psu:'电源',cooler:'散热'};
+      const _MID_MIN={case:'机箱',gpu1:'显卡',ram:'内存',disk:'硬盘'};
       if(_gj.grade==='high'){
-        const notFlag=_core.filter(x=>x[1].part.tier!=='flag').map(x=>_nm[x[0]]);
-        const used=_core.filter(x=>x[1].shop==='xianyu').map(x=>_nm[x[0]]);
-        add(!notFlag.length,notFlag.length?('旗舰单：'+notFlag.join('、')+' 不是旗舰件'):'旗舰单：核心件都是旗舰');
-        add(!used.length,used.length?('旗舰单：'+used.join('、')+' 用了二手'):'旗舰单：核心件都是全新');
+        const f=build;
+        const missFlag=[];
+        Object.keys(_FLAG_MIN).forEach(function(k){
+          const it=f[k];
+          if(k==='psu'&&!it)return;
+          if(!it||!it.part){missFlag.push(_FLAG_MIN[k]+'(未装)');return;}
+          if(it.part.tier!=='flag')missFlag.push(_FLAG_MIN[k]);
+        });
+        add(!missFlag.length,missFlag.length?('旗舰单：'+missFlag.join('、')+' 不是旗舰件'):'旗舰单：主板/电源/散热都是旗舰');
+        const lowMid=[];
+        if(f.case&&f.case.part&&f.case.part.tier==='budget')lowMid.push('机箱');
+        if(f.gpu1&&f.gpu1.part&&f.gpu1.part.tier==='budget')lowMid.push('显卡');
+        build.rams.forEach(function(r){if(r&&r.part&&r.part.tier==='budget')lowMid.push('内存');});
+        build.m2.concat(build.sata).forEach(function(d){if(d&&d.part&&d.part.tier==='budget')lowMid.push('硬盘');});
+        add(!lowMid.length,lowMid.length?('旗舰单：'+lowMid.join('、')+' 只是低端件'):'旗舰单：机箱/显卡/内存/硬盘都在中端以上');
+        /* 旗舰单：整套必须全新 */
+        const _used=[];
+        ['case','mb','cpu','cooler','psu','gpu1','gpu2'].forEach(function(k){
+          if(f[k]&&f[k].shop==='xianyu')_used.push(({case:'机箱',mb:'主板',cpu:'CPU',cooler:'散热',psu:'电源',gpu1:'显卡',gpu2:'显卡2'})[k]);
+        });
+        build.rams.forEach(function(r){if(r&&r.shop==='xianyu')_used.push('内存');});
+        build.m2.concat(build.sata).forEach(function(d){if(d&&d.shop==='xianyu')_used.push('硬盘');});
+        add(!_used.length,_used.length?('旗舰单：'+_used.join('、')+' 用了二手，必须全新'):'旗舰单：全套全新');
+        if(f.cpu&&f.cpu.part)add((f.cpu.part.cs||0)>=19539,'旗舰单：CPU 跑分 '+(f.cpu.part.cs||0)+' / 要求 ≥19539（9700X 级）');
+        if(f.gpu1&&f.gpu1.part)add((f.gpu1.part.ts||0)>=30445,'旗舰单：显卡跑分 '+(f.gpu1.part.ts||0)+' / 要求 ≥30445（9070XT 级）');
       }else if(_gj.grade==='mid'){
-        const flag=_core.filter(x=>x[1].part.tier==='flag').map(x=>_nm[x[0]]);
-        add(!flag.length,flag.length?('性价比单：'+flag.join('、')+' 上了旗舰，太费钱'):'性价比单：核心件没上旗舰');
+        /* 中端单不做硬检查：玩家以赚钱为主，自然不会给中端单塞旗舰件。
+           这里只留一句提示，不产生红叉。 */
       }
     }
   }catch(e){}
