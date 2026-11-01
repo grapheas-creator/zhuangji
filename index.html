@@ -3469,7 +3469,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00524</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00525</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3651,7 +3651,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00524</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00525</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6651,7 +6651,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00524';
+const APP_BUILD='00525';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9294,7 +9294,7 @@ function playPlotEvent(evId,onDone){
       '</div>'+
       '<div class="gal-hint" id="galHint">轻触继续 <b>▸</b></div>'+
     '</div></div>';
-  document.body.appendChild(ov);
+  document.body.appendChild(ov);window.__sceneOpen=true;
   requestAnimationFrame(()=>requestAnimationFrame(()=>{try{ov.classList.add('on');
     const c=ov.querySelector('#galCg');if(c)c.classList.add('on');
     const sp=ov.querySelector('#galSprite');if(sp)setTimeout(()=>{try{sp.classList.add('on');}catch(e){}},380);}catch(e){}}));
@@ -9302,10 +9302,12 @@ function playPlotEvent(evId,onDone){
   const nameEl=ov.querySelector('#galName'),avEl=ov.querySelector('#galAv'),
         whoEl=ov.querySelector('#galWho'),textEl=ov.querySelector('#galText'),
         hint=ov.querySelector('#galHint');
-  const close=()=>{if(closed)return;closed=true;clearTimeout(timer);
+  const close=()=>{if(closed)return;closed=true;clearTimeout(timer);window.__sceneOpen=false;
     if(vidPlayer){try{vidPlayer.destroy();}catch(e){}vidPlayer=null;}
+    window.__sceneOpen=false;
     ov.style.opacity='0';setTimeout(()=>{try{ov.remove();}catch(e){}
-      if(typeof onDone==='function')onDone();},260);};
+      if(typeof onDone==='function')onDone();
+      setTimeout(()=>{try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}},260);},260);};
   const parse=raw=>{
     if(/^我：/.test(raw))return{who:'我',txt:raw.slice(2)};
     if(/^[^：]{1,5}：/.test(raw))return{who:raw.split('：')[0],txt:raw.replace(/^[^：]+：/,'')};
@@ -12293,7 +12295,7 @@ function coachVoiceToggle(){
   else{const t=document.getElementById('coachText');if(t)coachSay(t.textContent);}
 }
 try{document.addEventListener('click',e=>{if(e.target&&e.target.id==='coachVoice')coachVoiceToggle();});}catch(e){}
-function coachHide(){_coachHiddenAt=performance.now();coachFaceHide();try{if(_coachAudio)_coachAudio.pause();}catch(e){}const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
+function coachHide(){_coachHiddenAt=performance.now();try{if(typeof tutGalHide==='function')tutGalHide();}catch(e){}coachFaceHide();try{if(_coachAudio)_coachAudio.pause();}catch(e){}const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
 let _coachGlowEl=null;
 function coachGlow(el){
   if(_coachGlowEl===el)return;
@@ -12755,6 +12757,14 @@ function coachRefresh(){
   if(Date.now()<_coachHoldUntil)return;
   const scr=document.getElementById('titleScr');
   if(scr&&!scr.classList.contains('hide')){coachHide();return;}
+  /* 剧情/微信/弹窗开着时一律不出引导（连台词框一起收），避免两个框叠在一起 */
+  try{
+    if(window.__sceneOpen||document.getElementById('chatPop')||document.getElementById('plotEvent')||
+       document.getElementById('storyPop')||document.getElementById('dayOpen')||
+       (document.getElementById('mask')&&document.getElementById('mask').classList.contains('on'))){
+      coachHide();return;
+    }
+  }catch(e){}
   /* 剧情弹窗 / 通用弹窗（新手说明、读取确认…）开着时不要抢焦点，
      等它们关掉再来；否则玩家会看到「接一单」的教练卡压在剧情上面。 */
   {
@@ -15756,7 +15766,7 @@ function playChatScene(id,onDone){
         '<div class="wxNarBox" id="wxNar"><div class="wxNarText" id="wxNarText"></div>'+
         '<div class="wxHint" id="wxHint">轻触继续 ▸</div></div>'+
       '</div>';
-    document.body.appendChild(ov);
+    document.body.appendChild(ov);window.__sceneOpen=true;
     requestAnimationFrame(()=>{try{ov.classList.add('on');}catch(e){}});
     const body=ov.querySelector('#chatBody');
     const narBox=ov.querySelector('#chatFoot');
@@ -15766,8 +15776,13 @@ function playChatScene(id,onDone){
     const close=()=>{
       if(closed)return;closed=true;clearTimeout(timer);
       try{state.story.seen=state.story.seen||{};state.story.seen['chat_'+id]=1;save();}catch(e){}
+      window.__sceneOpen=false;
       ov.classList.remove('on');
-      setTimeout(()=>{try{ov.remove();}catch(e){}if(typeof onDone==='function')onDone();},240);
+      setTimeout(()=>{try{ov.remove();}catch(e){}
+        if(typeof onDone==='function')onDone();
+        /* 剧情关掉之后把引导叫回来，不然玩家会「没有任何提示」地卡着 */
+        setTimeout(()=>{try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}},260);
+      },240);
     };
     const typeNar=(txt)=>{
       narBox.classList.add('show');
