@@ -3269,6 +3269,34 @@ body{
 .mbTgt .tchip:first-child{font-weight:800}
 .mbTgt .tchip:first-child:not(:empty){}
 </style>
+<style id="galBoot">
+/* ===== 加载页：粉樱风；游戏名字体换成站酷快乐体 ===== */
+#bootSplash .bs-logo{font-family:'WCCute','PingFang SC',sans-serif!important;
+  font-weight:400!important;letter-spacing:6px!important;font-size:34px!important;
+  background:linear-gradient(180deg,#fff6ea 0%,#ffd9c4 52%,#ffb2a0 100%)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+  filter:drop-shadow(0 3px 0 rgba(150,90,70,.35)) drop-shadow(0 10px 24px rgba(90,40,25,.45))!important}
+#bootSplash .bs-sub{color:#e8c8ba!important;letter-spacing:5px!important;font-size:10px!important}
+/* 进度条：奶油底 + 樱粉填充 + 两端小花 */
+#bootSplash .bs-bar{position:relative;height:12px!important;border-radius:999px!important;
+  background:linear-gradient(180deg,rgba(255,252,246,.30),rgba(255,238,226,.18))!important;
+  border:1px solid rgba(255,190,200,.55)!important;
+  box-shadow:inset 0 1px 3px rgba(120,60,50,.25),0 6px 18px -10px rgba(242,138,164,.8)!important}
+#bootSplash .bs-bar i{background:linear-gradient(90deg,#ffc0cf,#ffe3cf 55%,#ffb8c8)!important;
+  box-shadow:0 0 16px rgba(242,138,164,.75),inset 0 1px 0 rgba(255,255,255,.85)!important;
+  border-radius:999px!important}
+/* 条两端各贴一朵樱花（用已有的角花素材）*/
+#bootSplash .bs-bar::before,#bootSplash .bs-bar::after{content:'';position:absolute;top:50%;
+  width:26px;height:26px;margin-top:-13px;background:url('data:image/webp;base64,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') center/contain no-repeat;
+  opacity:.95;pointer-events:none}
+#bootSplash .bs-bar::before{left:-16px;transform:rotate(-18deg)}
+#bootSplash .bs-bar::after{right:-16px;transform:rotate(160deg)}
+#bootSplash .bs-meta{color:#e6cdbf!important}
+#bootSplash .bs-meta b{color:#fff0e4!important}
+#bootSplash .bs-tip{color:#cfb0a2!important}
+/* 顶栏游戏名也用可爱体 */
+header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-serif!important;font-weight:400!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3362,7 +3390,7 @@ body{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00512</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00513</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3544,7 +3572,7 @@ body{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00512</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00513</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6544,7 +6572,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00512';
+const APP_BUILD='00513';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
