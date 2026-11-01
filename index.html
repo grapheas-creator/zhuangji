@@ -3417,7 +3417,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00515</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00516</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3599,7 +3599,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00515</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00516</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6599,7 +6599,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00515';
+const APP_BUILD='00516';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -7119,7 +7119,9 @@ COOL_BRANDS.forEach((br)=>COOL_TYPE.forEach(([tn,cap,h,rad,base],ti)=>{
 /* ===== 精简商品表：机箱 / 散热只保留有代表性的型号（用户要求）===== */
 setTimeout(function(){
   /* 精简前先按全量分一次档位 */
-  try{if(typeof assignTiers==='function')assignTiers();}catch(e){}
+  try{if(typeof assignTiers==='function')assignTiers();
+try{(G||[]).forEach(function(x){if(x&&(x.ts||0)>=30445&&x.tier==='budget')x.tier='mid';});
+(C||[]).forEach(function(x){if(x&&(x.cs||0)>=19539&&x.tier==='budget')x.tier='mid';});}catch(e){}}catch(e){}
   /* 机箱/散热同样只在手机端精简；电脑端保留全量 */
   const _mob=(typeof isMobile==='function')?isMobile():(window.innerWidth<=1159);
   /* 电脑端：不裁任何东西，直接收工 */
@@ -7682,7 +7684,28 @@ function assignTiers(){
   };
   const cats={cpu:C,mb:B,ram:M,gpu:G,psu:P,case:K,cooler:H,disk:ST};
   const pr=function(x){return (x&&typeof x.p==='number'&&x.p>0)?x.p:((x&&typeof x.u==='number'&&x.u>0)?x.u:0);};
+  const scoreOf={cpu:function(x){return x.cs||0;},gpu:function(x){return x.ts||0;}};
   Object.keys(cats).forEach(function(k){
+    /* CPU/显卡：跟「性能相近的邻居」比价，比邻居中位价贵 15% 以上算旗舰、便宜 15% 以下算低端。
+       原来是按 log2 分桶，桶里只剩两张时会把最贵的判成低端（9070XT 就是被这么误判的）。 */
+    if(scoreOf[k]){
+      const arr=(cats[k]||[]).filter(function(x){return x&&pr(x)>0;});
+      arr.forEach(function(x){
+        const s0=scoreOf[k](x);
+        if(!s0){x.tier='mid';return;}
+        const near=arr.filter(function(y){
+          const s1=scoreOf[k](y);
+          return s1&&Math.abs(s1-s0)<=s0*0.15;
+        });
+        if(near.length<3){x.tier='mid';return;}
+        const prices=near.map(pr).sort(function(a,b){return a-b;});
+        const med=prices[Math.floor(prices.length/2)];
+        const p0=pr(x);
+        x.tier=(p0>med*1.15?'flag':(p0<med*0.85?'budget':'mid'));
+      });
+      (cats[k]||[]).forEach(function(x){if(x&&!x.tier)x.tier='mid';});
+      return;
+    }
     const groups={};
     (cats[k]||[]).forEach(function(x){
       if(!x||pr(x)<=0)return;
@@ -9605,7 +9628,7 @@ function makeJobs(dateStr,day){
       try{
         const _base=minBuildCost({ts:0,cs:0,ram:8},{});
         if(_base){
-          const _b=Math.max(600,Math.ceil(_base*1.5/50)*50);
+          const _b=Math.ceil(_base*1.45/50)*50;
           const _nm=['整机 · 街坊的办公机','整机 · 小店的收银机','整机 · 给学生配一台','整机 · 前台用的电脑'][Math.floor(rand()*4)];
           const _dl=2+Math.floor(rand()*3);
           jobs.push({id:'J'+day+'-'+i,cat:'办公机',tier:0,baseCost:_base,name:_nm,
@@ -9699,6 +9722,24 @@ function makeJobs(dateStr,day){
     /* 旗舰单有性能底线：至少 9700X + 9070XT 这个级别。
        注意：这是「旗舰单的门槛」，不等于「超过这个级别就算旗舰单」——档位仍由预算/类型决定。 */
     const _grade=(newOnly?'high':(tight?'low':'mid'));
+    /* 旗舰单最低要有多少钱：按「主板/电源/散热旗舰 + 其余中端以上 + 全新」扫一遍 */
+    const flagshipFloor=function(){
+      try{
+        const nx=function(x){return (x&&typeof x.p==='number'&&x.p>0)?x.p:null;};
+        const pick=function(arr,f){let b=null;arr.forEach(function(x){if(!f(x))return;const p=nx(x);if(p==null)return;if(!b||p<nx(b))b=x;});return b;};
+        const mb=pick(B,function(x){return x.tier==='flag';});
+        const psu=pick(P,function(x){return x.tier==='flag';});
+        const cool=pick(H,function(x){return x.tier==='flag';});
+        const cse=pick(K,function(x){return x.tier!=='budget';});
+        const cpu=pick(C,function(x){return (x.cs||0)>=19539;});
+        const gpu=pick(G,function(x){return (x.ts||0)>=30445&&x.tier!=='budget';});
+        const ram=pick(M,function(x){return x.tier!=='budget'&&(x.cap||0)>=16;});
+        const disk=pick(ST,function(x){return x.tier!=='budget';});
+        const all=[mb,psu,cool,cse,cpu,gpu,ram,disk];
+        if(all.some(function(x){return !x;}))return null;
+        return all.reduce(function(s,x){return s+nx(x);},0);
+      }catch(e){return null;}
+    };
     if(_grade==='high'){
       need.cs=Math.max(need.cs||0,19539);
       need.ts=Math.max(need.ts||0,30445);
@@ -9721,6 +9762,10 @@ function makeJobs(dateStr,day){
       if(cat==='工作机'&&tier===0)partBudget=Math.max(partBudget,21000);
       /* 顶配单写明要 5090 级别，预算必须覆盖一张 5090 再加整机 */
       if(ultra)partBudget=Math.max(partBudget,66000);
+      if(_grade==='high'){
+        const _ff=flagshipFloor();
+        if(_ff)partBudget=Math.max(partBudget,Math.ceil(_ff*1.22/50)*50);
+      }
       if(_special||!(best.ts>=(need.ts||0)&&best.cs>=(need.cs||0)&&ramCap>=_ramNeed)){
         const _floor=minBuildCost(Object.assign({},need,{ram:_ramNeed}),{newOnly,cat,tier,gpuPref:pref,ultra});
         if(_floor)partBudget=Math.max(partBudget,Math.ceil(_floor*1.15/50)*50);
@@ -9736,6 +9781,11 @@ function makeJobs(dateStr,day){
     if(newOnly)extra.push('只要全新件，不接受二手');
     else if(tight)extra.push('预算极紧：二手件、杂牌内存都接受');
     else extra.push('预算宽松，但电源要用全新的');
+    /* 旗舰单指定 A 卡但全表没有合规 A 卡时，取消品牌指定，否则这单无解 */
+    if(_grade==='high'&&pref==='amd'){
+      const _okAmd=(typeof G!=='undefined')&&G.some(function(g){return /Radeon|AMD/i.test(g.n)&&(g.ts||0)>=30445&&g.tier!=='budget'&&g.p!=null;});
+      if(!_okAmd){pref=null;ref.pref=null;}
+    }
     if(ref.pref)extra.push('显卡只要 '+prefName(ref.pref));
     if(ultra)extra.push('指定要 RTX 5090 级别');
     if(ultra)extra.push('极限装机：全套必须全新件');
