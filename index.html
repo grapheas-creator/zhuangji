@@ -3445,12 +3445,9 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 .story-pop .sp-card{position:relative!important}
 </style>
 <style id="galWxCover">
-/* 微信全屏层：盖住一切游戏 UI（底部交付条、页签、顶栏） */
-.chatPop.chatFull{position:fixed!important;inset:0!important;z-index:99990!important;
+/* 微信层只保留整屏尺寸与层级，不再靠隐藏游戏 UI 来“遮” */
+.chatPop.chatFull{position:fixed!important;inset:0!important;z-index:950!important;
   background:#e9e6e1!important;height:100vh!important;height:100dvh!important}
-body.wx-open #actionBar,body.wx-open #mNav,body.wx-open #mobileBar,
-body.wx-open header,body.wx-open #coach,body.wx-open .tutGal,
-body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;opacity:0!important}
 </style>
 </head>
 <body>
@@ -3545,7 +3542,7 @@ body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;op
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00535</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00536</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3727,7 +3724,7 @@ body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;op
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00535</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00536</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6727,7 +6724,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00535';
+const APP_BUILD='00536';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9343,6 +9340,7 @@ const PLOT_EVENTS={
 function playPlotEvent(evId,onDone){
   const ev=PLOT_EVENTS[evId];if(!ev)return false;
   if(document.getElementById('plotEvent'))return false;
+  if(typeof sceneBusy==='function'&&sceneBusy('plotEvent'))return false;
   const lines=(ev.lines||[]).slice();
   if(!lines.length){if(typeof onDone==='function')onDone();return true;}
   const portrait=(typeof window!=='undefined'&&window.innerHeight>window.innerWidth);
@@ -14600,6 +14598,7 @@ function deliver(){
    逐句出话，看完可以直接「接这单」。每条剧情只自动弹一次（story.seen 记着），
    之后的对话仍然保留在工单列表里。 */
 function playStory(sd,j,onDone){
+  if(typeof sceneBusy==='function'&&sceneBusy('storyPop')){return false;}
   const old=document.getElementById('storyPop');if(old)old.remove();
   const lines=(sd.lines||[]).slice(0,4);
   const ov=document.createElement('div');
@@ -14697,13 +14696,18 @@ function playStoryForToday(onDone){
   }
 
   /* ---- 5. 剧情工单接单卡 ---- */
+  if(typeof sceneBusy==='function'&&sceneBusy()){
+    setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){}},600);
+    return true;
+  }
   let j=null;
   try{j=state.jobs.find(x=>x.story&&x.status==='open');}catch(e){}
   if(!j){if(onDone)onDone();return false;}
   if(state.story.seen[j.storyId]){if(onDone)onDone();return false;}
   const sd=storyDef(j.storyId);
   if(!sd){if(onDone)onDone();return false;}
-  playStory(sd,j,onDone);
+  const ok=playStory(sd,j,onDone);
+  if(ok===false){setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){}},600);}
   return true;
 }
 function maybeStoryPopup(){
@@ -15863,10 +15867,25 @@ window.CHAT_SCENES={
       ['me','明白，能修就修，修不了给你换个便宜的']
     ]}
 };
+/* 同一时刻只允许一个场景：剧情 / 微信 / 接单卡 / 结算 互斥。
+   后面的场景不是靠层级盖住前面的，而是根本不创建，等前一个关掉再播。 */
+function sceneBusy(exclude){
+  try{
+    const id=exclude||'';
+    if(id!=='plotEvent'&&document.getElementById('plotEvent'))return 'plotEvent';
+    if(id!=='chatPop'&&document.getElementById('chatPop'))return 'chatPop';
+    if(id!=='storyPop'&&document.getElementById('storyPop'))return 'storyPop';
+    if(document.getElementById('dayopen')||document.querySelector('.dayopen.on'))return 'day';
+    const m=document.getElementById('mask');
+    if(m&&m.classList.contains('on'))return 'modal';
+  }catch(e){}
+  return '';
+}
 function playChatScene(id,onDone){
   try{
     const sc=CHAT_SCENES[id];if(!sc)return false;
     if(document.getElementById('chatPop'))return false;
+    if(sceneBusy('chatPop'))return false;   /* 别的场景在播：先不创建，等它关 */
     const A=CHAT_ACTORS[sc.who]||{role:'',av:''};
     const ov=document.createElement('div');
     ov.id='chatPop';ov.className='chatPop chatFull';
