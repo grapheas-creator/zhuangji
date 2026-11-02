@@ -3562,6 +3562,26 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 .story-pop .sp-av img{display:block!important;width:52px!important;height:52px!important;
   object-fit:cover!important;object-position:center top!important}
 </style>
+<style id="galThemeCreamFinal">
+/* ===== 最终覆盖：所有深色块与金橙按钮统一成奶油樱花 ===== */
+body .job{background:linear-gradient(160deg,#fffdf9,#fdf1e6 60%)!important;
+  border-color:rgba(214,150,120,.30)!important;box-shadow:0 12px 26px -20px rgba(160,100,80,.55)!important}
+body .job .nm,body .job .top>div{color:#4b3a2f!important}
+body .job .money{color:#c2456b!important}
+body .job ul li,body .job .softline{color:#7a6353!important}
+body .job.story,body .job.game,body .job.work{background:linear-gradient(160deg,#fffdf9,#fdf1e6 60%)!important}
+/* 主按钮：金橙 → 樱花粉 */
+body .primary,body button.primary{background:linear-gradient(180deg,#ffb3c6,#f286a6)!important;
+  border-color:#ffc2d2!important;color:#5c1f30!important;font-weight:700!important;
+  box-shadow:0 8px 20px -10px rgba(220,110,140,.8)!important;text-shadow:none!important}
+body .bad{background:linear-gradient(180deg,#ffd9c8,#ffb59b)!important;color:#6b2a16!important}
+/* 标签/筛选选中态 */
+body .chip.on{background:linear-gradient(180deg,#ffd9e4,#ffc3d5)!important;color:#8c4351!important;
+  border-color:rgba(242,138,164,.55)!important}
+/* 底部交付条 */
+body #actionBar{background:linear-gradient(180deg,rgba(255,253,250,.97),rgba(253,241,230,.97))!important;
+  border-top:1px solid rgba(214,150,120,.28)!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3659,7 +3679,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01002</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01003</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3841,7 +3861,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01002 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01003 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6926,7 +6946,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01002';
+const APP_BUILD='01003';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -8999,7 +9019,7 @@ STORY[1]={day:1,id:'c1d1',who:'陈默',role:'高中同学',av:'陈',col:'#5b8cff
   tip:'第一单：带核显的 CPU 能省掉一张显卡的钱。预算卡在 ¥1000，二手件这时候不丢人。',
   job:{cat:'办公机',tier:0,name:'新手单 · 老同学的第一台剪辑机',
     sw:'剪映 1080p 简单剪辑（核显可用）',level:'m',
-    target:{ts:400,cs:3000,ram:8},newOnly:false,tight:true,
+    target:{ts:0,cs:3000,ram:8,igp:1,igpText:'核显够用'},newOnly:false,tight:true,
     partBudget:620,labor:150,
     extra:['预算极紧：二手件、杂牌内存都接受','这台机器不用装独立显卡']},
   saveTo:'陈默',
@@ -10112,10 +10132,16 @@ function makeJobs(dateStr,day){
     }catch(e){}
     /* 软件本身不需要显卡分（need.ts=0，比如 Office / ERP）就别再按参考机核显分算门槛，
        否则一台「家用上网机」会被写成要 3DMark ≥ 400，等于逼玩家配显卡。 */
+    /* 核显单：软件只要核显级别（3DMark ≤1200）就不写「3DMark 多少分」，
+       改成「核显够用」或「能玩《XX》」——玩家不用去猜分数。 */
+    const _igp = need.ts>0 && need.ts<=1200;
+    const _gameM=/(《[^》]+》)/.exec((swNames||[]).join(' ')||'');
+    const _igpText = _igp ? (_gameM ? ('能玩'+_gameM[1]) : '核显够用') : '';
     const target={
-      ts:need.ts>0?R2(need.ts,100):0,
+      ts:(_igp&&need.ts<=800)?0:(need.ts>0?R2(need.ts,100):0),
       cs:need.cs>0?R2(need.cs,100):0,
       ram:need.ram};
+    if(_igp){target.igp=1;target.igpText=_igpText;}
     const extra=[];
     if(newOnly)extra.push('只要全新件，不接受二手');
     else if(tight)extra.push('预算极紧：二手件、杂牌内存都接受');
@@ -11197,7 +11223,8 @@ function targetBits(j){
   }else if(j.hideScore){
     out.push(lvlName(j));
   }else{
-    if(t.ts>0)out.push('3DMark '+t.ts.toLocaleString());
+    if(t.igpText)out.push(t.igpText);
+    else if(t.ts>0)out.push('3DMark '+t.ts.toLocaleString());
     if(t.cs>0)out.push('CB '+t.cs.toLocaleString());
   }
   if(t.ram&&!j.assembly)out.push('内存 '+t.ram+'G');
