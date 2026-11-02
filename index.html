@@ -3864,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01152</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01154</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4048,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01152 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01154 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7133,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01152';
+const APP_BUILD='01154';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9755,7 +9755,11 @@ const Scene={
     /* 任何一个场景打开，都说明已经过了加载阶段：直接撤掉加载页，
        免得它盖住层级更低的弹层（接单卡曾经 z=78 被它挡死）。 */
     try{var _ld=document.getElementById('startLoad');if(_ld){_ld.style.opacity='0';setTimeout(function(){try{_ld.remove();}catch(e){}},420);}}catch(e){}},
-  exit(){this.playing=null;setTimeout(()=>{if(!this.busy()&&document.body.classList.contains('scene-mode'))this.chrome(true);},300);},
+  exit(){this.playing=null;setTimeout(()=>{
+    if(!this.busy()&&document.body.classList.contains('scene-mode'))this.chrome(true);
+    /* 场景结束后补一次引导刷新，让被收起的框回来 */
+    try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
+  },420);},
   end(){this.chain=false;if(!this.playing&&document.body.classList.contains('scene-mode'))this.chrome(true);},
   busy(){return !!this.playing||this.chain;}
 };
@@ -15501,7 +15505,14 @@ renderAll();
         document.getElementById('startLoad')||document.getElementById('chatPop')||
         document.getElementById('plotEvent')||document.getElementById('storyPop'));
     }catch(e){}
-    if(_busy){ hideNow(); COACH.key=null; return; }
+    if(_busy){
+      hideNow(); COACH.key=null;
+      /* 关键：被剧情/弹窗收起来的框，不算「画过」。
+         否则场景结束后 coachRefresh 看到步骤没变会直接返回，框永远回不来
+         ——首次进游戏「只有语音没有框」就是这么来的。 */
+      try{_coachKey=null;_coachDrawnKey=null;}catch(e){}
+      return;
+    }
     if(!step || (scr && !scr.classList.contains('hide'))){ hideNow(); COACH.key=null; return; }
     schedule(60);
   };
@@ -16012,11 +16023,15 @@ function playChatScene(id,onDone){
       row.className='chatRow '+(side==='me'?'me':'them');
       const avSrc=(side==='me')?myAv:A.av;
       const b=document.createElement('div');b.className='cb';b.textContent=txt;
+      const AVSTYLE='width:40px;height:40px;min-width:40px;min-height:40px;max-width:40px;max-height:40px;'+
+        'object-fit:cover;object-position:center top;border-radius:6px;display:block;flex:0 0 40px;background:#f1e6da';
       if(side==='me'){
         row.appendChild(b);
-        if(avSrc){const im=document.createElement('img');im.className='cav';im.alt='';im.src=avSrc;row.appendChild(im);}
+        if(avSrc){const im=document.createElement('img');im.className='cav';im.alt='';im.src=avSrc;
+          im.style.cssText=AVSTYLE;row.appendChild(im);}
       }else{
-        if(avSrc){const im=document.createElement('img');im.className='cav';im.alt='';im.src=avSrc;row.appendChild(im);}
+        if(avSrc){const im=document.createElement('img');im.className='cav';im.alt='';im.src=avSrc;
+          im.style.cssText=AVSTYLE;row.appendChild(im);}
         row.appendChild(b);
       }
       body.appendChild(row);
