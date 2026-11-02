@@ -3679,7 +3679,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01004</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01005</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3861,7 +3861,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01004 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01005 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6946,7 +6946,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01004';
+const APP_BUILD='01005';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9599,7 +9599,7 @@ function playPlotEvent(evId,onDone){
         whoEl=ov.querySelector('#galWho'),textEl=ov.querySelector('#galText'),
         hint=ov.querySelector('#galHint');
   const close=()=>{if(closed)return;closed=true;clearTimeout(timer);window.__sceneOpen=false;
-    setTimeout(()=>{try{if(typeof sceneBusy!=='function'||!sceneBusy())gameChrome(true);}catch(e){}},300);
+    setTimeout(()=>{try{if(!window.__sceneChain&&(typeof sceneBusy!=='function'||!sceneBusy()))gameChrome(true);}catch(e){}},300);
     if(vidPlayer){try{vidPlayer.destroy();}catch(e){}vidPlayer=null;}
     window.__sceneOpen=false;
     ov.style.opacity='0';setTimeout(()=>{try{ov.remove();}catch(e){}
@@ -14306,7 +14306,7 @@ function playStory(sd,j,onDone){
     const x=document.getElementById('storyPop');
     if(x){x.classList.add('out');setTimeout(()=>{try{x.remove();}catch(e){}
       /* 接单卡关掉后，如果没有别的场景了，把游戏界面放回来 */
-      setTimeout(()=>{try{if(typeof sceneBusy!=='function'||!sceneBusy())gameChrome(true);}catch(e){}},60);
+      setTimeout(()=>{try{if(!window.__sceneChain&&(typeof sceneBusy!=='function'||!sceneBusy()))gameChrome(true);}catch(e){}},60);
     },240);}
     if(typeof onDone==='function')onDone();
     if(take&&j.status==='open')acceptJob(j.id);
@@ -14386,7 +14386,7 @@ function playStoryForToday(onDone){
   }
   let j=null;
   try{j=state.jobs.find(x=>x.story&&x.status==='open');}catch(e){}
-  if(!j){try{if(typeof gameChrome==='function')gameChrome(true);}catch(e){}if(onDone)onDone();return false;}
+  if(!j){try{window.__sceneChain=false;if(typeof gameChrome==='function')gameChrome(true);}catch(e){}if(onDone)onDone();return false;}
   if(state.story.seen[j.storyId]){if(onDone)onDone();return false;}
   const sd=storyDef(j.storyId);
   if(!sd){if(onDone)onDone();return false;}
@@ -14960,7 +14960,9 @@ renderAll();
           '<div class="sl-tip">正在生火开张…</div></div>';
         document.body.appendChild(_veil);
       }catch(e){}
+      try{window.__sceneChain=true;}catch(e){}
       const _reveal=()=>{
+        try{window.__sceneChain=false;}catch(e){}
         try{
           if(_veil){_veil.style.opacity='0';setTimeout(()=>{try{_veil.remove();}catch(e){}},420);}
         }catch(e){}
@@ -15215,8 +15217,8 @@ try{
       if(_ld){
         /* 没有场景在播却还挂着加载页：说明收尾回调丢了，直接揭开 */
         const busy=(typeof sceneBusy==='function')?sceneBusy():'';
-        if(!busy&&!window.__sceneOpen){_ld.style.opacity='0';setTimeout(()=>{try{_ld.remove();}catch(e){}
-          try{if(typeof gameChrome==='function')gameChrome(true);}catch(e){}},420);}
+        if(!busy&&!window.__sceneOpen&&!window.__sceneChain){_ld.style.opacity='0';setTimeout(()=>{try{_ld.remove();}catch(e){}
+          if(!window.__sceneChain){try{if(typeof gameChrome==='function')gameChrome(true);}catch(e){}}},420);}
         return;
       }
       coachRefresh();
@@ -15657,7 +15659,7 @@ function playChatScene(id,onDone){
       try{state.story.seen=state.story.seen||{};state.story.seen['chat_'+id]=1;save();}catch(e){}
       window.__sceneOpen=false;
       try{document.body.classList.remove('wx-open');}catch(e){}
-      setTimeout(()=>{try{if(typeof sceneBusy!=='function'||!sceneBusy())gameChrome(true);}catch(e){}},300);
+      setTimeout(()=>{try{if(!window.__sceneChain&&(typeof sceneBusy!=='function'||!sceneBusy()))gameChrome(true);}catch(e){}},300);
       ov.classList.remove('on');
       setTimeout(()=>{try{ov.remove();}catch(e){}
         if(typeof onDone==='function')onDone();
