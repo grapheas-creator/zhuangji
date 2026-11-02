@@ -3864,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01157</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01158</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4048,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01157 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01158 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7133,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01157';
+const APP_BUILD='01158';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -11950,24 +11950,9 @@ document.addEventListener('click',function(e){
     try{if(typeof toast==='function')toast('先跟着旺财的提示操作');}catch(x){}
   }catch(err){}
 },true);
-document.addEventListener('click',function(e){
-  if(!tutLocked())return;
-  const el=e.target&&e.target.closest?e.target.closest('[data-buy],[data-install],[data-sell],[data-more]'):null;
-  if(!el)return;
-  if(el.closest('#coach'))return;                     /* 引导自己的按钮 */
-  if(el.closest('#mask'))return;                      /* 购买确认弹窗 */
-  const tgt=tutTargetEl();
-  /* 目标找不到、或者引导根本没显示时，一律不拦——
-     否则玩家会「所有按钮都点不动、提示卡又不在」直接卡死 */
-  if(!tgt)return;
-  const _coach=document.getElementById('coach');
-  if(!_coach||!_coach.classList.contains('on'))return;
-  if(tgt===el||tgt.contains(el)||el.contains(tgt))return;
-  e.preventDefault();e.stopPropagation();
-  window.__tutBlocks=(window.__tutBlocks||0)+1;
-  if(window.__tutBlocks===4){try{toast('先照着引导做；不想看引导可以点「跳过引导」');window.__tutBlocks=0;return;}catch(x){}}
-  try{toast('先跟着引导走：'+(coachStep()||{}).title||'');}catch(err){try{toast('先跟着引导走');}catch(e2){}}
-},true);
+/* 旧的引导锁监听已删除：它只看 #coach（桌面卡），手机上永远不生效，
+   现在统一由前面那条「新手严格锁」负责，避免两套判定互相打架。 */
+
 /* 引导画框时所在的「页面指纹」：面板 / 手机页签 / 分类 / 在施工单。
    任何一个变了，旧框就必须先消失，不能让它挂在新页面上等重画。 */
 function _coachSig(){
