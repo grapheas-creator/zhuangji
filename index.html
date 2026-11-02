@@ -3507,6 +3507,49 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 .chatPop .wxTop{justify-content:flex-start!important;padding-left:14px!important}
 .chatPop .wxTop b{text-align:left!important;flex:0 1 auto!important;margin-right:auto!important}
 </style>
+<style id="galWxReal">
+/* ===== 仿微信样式 ===== */
+.chatPop.chatFull{background:#ededed!important}
+.wxTop{position:relative!important;display:flex!important;align-items:center!important;
+  height:50px!important;padding:0 14px!important;background:#ededed!important;
+  border-bottom:1px solid rgba(0,0,0,.05)!important}
+.wxTop .wxBack{position:relative;font-size:24px;color:#333;line-height:1}
+.wxTop .wxBadge{position:absolute;left:14px;top:-2px;font-style:normal;font-size:9px;color:#888;
+  background:#e5e5e5;border-radius:8px;padding:0 5px}
+.wxTop .wxTitle{position:absolute!important;left:50%!important;transform:translateX(-50%)!important;
+  font-size:17px!important;font-weight:600!important;color:#191919!important;letter-spacing:.5px}
+.wxTop .wxMore{position:absolute;right:14px;font-size:20px;color:#333}
+.wxBody{background:#ededed!important;padding:8px 10px 4px!important}
+.wxTime{text-align:center!important;color:#999!important;font-size:11.5px!important;
+  margin:6px 0 12px!important;font-family:'PingFang SC',sans-serif!important}
+/* 气泡行 */
+.chatPop .chatRow{display:flex!important;align-items:flex-start!important;gap:8px!important;
+  margin:0 0 14px!important;max-width:100%!important;width:auto!important}
+.chatPop .chatRow.them{align-self:flex-start!important;flex-direction:row!important}
+.chatPop .chatRow.me{align-self:flex-end!important;flex-direction:row!important;justify-content:flex-end!important}
+.chatPop .chatRow .cav{width:40px!important;height:40px!important;border-radius:6px!important;
+  flex:0 0 40px!important;object-fit:cover!important;background:#ddd}
+/* 气泡本体 */
+.chatPop .chatRow .cb{position:relative!important;max-width:66vw!important;width:auto!important;
+  padding:10px 13px!important;border-radius:6px!important;font-size:15.5px!important;
+  line-height:1.65!important;font-family:'PingFang SC','WCCute',sans-serif!important;
+  word-break:normal!important;white-space:normal!important;box-shadow:none!important}
+.chatPop .chatRow.them .cb{background:#fff!important;color:#191919!important}
+.chatPop .chatRow.them .cb::before{content:'';position:absolute;left:-6px;top:12px;
+  border:6px solid transparent;border-right-color:#fff;border-left:0}
+.chatPop .chatRow.me .cb{background:#95ec69!important;color:#15220f!important}
+.chatPop .chatRow.me .cb::before{content:'';position:absolute;right:-6px;top:12px;
+  border:6px solid transparent;border-left-color:#95ec69;border-right:0}
+/* 底部输入条（装饰） */
+.wxInputBar{display:flex!important;align-items:center!important;gap:10px!important;
+  padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important;background:#f7f7f7!important;
+  border-top:1px solid rgba(0,0,0,.06)!important}
+.wxInputBar .wxIc{font-size:20px;color:#5b5b5b;flex:0 0 auto}
+.wxInputBar .wxInput{flex:1 1 auto;height:34px;border-radius:6px;background:#fff}
+/* 旁白框浮在输入条上方 */
+.wxFoot{background:transparent!important;padding:0!important}
+.wxNarBox{margin:0 10px 10px!important;max-width:none!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3600,7 +3643,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00544</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00545</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3782,7 +3825,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00544</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00545</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6782,7 +6825,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00544';
+const APP_BUILD='00545';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -15985,12 +16028,19 @@ function playChatScene(id,onDone){
     const A=CHAT_ACTORS[sc.who]||{role:'',av:''};
     const ov=document.createElement('div');
     ov.id='chatPop';ov.className='chatPop chatFull';
+    const myAv=(function(){try{return (typeof CHAR_AVATAR!=='undefined'&&CHAR_AVATAR['我'])||'';}catch(e){return '';}})();
     ov.innerHTML=
-      '<div class="wxTop"><span class="wxBack">‹</span><b>'+sc.title+'</b><span class="wxMore">⋯</span></div>'+
-      '<div class="wxBody" id="chatBody"></div>'+
+      '<div class="wxTop">'+
+        '<span class="wxBack">‹<i class="wxBadge">1</i></span>'+
+        '<b class="wxTitle">'+sc.title+'</b>'+
+        '<span class="wxMore">⋯</span>'+
+      '</div>'+
+      '<div class="wxBody" id="chatBody"><div class="wxTime">第 '+ (state.day||1) +' 天 '+(state.date||'')+'</div></div>'+
       '<div class="wxFoot" id="chatFoot">'+
         '<div class="wxNarBox" id="wxNar"><div class="wxNarText" id="wxNarText"></div>'+
         '<div class="wxHint" id="wxHint">轻触继续 ▸</div></div>'+
+        '<div class="wxInputBar"><span class="wxIc">◉</span><div class="wxInput"></div>'+
+        '<span class="wxIc">☺</span><span class="wxIc">＋</span></div>'+
       '</div>';
     document.body.appendChild(ov);window.__sceneOpen=true;try{document.body.classList.add('wx-open');}catch(e){}
     try{if(typeof gameChrome==='function')gameChrome(false);}catch(e){}
@@ -16039,9 +16089,16 @@ function playChatScene(id,onDone){
       narBox.classList.remove('show');
       const row=document.createElement('div');
       row.className='chatRow '+(side==='me'?'me':'them');
-      if(side!=='me')row.innerHTML='<img class="cav" alt="" src="'+A.av+'">';
+      const avSrc=(side==='me')?myAv:A.av;
       const b=document.createElement('div');b.className='cb';b.textContent=txt;
-      row.appendChild(b);body.appendChild(row);
+      if(side==='me'){
+        row.appendChild(b);
+        if(avSrc){const im=document.createElement('img');im.className='cav';im.alt='';im.src=avSrc;row.appendChild(im);}
+      }else{
+        if(avSrc){const im=document.createElement('img');im.className='cav';im.alt='';im.src=avSrc;row.appendChild(im);}
+        row.appendChild(b);
+      }
+      body.appendChild(row);
       body.scrollTop=body.scrollHeight;
       hint.style.display='';
       if(i>=sc.lines.length)hint.textContent='轻触结束 ▸';
