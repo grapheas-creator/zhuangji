@@ -3583,6 +3583,16 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 .story-pop .sp-av img{display:block!important;width:52px!important;height:52px!important;
   object-fit:cover!important;object-position:center top!important}
 </style>
+<style id="galNarCard">
+/* 旁白卡片：奶油底 + 樱花边，让它在灰色聊天区里看得出来 */
+.chatPop .wxNarBox{display:none;background:linear-gradient(180deg,#fffdf8,#fdf1e6)!important;
+  border:1px solid rgba(242,138,164,.5)!important;border-radius:14px!important;
+  padding:13px 16px 15px!important;margin:0 12px 10px!important;
+  box-shadow:0 12px 26px -18px rgba(160,90,110,.65)!important}
+.chatPop .wxNarBox.show{display:block!important}
+.chatPop .wxNarText{color:#5b4437!important;font-size:15px!important;line-height:1.75!important}
+.chatPop .wxHint{color:#b4556e!important;right:16px!important;bottom:8px!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3676,7 +3686,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00558</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00559</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3858,7 +3868,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00558</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00559</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6858,7 +6868,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00558';
+const APP_BUILD='00559';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -16117,7 +16127,7 @@ function playChatScene(id,onDone){
     try{if(typeof gameChrome==='function')gameChrome(false);}catch(e){}
     requestAnimationFrame(()=>{try{ov.classList.add('on');}catch(e){}});
     const body=ov.querySelector('#chatBody');
-    const narBox=ov.querySelector('#chatFoot');
+    const narBox=ov.querySelector('#wxNar');   /* 之前错拿了 wxFoot，旁白框永远 display:none */
     const narText=ov.querySelector('#wxNarText');
     const hint=ov.querySelector('#wxHint');
     let i=0,closed=false,typing=false,timer=0;
