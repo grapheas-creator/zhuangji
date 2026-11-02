@@ -3759,6 +3759,14 @@ html body .titleScr .tMark{
   padding:3px 10px!important;border-radius:999px!important;
   text-shadow:0 1px 2px rgba(0,0,0,.5)!important}
 </style>
+<style id="galMarkBack">
+html body .titleScr .tMark{
+  color:#fff6ea!important;background:rgba(72,48,38,.42)!important;
+  border:1px solid rgba(255,240,225,.28)!important;border-radius:999px!important;
+  padding:3px 10px!important;font-size:10.5px!important;letter-spacing:.5px!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.35)!important;backdrop-filter:blur(4px);
+  font-family:'WCCute','PingFang SC',sans-serif!important;opacity:.92}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3856,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01145</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01147</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4040,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01145 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01147 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7125,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01145';
+const APP_BUILD='01147';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -11203,6 +11211,9 @@ function benchPhoto(){
       const src=(window.CASE_FRONT||{})[tier]||set.front;
       return src?{src,tag:'已装机 · '+tier.toUpperCase()}:null;
     }
+    /* CPU 装好、还没涂硅脂：台面直接用现有的「主板+CPU」实拍图
+       （BENCH_IMG 每组芯片组都有 cpu 这张），不再另外生成图。 */
+    if(part('cpu')&&!b.paste&&set.cpu)return {src:set.cpu,tag:'涂硅脂'};
     if(b.cooler){
       const liq=(b.cooler.part.rad||0)>0;
       const src=liq?(set.aio||set.air||set.cool):(set.air||set.cool||set.aio);
