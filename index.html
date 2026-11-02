@@ -3870,7 +3870,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01166</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01167</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4054,7 +4054,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01166 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01167 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7139,7 +7139,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01166';
+const APP_BUILD='01167';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14645,8 +14645,8 @@ async function runBootIntro(){
     }catch(e){}
   };
 
-  /* 0 一进来就压加载页，别让游戏底页露面 */
-  showLoad();
+  /* 0 不再另起一张加载页：网页启动页已经做过加载了。
+     这里只保持 boot-mode（底页 display:none），屏幕是奶油底，等剧情开场。 */
   await wait(300);
 
   /* 1 开头剧情 */
@@ -14654,9 +14654,7 @@ async function runBootIntro(){
     const ok=await _playScene(cb=>playPlotEvent('opening',cb));
     if(ok){S['plot_opening']=1;state.story.flags.opening=true;try{save();}catch(e){}}
   }
-  /* 2 剧情结束：撤掉加载页，然后立刻接微信。
-     两者之间不留空隙，加载页就只会出现一次（开头那一下）。 */
-  hideLoad();
+  /* 2 剧情结束 → 立刻接微信（不再有加载页进出） */
   await wait(0);
   /* 3 陈默微信 */
   if(state.day===1&&!S['chat_chat_chenmo_d1']&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
@@ -14669,7 +14667,7 @@ async function runBootIntro(){
     if(j&&!S[j.storyId]){const sd=storyDef(j.storyId);if(sd)await _playScene(cb=>playStory(sd,j,cb));}
   }catch(e){}
   /* 5 撤加载页 → 底页 + 开工说明（页面锁生效） */
-  hideLoad();await wait(420);
+  await wait(420);
   try{document.body.classList.remove('boot-mode');}catch(e){}   /* 这时才让底页出现 */
   try{Scene.end();}catch(e){}
   try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
