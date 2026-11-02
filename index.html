@@ -3664,7 +3664,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00548</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00549</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3846,7 +3846,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00548</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00549</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6846,7 +6846,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00548';
+const APP_BUILD='00549';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -16202,8 +16202,13 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
       if(!r.ok)throw 0;return r.json();
     }).then(function(d){
       var remote=d&&String(d.build||'');
-      if(!remote||remote===cur)return;
-      try{ if(sessionStorage.getItem(KEY)===remote)return; sessionStorage.setItem(KEY,remote); }catch(e){}
+      if(!remote||remote===cur){try{sessionStorage.setItem('wczj_try','0');}catch(e){}return;}
+      /* 允许多次重试直到拿到最新：万一 Reload 拿到的还是 CDN 里的中间版本，
+         下轮会换个随机参数再来，最多 5 次，避免卡在旧版本或死循环。 */
+      let tries=0;
+      try{ tries=parseInt(sessionStorage.getItem('wczj_try')||'0',10)||0; }catch(e){}
+      if(tries>=5){try{sessionStorage.setItem('wczj_try','0');}catch(e){}return;}
+      try{ sessionStorage.setItem('wczj_try',String(tries+1)); }catch(e){}
       try{sessionStorage.setItem(DONEFLAG,remote);}catch(e){}
       /* 先给个提示，再刷新 */
       try{
@@ -16217,7 +16222,7 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
         document.body.appendChild(b);
       }catch(e){}
       setTimeout(function(){
-        var u=location.pathname+'?v='+encodeURIComponent(remote);
+        var u=location.pathname+'?v='+encodeURIComponent(remote)+'&r='+Date.now().toString(36);
         try{ location.replace(u); }catch(e){ location.href=u; }
       },900);
       }).catch(function(){checking=false;});
