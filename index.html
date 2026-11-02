@@ -3753,7 +3753,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01118</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01119</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3936,7 +3936,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01118 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01119 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7021,7 +7021,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01118';
+const APP_BUILD='01119';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -12115,6 +12115,15 @@ let _coachAudio=null,_coachAudioKey='';
 function coachSay(key,text){
   try{
     if(!_coachSpeakOn)return;
+    /* 弹窗、场景、加载页开着的时候不要念：玩家还在看说明/剧情，
+       引导的语音先出来会显得莫名其妙。 */
+    try{
+      const m=document.getElementById('mask');
+      if((m&&m.classList.contains('on'))||window.__sceneBusyHold||
+         (typeof Scene!=='undefined'&&Scene.busy&&Scene.busy())||
+         document.getElementById('startLoad')||document.getElementById('chatPop')||
+         document.getElementById('plotEvent')||document.getElementById('storyPop'))return;
+    }catch(e){}
     const norm=String(key||'').split('@')[0];
     const uri=window.COACH_VOICE&&window.COACH_VOICE[norm];
     if(uri){
@@ -14991,8 +15000,10 @@ try{
 }
 
 function maybeOnboard(){
+  /* 每开一局都讲一次（存在本局 state 里），刷新页面后新开也会再看到；
+     以前用 localStorage 永久记住，刷新一次就再也不出现了。 */
   let seen=false;
-  try{seen=localStorage.getItem('pcbs2_onboard')==='1';}catch(e){}
+  try{seen=!!(state.tut&&state.tut.onboarded);}catch(e){}
   if(seen){_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},240);return;}
   setTimeout(()=>{
     modal('欢迎来到旺财装机店',
@@ -15004,7 +15015,7 @@ function maybeOnboard(){
         不用记流程：清单会告诉你现在该做什么。<br>
         客户给的部件费是预算，花得越少赚得越多——但别省到跑不动客户的软件。
       </div>`,
-      ()=>{try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},600);});
+      ()=>{try{state.tut=state.tut||{};state.tut.onboarded=1;save();}catch(e){}try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},600);});
     const no=document.getElementById('mNo');if(no)no.style.display='none';
     const yes=document.getElementById('mYes');if(yes)yes.textContent='开始干活';
   },600);
