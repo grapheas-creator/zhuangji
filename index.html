@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01179</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01180</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01179</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01180</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,10 +7111,10 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01179';
+const APP_BUILD='01180';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
-/* 水印上统一的写法：v0.12.0 · 01179 */
+/* 水印上统一的写法：v0.12.0 · 01180 */
 const APP_VER_TXT=APP_VER+' · '+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
 try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
@@ -7674,7 +7674,10 @@ try{(G||[]).forEach(function(x){if(x&&(x.ts||0)>=30445&&x.tier==='budget')x.tier
 
     /* ---------- 硬盘：6 个品牌，每品牌留 6 个主容量 ---------- */
     const DISK_BRAND=/^(三星|西部数据|希捷|铠侠|致态|金士顿)/;
-    const DISK_KEEP=/SATA.*(480G|960G|2T|4T)|NVMe.*(512G|1T|2T|4T)|^(希捷|西部数据).*(2T|4T|8T)/;
+    /* 以前只留 480G 起，于是新手单「SATA 120G 起」那句话成了空话：
+       货架上最便宜的盘是 ¥87 的 480G，引导只能指它。120G/240G 二手在市场里
+       本来就常见（40~60 元），把这两档放回来，低价单才有便宜盘可用。 */
+    const DISK_KEEP=/SATA.*(120G|240G|480G|960G|2T|4T)|NVMe.*(512G|1T|2T|4T)|^(希捷|西部数据).*(2T|4T|8T)/;
     cut(ST,function(x){
       if(!DISK_BRAND.test(x.n))return false;
       return DISK_KEEP.test(x.n);
@@ -16197,7 +16200,7 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 #btnMotion.off{opacity:.6;border-color:rgba(196,150,120,.3)!important;color:#93796a!important}
 
 /* ===== 版本号水印：全站一种写法、一种样子 =====
-   v0.12.0 · 01179
+   v0.12.0 · 01180
    - 标题页用 #tVer（在 .tMeta 里），游戏内用 #verMark（固定右下角）
    - 深底浅字胶囊，压在任何画面（含剧情卡/微信层）上都读得清 */
 #tVer,#verMark{
