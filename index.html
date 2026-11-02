@@ -3594,7 +3594,7 @@ body .modal .warnMain{color:#9a4a10!important}
 <style id="galNameFix">
 /* 名字牌：按文字宽度收缩，不要拉成整条粉色 */
 #plotEvent .gal-box .gal-name,.plotCg .gal-box .gal-name{
-  display:inline-flex!important;align-items:center!important;width:auto!important;
+  align-items:center!important;width:auto!important;
   max-width:fit-content!important;align-self:flex-start!important;
   padding:2px 12px!important;border-radius:999px!important;
   background:linear-gradient(180deg,rgba(255,224,232,.95),rgba(255,205,220,.95))!important;
@@ -3613,6 +3613,15 @@ body .modal .warnMain{color:#9a4a10!important}
 <style id="galNameEmpty">
 /* 名字为空时彻底不占位（双保险） */
 #plotEvent .gal-name:empty{display:none!important}
+</style>
+<style id="galNameVisibility">
+/* 只有带了 .on（有说话人）才显示；空名字牌绝不占位。
+   之前这里写了 display:inline-flex!important，把默认的 display:none 顶掉了，
+   于是旁白时框里就留了一条空的粉色小条。 */
+#plotEvent .gal-box .gal-name.on,#plotEvent .gal-box .gal-name:not(:empty){
+  display:inline-flex!important}
+#plotEvent .gal-box .gal-name:empty,
+#plotEvent .gal-box .gal-name:not(.on){display:none!important}
 </style>
 </head>
 <body>
@@ -3711,7 +3720,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01107</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01108</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3893,7 +3902,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01107 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01108 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6978,7 +6987,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01107';
+const APP_BUILD='01108';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
