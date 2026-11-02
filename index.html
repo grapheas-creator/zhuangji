@@ -3864,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01150</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01151</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4048,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01150 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01151 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7133,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01150';
+const APP_BUILD='01151';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -10436,7 +10436,7 @@ function aeTone(freq,dur,type,vol,slide,when){
   g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   o.connect(g);g.connect(AE.sfxGain);o.start(t);o.stop(t+dur+0.02);
 }
-function aeNoise(dur,vol,hp,when){
+function aeNoise(dur,vol,hp,when,bus){
   const ctx=AE.ctx;if(!ctx)return;
   const t=(when||ctx.currentTime);
   const len=Math.floor(ctx.sampleRate*dur),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
@@ -10444,7 +10444,7 @@ function aeNoise(dur,vol,hp,when){
   const src=ctx.createBufferSource();src.buffer=buf;
   const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=hp||600;
   const g=ctx.createGain();g.gain.value=vol||0.12;
-  src.connect(f);f.connect(g);g.connect(AE.sfxGain);src.start(t);
+  src.connect(f);f.connect(g);g.connect(bus||AE.sfxGain);src.start(t);
 }
 const SFX={
   click(){aeResume();aeTone(760,0.05,'square',0.10,520);},
@@ -10479,6 +10479,8 @@ const SFX={
 const AE_CHORDS=[[220.0,261.6,329.6,392.0],[174.6,220.0,261.6,349.2],[261.6,329.6,392.0,523.3],[196.0,246.9,293.7,392.0]];
 function aeMusicStep(step,when){
   const ctx=AE.ctx;if(!ctx)return;
+  /* 音量为 0 时干脆不产生任何音符（包括打点噪声），才算真的关掉 */
+  try{if(!AE.musicGain||AE.musicGain.gain.value<=0.001)return;}catch(e){}
   const bar=Math.floor(step/8)%4,ch=AE_CHORDS[bar];
   const beat=step%8;
   const mk=(freq,dur,type,vol)=>{
@@ -10499,7 +10501,7 @@ function aeMusicStep(step,when){
   const arpNote=ch[(beat+Math.floor(step/8))%4]*2;
   mk(arpNote,0.22,'triangle',0.045*MV*1.5);
   /* 轻打点 */
-  if(beat===2||beat===6)aeNoise(0.05,0.03,2000,when);
+  if(beat===2||beat===6)aeNoise(0.05,0.03,2000,when,AE.musicGain);
 }
 function aeMusicStart(){
   if(!AE.ctx||AE.muted||AE.musicTimer)return;
