@@ -3688,7 +3688,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01009</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01100</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3870,7 +3870,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01009 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01100 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6955,7 +6955,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01009';
+const APP_BUILD='01100';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9568,6 +9568,16 @@ const PLOT_EVENTS={
     ],
     tip:'店规：技嘉的配件不进、不卖。上门推销的一律回绝。'}
 };
+/* ===== 场景状态机：剧情 / 微信 / 接单卡共用一套开闭与互斥 =====
+   playing=当前场景；chain=开场链是否在跑；seq=防双链序号。 */
+const Scene={
+  playing:null,chain:false,seq:0,
+  chrome(on){document.body.classList.toggle('scene-mode',!on);if(on)try{renderAll();}catch(e){}},
+  enter(kind){this.playing=kind;this.chrome(false);try{coachHide();}catch(e){}},
+  exit(){this.playing=null;setTimeout(()=>{if(!this.busy()&&document.body.classList.contains('scene-mode'))this.chrome(true);},300);},
+  end(){this.chain=false;if(!this.playing&&document.body.classList.contains('scene-mode'))this.chrome(true);},
+  busy(){return !!this.playing||this.chain;}
+};
 function playPlotEvent(evId,onDone){
   const ev=PLOT_EVENTS[evId];if(!ev)return false;
   if(document.getElementById('plotEvent'))return false;
@@ -9598,8 +9608,7 @@ function playPlotEvent(evId,onDone){
       '</div>'+
       '<div class="gal-hint" id="galHint">轻触继续 <b>▸</b></div>'+
     '</div></div>';
-  document.body.appendChild(ov);window.__sceneOpen=true;
-  try{if(typeof gameChrome==='function')gameChrome(false);}catch(e){}
+  document.body.appendChild(ov);Scene.enter('plot');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{try{ov.classList.add('on');
     const c=ov.querySelector('#galCg');if(c)c.classList.add('on');
     const sp=ov.querySelector('#galSprite');if(sp)setTimeout(()=>{try{sp.classList.add('on');}catch(e){}},380);}catch(e){}}));
@@ -9607,10 +9616,8 @@ function playPlotEvent(evId,onDone){
   const nameEl=ov.querySelector('#galName'),avEl=ov.querySelector('#galAv'),
         whoEl=ov.querySelector('#galWho'),textEl=ov.querySelector('#galText'),
         hint=ov.querySelector('#galHint');
-  const close=()=>{if(closed)return;closed=true;clearTimeout(timer);window.__sceneOpen=false;
-    setTimeout(()=>{try{if(!window.__sceneChain&&(typeof sceneBusy!=='function'||!sceneBusy()))gameChrome(true);}catch(e){}},300);
+  const close=()=>{if(closed)return;closed=true;clearTimeout(timer);Scene.exit();
     if(vidPlayer){try{vidPlayer.destroy();}catch(e){}vidPlayer=null;}
-    window.__sceneOpen=false;
     ov.style.opacity='0';setTimeout(()=>{try{ov.remove();}catch(e){}
       if(typeof onDone==='function')onDone();
       setTimeout(()=>{try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}},260);},260);};
@@ -12030,26 +12037,6 @@ function coachFaceHide(){
   try{if(_tutVid)_tutVid.pause();}catch(e){}
   try{if(_coachVid)_coachVid.pause();}catch(e){}
 }
-/* 引导自愈：第一天的引导没走完、镜头框却不在屏幕上时，隔几秒自己重画一次。
-   以前只要哪一步定位失败把卡收起来，它就再也不会回来——玩家剩一张过期提示或什么都没有，
-   只能干看着商店，不知道该买什么。 */
-setInterval(function(){
-  try{
-    if(!state||state.day>1)return;
-    const t=state.tut||{};
-    if(t.guideOff||t.hidden)return;
-    const c=document.getElementById('coach');
-    if(c&&c.classList.contains('on'))return;
-    const s=coachStep();
-    if(!s)return;
-    if(_coachDismissed===s.k)return;
-    /* 先把「人在哪一页、仓库停在哪个分类」对齐到这一步该在的地方。
-       以前这段只在 coachRefresh 里跑：教练卡一旦没亮，分类就一直是旧的，
-       进仓库看到的是别的分类，行都不渲染，自然没有「装上」可点 —— 表现就是“过不去”。 */
-    try{if(_coachSyncPage(s))return;}catch(e){}
-    coachRefresh();
-  }catch(e){}
-},2500);
 let _coachAudio=null,_coachAudioKey='';
 function coachSay(key,text){
   try{
@@ -12525,7 +12512,7 @@ function coachRefresh(){
   if(scr&&!scr.classList.contains('hide')){coachHide();return;}
   /* 剧情/微信/弹窗开着时一律不出引导（连台词框一起收），避免两个框叠在一起 */
   try{
-    if(window.__sceneOpen||document.getElementById('chatPop')||document.getElementById('plotEvent')||
+    if(Scene.playing||document.getElementById('chatPop')||document.getElementById('plotEvent')||
        document.getElementById('storyPop')||document.getElementById('dayOpen')||
        (document.getElementById('mask')&&document.getElementById('mask').classList.contains('on'))){
       coachHide();return;
@@ -14304,20 +14291,17 @@ function playStory(sd,j,onDone){
       <button class="mini" id="spLater">稍后再说</button>
       <button class="primary" id="spTake">接这单</button>
     </div></div>`;
-  try{if(typeof gameChrome==='function')gameChrome(false);}catch(e){}
-  document.body.appendChild(ov);
+  document.body.appendChild(ov);Scene.enter('story');
   requestAnimationFrame(()=>ov.classList.add('on'));
   const close=(take)=>{
+    Scene.exit();
     state.story=state.story||{done:{},flags:{}};
     state.story.seen=state.story.seen||{};
     state.story.seen[j.storyId]=true;
     save();
     const x=document.getElementById('storyPop');
-    if(x){x.classList.add('out');setTimeout(()=>{try{x.remove();}catch(e){}
-      /* 接单卡关掉后，如果没有别的场景了，把游戏界面放回来 */
-      setTimeout(()=>{try{if(!window.__sceneChain&&(typeof sceneBusy!=='function'||!sceneBusy()))gameChrome(true);}catch(e){}},60);
-    },240);}
-    if(typeof onDone==='function')onDone();
+    if(x){x.classList.add('out');setTimeout(()=>{try{x.remove();}catch(e){}if(typeof onDone==='function')onDone();},240);}
+    else if(typeof onDone==='function')onDone();
     if(take&&j.status==='open')acceptJob(j.id);
     else renderAll();
   };
@@ -14351,28 +14335,23 @@ function playStoryForToday(onDone){
      每一步播完回调里再进这个函数，走下一步。 */
   state.story=state.story||{done:{},flags:{}};
   state.story.seen=state.story.seen||{};
-  /* 场景链令牌：如果同时有两条链在跑（重复触发），旧链的回调一律作废，
-     否则开场/微信会被播两遍。 */
-  const _token=Date.now()+'_'+Math.random();
-  window.__storyToken=_token;
-  const _alive=()=>window.__storyToken===_token;
+  /* 场景链序号：并发触发只留最后一条链，旧链回调作废。 */
+  const _id=++Scene.seq;Scene.chain=true;
+  const _alive=()=>_id===Scene.seq&&Scene.chain;
   const next=(delay)=>{setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},(delay||200));};
 
   /* ---- 1. 开场（没播成功就不算看过，下次还会补播） ---- */
-  if(state.day===1&&!state.story.seen['plot_opening']&&!window.__openingPlaying){
-    window.__openingPlaying=true;
+  if(state.day===1&&!state.story.seen['plot_opening']&&!Scene.playing){
     /* 先落盘「已看」：万一中途刷新/切后台，回来不会再播一遍 */
     let _prevSeen=state.story.seen['plot_opening'];
     state.story.seen['plot_opening']=1;
     try{save();}catch(e){}
     const ok=playPlotEvent('opening',()=>{
-      window.__openingPlaying=false;
       try{state.story.seen['plot_opening']=1;state.story.flags.opening=true;save();}catch(e){}
       next(260);
     });
     if(ok)return true;
     /* 没播出来：回滚标记，下次还能补播 */
-    window.__openingPlaying=false;
     state.story.seen['plot_opening']=_prevSeen;try{save();}catch(e){}
     /* 暂时播不了（有别的场景/弹窗占着）：等一会再来，绝不跳过开场 */
     setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);
@@ -14409,11 +14388,11 @@ function playStoryForToday(onDone){
   }
   let j=null;
   try{j=state.jobs.find(x=>x.story&&x.status==='open');}catch(e){}
-  if(!j){try{window.__sceneChain=false;if(typeof gameChrome==='function')gameChrome(true);}catch(e){}if(onDone)onDone();return false;}
-  if(state.story.seen[j.storyId]){if(onDone)onDone();return false;}
+  if(!j){Scene.end();if(onDone)onDone();return false;}
+  if(state.story.seen[j.storyId]){Scene.end();if(onDone)onDone();return false;}
   const sd=storyDef(j.storyId);
-  if(!sd){if(onDone)onDone();return false;}
-  const ok=playStory(sd,j,onDone);
+  if(!sd){Scene.end();if(onDone)onDone();return false;}
+  const ok=playStory(sd,j,()=>{Scene.end();if(onDone)onDone();});
   if(ok===false){setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);}
   return true;
 }
@@ -14968,15 +14947,6 @@ renderAll();
       try{
         _veil=document.createElement('div');
         _veil.id='startLoad';
-        /* 兜底：不管剧情调度出什么问题，加载页最多停留 12 秒 */
-        setTimeout(()=>{
-          try{
-            const el=document.getElementById('startLoad');
-            if(!el)return;
-            el.style.opacity='0';
-            setTimeout(()=>{try{el.remove();}catch(e){}try{if(typeof gameChrome==='function')gameChrome(true);}catch(e){}},420);
-          }catch(e){}
-        },12000);
         _veil.innerHTML='<div class="sl-bg"></div><div class="sl-veil"></div>'+
           '<div class="sl-inner"><div class="sl-logo">旺财装机店</div>'+
           '<div class="sl-sub">一间小店 · 一台台机器 · 一单单生意</div>'+
@@ -14984,9 +14954,8 @@ renderAll();
           '<div class="sl-tip">正在生火开张…</div></div>';
         document.body.appendChild(_veil);
       }catch(e){}
-      try{window.__sceneChain=true;}catch(e){}
       const _reveal=()=>{
-        try{window.__sceneChain=false;}catch(e){}
+        try{Scene.end();}catch(e){}
         try{
           if(_veil){_veil.style.opacity='0';setTimeout(()=>{try{_veil.remove();}catch(e){}},420);}
         }catch(e){}
@@ -15205,49 +15174,32 @@ renderAll();
     schedule(60);
   };
 })();
-/* 引导看门狗：光圈和文案必须描述同一步。
-   切页、重排、弹窗打断都可能让中间状态停住；这里每 0.7 秒核对一次，
-   发现框还停在旧目标上就重新走一遍定位，不再让玩家看到「装上机箱 / 框着二手 ¥51」。 */
-setInterval(function(){
-  try{
-    const c=document.getElementById('coach');
-    const st=(typeof coachStep==='function')?coachStep():null;
-    /* 已经没有要引导的步骤了，引导层却还挂着：直接收掉（连带滚动锁/压暗） */
-    if(!st){
-      if(c&&c.classList.contains('on'))coachHide();
-      try{scrollLockOff();scrollDimOff();}catch(e){}
-      return;
-    }
-    if(!c||!c.classList.contains('on'))return;
-    if(!st.sel)return;
-    let want=null;try{want=st.sel();}catch(e){}
-    /* 只把框挪到正确目标，不走整轮 coachRefresh：
-       coachRefresh 会把卡片淡入动画重播一次，玩家就会看到引导「弹了第二遍」 */
-    if(want&&want!==_coachEl){
-      try{ if(positionCoach(want)) _coachEl=want; }catch(e){}
-    }
-  }catch(e){}
-},700);
 </script>
 <script>
-/* 引导看门狗：任何原因导致引导没画出来（弹窗刚关、节流吞掉一次、切页被打断），
-   每 1.5 秒都会再试一次，直到引导真正出现或本步完成。 */
+/* 统一看门狗（1.5s，三个合并成一个）：①加载页超时兜底 ②引导缺失重试/光圈对齐 */
 try{
   setInterval(function(){
     try{
-      if(typeof coachRefresh!=='function')return;
-      if(!state)return;
-      if((state.day||1)!==1)return;
-      if(state.tut&&state.tut.guideOff)return;
-      const _ld=document.getElementById('startLoad');
-      if(_ld){
-        /* 没有场景在播却还挂着加载页：说明收尾回调丢了，直接揭开 */
-        const busy=(typeof sceneBusy==='function')?sceneBusy():'';
-        if(!busy&&!window.__sceneOpen&&!window.__sceneChain&&(Date.now()-(window.__loadAt||0))>1200){_ld.style.opacity='0';setTimeout(()=>{try{_ld.remove();}catch(e){}
-          if(!window.__sceneChain){try{if(typeof gameChrome==='function')gameChrome(true);}catch(e){}}},420);}
+      const ld=document.getElementById('startLoad');
+      if(ld){
+        /* 没有场景在播却还挂着加载页：说明收尾回调丢了，直接揭开（至少 1.2 秒） */
+        if(!Scene.busy()&&Date.now()-(window.__loadAt||0)>1200){
+          ld.style.opacity='0';
+          setTimeout(()=>{try{ld.remove();}catch(e){}if(!Scene.busy())try{Scene.chrome(true);}catch(e){}},420);
+        }
         return;
       }
-      coachRefresh();
+      if(!state||(state.day||1)!==1||(state.tut&&state.tut.guideOff))return;
+      if(Scene.busy())return;
+      const c=document.getElementById('coach');
+      const st=(typeof coachStep==='function')?coachStep():null;
+      if(!st){if(c&&c.classList.contains('on'))coachHide();return;}
+      if(c&&c.classList.contains('on')&&st.sel){
+        let want=null;try{want=st.sel();}catch(e){}
+        if(want&&want!==_coachEl)try{if(positionCoach(want))_coachEl=want;}catch(e){}
+        return;
+      }
+      if(typeof coachRefresh==='function')coachRefresh();
     }catch(e){}
   },1500);
 }catch(e){}
@@ -15630,14 +15582,6 @@ window.CHAT_SCENES={
 };
 /* 同一时刻只允许一个场景：剧情 / 微信 / 接单卡 / 结算 互斥。
    后面的场景不是靠层级盖住前面的，而是根本不创建，等前一个关掉再播。 */
-/* 剧情/微信播放期间，把游戏界面整个收掉（display:none），
-   不是用层级盖住 —— 这样底层不存在，也就没有"被掩盖"这回事。 */
-function gameChrome(on){
-  try{
-    document.body.classList.toggle('scene-mode',!on);
-    if(on){try{if(typeof renderAll==='function')renderAll();}catch(e){}}
-  }catch(e){}
-}
 function sceneBusy(exclude){
   try{
     const id=exclude||'';
@@ -15672,8 +15616,7 @@ function playChatScene(id,onDone){
         '<div class="wxInputBar"><span class="wxIc">◉</span><div class="wxInput"></div>'+
         '<span class="wxIc">☺</span><span class="wxIc">＋</span></div>'+
       '</div>';
-    document.body.appendChild(ov);window.__sceneOpen=true;try{document.body.classList.add('wx-open');}catch(e){}
-    try{if(typeof gameChrome==='function')gameChrome(false);}catch(e){}
+    document.body.appendChild(ov);Scene.enter('chat');
     requestAnimationFrame(()=>{try{ov.classList.add('on');}catch(e){}});
     const body=ov.querySelector('#chatBody');
     const narBox=ov.querySelector('#wxNar');   /* 之前错拿了 wxFoot，旁白框永远 display:none */
@@ -15683,9 +15626,7 @@ function playChatScene(id,onDone){
     const close=()=>{
       if(closed)return;closed=true;clearTimeout(timer);clearTimeout(autoT);
       try{state.story.seen=state.story.seen||{};state.story.seen['chat_'+id]=1;save();}catch(e){}
-      window.__sceneOpen=false;
-      try{document.body.classList.remove('wx-open');}catch(e){}
-      setTimeout(()=>{try{if(!window.__sceneChain&&(typeof sceneBusy!=='function'||!sceneBusy()))gameChrome(true);}catch(e){}},300);
+      Scene.exit();
       ov.classList.remove('on');
       setTimeout(()=>{try{ov.remove();}catch(e){}
         if(typeof onDone==='function')onDone();
