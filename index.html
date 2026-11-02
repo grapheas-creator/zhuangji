@@ -3728,7 +3728,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01112</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01113</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3910,7 +3910,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01112 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01113 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6995,7 +6995,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01112';
+const APP_BUILD='01113';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14369,81 +14369,78 @@ function bootFadeIn(){
     }));
   }catch(e){}
 }
-function playStoryForToday(onDone,_cont){
-  /* 单入口保护：一次性剧情链只能有一条。
-     以前 startNew 和 maybeStoryPopup 会各起一条链，后一条把前一条的回调作废，
-     结果开场播完后「已看」没写进去，下一次又播一遍。
-     _cont=true 是本链自己的内部继续，不算新入口。 */
-  if(!_cont){
-    const _now=Date.now();
-    if(Scene.chain&&(Scene.playing||_now-(Scene.chainAt||0)<2500))return true;
-    Scene.chainAt=_now;
-  }
-  /* ===== 场景调度：严格按顺序，一次只播一个 =====
-     1. 第 1 天开场（墨桀借钱开张）
-     2. 第 1 天陈默微信（下单）
-     3. 第 2 天陈默到店 / 第 6 天表姐上门（现实相遇）
-     4. 第 4 天韩经理微信
-     5. 剧情工单的接单卡
-     每一步播完回调里再进这个函数，走下一步。 */
-  state.story=state.story||{done:{},flags:{}};
-  state.story.seen=state.story.seen||{};
-  /* 场景链序号：并发触发只留最后一条链，旧链回调作废。 */
-  const _id=++Scene.seq;Scene.chain=true;
-  const _alive=()=>_id===Scene.seq&&Scene.chain;
-  const next=(delay)=>{setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone,true);}catch(e){if(onDone)onDone();}},(delay||200));};
-
-  /* ---- 1. 开场 ----
-     只在这里开一次：播成功 → 关闭回调里写「已看」并继续下一步；
-     打不开（已有场景在播）→ 什么都不做，交给那条链自己的回调。
-     以前这里做了「先写已看 → 失败回滚 → 600ms 重试」，重试正好在开场
-     还开着的时候触发，等它关掉后就又播了一遍 —— 已删掉这套机制。 */
-  if(state.day===1&&!state.story.seen['plot_opening']&&!Scene.playing){
-    const ok=playPlotEvent('opening',()=>{
-      try{state.story.seen['plot_opening']=1;state.story.flags.opening=true;save();}catch(e){}
-      next(260);
-    });
-    if(ok)return true;
-    return true;
-  }
-
-  /* ---- 2. 第 1 天陈默微信：必须在开场之后 ---- */
-  if(state.day===1&&state.story.seen['plot_opening']&&!state.story.seen['chat_chat_chenmo_d1']){
-    const started=!!(state.tut&&state.tut.done&&(state.tut.done.accept||state.tut.done.install));
-    if(!started&&typeof playChatScene==='function'&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
-      if(playChatScene('chat_chenmo_d1',()=>next(240)))return true;
-    }else if(started){
-      state.story.seen['chat_chat_chenmo_d1']=1;   /* 老存档：跳过 */
+/* ===== 场景顺序：串行 await，一次只播一个 =====
+   以前是「回调里递归调用自己 + 令牌/闸门/链标记」那套，点快了会把微信跳过、
+   点慢了链会断在某一环导致引导不出来。现在改成线性顺序：
+   每一步 await 到场景真正关闭才走下一步，全部走完一定调用 onDone。 */
+function _playScene(starter){
+  /* 把「播一个场景」包成 Promise：场景关闭时 resolve(true)；
+     打不开（有别的场景占着）就每 300ms 重试，最多约 12 秒。 */
+  return new Promise(function(resolve){
+    var tries=0;
+    function attempt(){
+      var r=false;
+      try{ r=starter(function(){resolve(true);}); }catch(e){ r=false; }
+      if(r===false){
+        tries++;
+        if(tries<40){ setTimeout(attempt,300); return; }
+        resolve(false); return;
+      }
     }
-  }
+    attempt();
+  });
+}
+async function playStoryForToday(onDone){
+  try{
+    state.story=state.story||{done:{},flags:{}};
+    state.story.seen=state.story.seen||{};
+    Scene.chain=true;
+    var S=state.story;
 
-  /* ---- 3. 现实相遇 ---- */
-  const _plotByDay={2:'meet_chenmo',6:'meet_zhouqin'};
-  const _pid=_plotByDay[state.day];
-  if(_pid&&!state.story.seen['plot_'+_pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[_pid]&&typeof playPlotEvent==='function'){
-    state.story.seen['plot_'+_pid]=1;try{save();}catch(e){}
-    if(playPlotEvent(_pid,()=>next(240)))return true;
-  }
+    /* 1. 第 1 天开场（墨桀） */
+    if(state.day===1&&!S.seen['plot_opening']){
+      var ok1=await _playScene(function(cb){return playPlotEvent('opening',cb);});
+      if(ok1){S.seen['plot_opening']=1;S.flags.opening=true;try{save();}catch(e){}}
+    }
 
-  /* ---- 4. 韩经理微信 ---- */
-  if(state.day===4&&!state.story.seen['chat_chat_hanjingli']&&typeof playChatScene==='function'&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_hanjingli){
-    if(playChatScene('chat_hanjingli',()=>next(240)))return true;
-  }
+    /* 2. 第 1 天陈默微信（老存档已接单就跳过） */
+    if(state.day===1&&!S.seen['chat_chat_chenmo_d1']){
+      var started=!!(state.tut&&state.tut.done&&(state.tut.done.accept||state.tut.done.install));
+      if(!started&&typeof playChatScene==='function'&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
+        var ok2=await _playScene(function(cb){return playChatScene('chat_chenmo_d1',cb);});
+        if(ok2){S.seen['chat_chat_chenmo_d1']=1;try{save();}catch(e){}}
+      }else{
+        S.seen['chat_chat_chenmo_d1']=1;try{save();}catch(e){}
+      }
+    }
 
-  /* ---- 5. 剧情工单接单卡 ---- */
-  if(typeof sceneBusy==='function'&&sceneBusy()){
-    setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone,true);}catch(e){}},600);
-    return true;
+    /* 3. 现实相遇：第 2 天陈默到店 / 第 6 天表姐上门 */
+    var plotByDay={2:'meet_chenmo',6:'meet_zhouqin'};
+    var pid=plotByDay[state.day];
+    if(pid&&!S.seen['plot_'+pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[pid]){
+      S.seen['plot_'+pid]=1;try{save();}catch(e){}
+      await _playScene(function(cb){return playPlotEvent(pid,cb);});
+    }
+
+    /* 4. 第 4 天韩经理微信 */
+    if(state.day===4&&!S.seen['chat_chat_hanjingli']&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_hanjingli){
+      var ok4=await _playScene(function(cb){return playChatScene('chat_hanjingli',cb);});
+      if(ok4){S.seen['chat_chat_hanjingli']=1;try{save();}catch(e){}}
+    }
+
+    /* 5. 剧情工单的接单卡 */
+    var j=null;
+    try{j=state.jobs.find(function(x){return x.story&&x.status==='open';});}catch(e){}
+    if(j&&!S.seen[j.storyId]){
+      var sd=storyDef(j.storyId);
+      if(sd)await _playScene(function(cb){return playStory(sd,j,cb);});
+    }
+  }catch(e){
+    console.error('[story]',e);
+  }finally{
+    Scene.chain=false;
+    try{if(onDone)onDone();}catch(e){}
   }
-  let j=null;
-  try{j=state.jobs.find(x=>x.story&&x.status==='open');}catch(e){}
-  if(!j){Scene.end();if(onDone)onDone();return false;}
-  if(state.story.seen[j.storyId]){Scene.end();if(onDone)onDone();return false;}
-  const sd=storyDef(j.storyId);
-  if(!sd){Scene.end();if(onDone)onDone();return false;}
-  const ok=playStory(sd,j,()=>{Scene.end();if(onDone)onDone();});
-  if(ok===false){setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone,true);}catch(e){}},600);}
-  return true;
 }
 function maybeStoryPopup(){
   /* 第一天：先看微信，再弹接单卡，别反过来 */
