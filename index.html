@@ -188,6 +188,21 @@ display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hi
 .slot .pick:hover{color:#fff3e2;border-color:rgba(255,196,120,.6);
   background:linear-gradient(180deg,rgba(255,190,130,.26),rgba(255,160,70,.12))}
 .slot .pick:active{transform:scale(.96)}
+/* 工作台空槽位上的「仓库 / 商店」跟着浅色主题走。
+   全局 button:not(.primary):not(.good):not(.bad):not(.on) 的优先级是 (0,4,1)，
+   .slot .pick 只有 (0,2,0) 压不住，所以这里必须 !important——
+   否则就是两块深褐色按钮，跟整页奶油色完全不是一套。 */
+.slot .pick{
+  background:linear-gradient(180deg,#fff8ef,#ffe9dc)!important;
+  border:1px solid rgba(226,160,130,.55)!important;
+  color:#7a4636!important;
+  box-shadow:0 1px 2px rgba(180,120,100,.12)!important;
+}
+.slot .pick:hover{
+  background:linear-gradient(180deg,#ffe6d4,#ffd2b2)!important;
+  border-color:rgba(214,140,110,.72)!important;
+  color:#5e2f22!important;
+}
 @media(max-width:1159px){.slot .pick{font-size:10.5px;padding:4px 9px}}
 .slot.filled .v{color:#4b3a2f}
 .slot .rm{position:absolute;right:6px;top:5px;font-size:11px;color:var(--dim);padding:1px 4px;border-radius:5px}
@@ -3827,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01175</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01177</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4011,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01175</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01177</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7096,10 +7111,10 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01175';
+const APP_BUILD='01177';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
-/* 水印上统一的写法：v0.12.0 · 01175 */
+/* 水印上统一的写法：v0.12.0 · 01177 */
 const APP_VER_TXT=APP_VER+' · '+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
 try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
@@ -12181,11 +12196,39 @@ function tutGalShow(step){
     return true;
 }
 function tutGalHide(){
+  try{_tutHiddenAt=Date.now();}catch(e){}
   try{const g=document.getElementById('tutGal');if(g)g.classList.remove('on');}catch(e){}
   try{document.body.classList.remove('tut-guide-open');}catch(e){}
   try{if(_tutVid)_tutVid.pause();}catch(e){}
   _sprDockKey='';
 }
+/* ===== 引导卡自愈 =====
+   这条流程的调用链太长了（场景结束 → 切页 → 等滚动 → 画卡），
+   任何一环没走通，玩家看到的就是「只有目标上的高亮框，没有旺财和台词」。
+   这里每 1.5 秒查一次：只要有步骤在等着、又没有任何场景/弹窗挡着，
+   而卡片已经收起超过 1.2 秒，就直接把它画回来。 */
+let _tutHiddenAt=0,_tutHealAt=0;
+setInterval(function(){
+  try{
+    if(!window.state||!state.tut||state.tut.guideOff||state.day>1)return;
+    if(window.__booting||window.__inGame===false)return;
+    const g=document.getElementById('tutGal');
+    if(!g||g.classList.contains('on'))return;
+    const t=document.getElementById('titleScr');
+    if(t&&!t.classList.contains('hide'))return;
+    const m=document.getElementById('mask');
+    if((m&&m.classList.contains('on'))||document.getElementById('plotEvent')||
+       document.getElementById('storyPop')||document.getElementById('chatPop')||
+       document.getElementById('startLoad')||document.getElementById('dayOpen')||
+       document.getElementById('dayOverlay')||document.getElementById('buildFlash')&&document.getElementById('buildFlash').classList.contains('on'))return;
+    if(Date.now()-_tutHiddenAt<1200)return;
+    const step=(typeof coachStep==='function')?coachStep():null;
+    if(!step)return;
+    _tutHiddenAt=Date.now();
+    try{console.log('[HEAL] show', step.k);}catch(e){}
+    if(typeof tutGalShow==='function')tutGalShow(step);
+  }catch(e){}
+},1500);
 /* 手机端引导卡上下停靠：目标在屏幕下半部时把卡翻到顶部。
    只处理卡片位置，不改变点击锁、目标高亮或语音。 */
 function tutDockBox(step){
@@ -12829,6 +12872,9 @@ function coachGo(step){
 }
 /* 开场期间（剧情 → 新手说明）不让教练提示抢焦点 */
 let _openingSeq=false;
+/* 开场锁的到期时间：锁只挡「说明卡还没关」这一小段，
+   任何没走到解锁的路径（卡被点掉/被剧情顶掉/旧存档缺字段）都靠它自动松开。 */
+let _openingUntil=0;
 let _daySwitching=false;
 let _coachHoldUntil=0;
 let _crAt=0,_crTrail=null,_coachWaitCount=0,_coachMiss=0;
@@ -12914,7 +12960,7 @@ function coachRefresh(){
      等它们关掉再来；否则玩家会看到「接一单」的教练卡压在剧情上面。 */
   {
     const mask=document.getElementById('mask');
-    const busy=_openingSeq||!!document.getElementById('plotEvent')||!!document.getElementById('storyPop')||!!(mask&&mask.classList.contains('on'));
+    const busy=(_openingSeq&&Date.now()<_openingUntil)||!!document.getElementById('plotEvent')||!!document.getElementById('storyPop')||!!(mask&&mask.classList.contains('on'));
     if(busy){
       /* 弹窗开着时不重画引导，但也别把引导收掉：
          收掉再重新出现，玩家看到的就是「这张卡弹了两遍」。
@@ -14829,14 +14875,25 @@ async function runBootIntro(){
   try{Scene.end();}catch(e){}
   /* 新手说明前不要把引导画出来：maybeOnboard 会先等 600ms 再弹窗，
      这一下足够引导卡先露一帧，看起来就像「说明卡在引导后面」。 */
-  try{if(typeof _openingSeq!=='undefined')_openingSeq=true;}catch(e){}
+  try{if(typeof _openingSeq!=='undefined'){_openingSeq=true;_openingUntil=Date.now()+6000;}}catch(e){}
   try{if(typeof coachHide==='function')coachHide();}catch(e){}
-  await new Promise(resolve=>{
-    try{
-      if(state.tut&&state.tut.onboarded){resolve();return;}
-      if(typeof maybeOnboard==='function')maybeOnboard(resolve);else resolve();
-    }catch(e){resolve();}
-  });
+  /* 等说明卡，但最多等 9 秒：这张卡如果被「点空白 / 被剧情顶掉 / 旧存档缺字段」
+     之类的方式关掉，回调就不会跑，纯 await 会把整个开局流程挂在半路，
+     开场锁永远不解 —— 引导框也就再也不出现。 */
+  await Promise.race([
+    new Promise(resolve=>{
+      try{
+        if(state.tut&&state.tut.onboarded){resolve();return;}
+        if(typeof maybeOnboard==='function')maybeOnboard(resolve);else resolve();
+      }catch(e){resolve();}
+    }),
+    new Promise(r=>setTimeout(r,9000))
+  ]);
+  /* 说明卡这一环结束就把开场锁解掉。
+     以前解锁只靠「开始干活」按钮的回调：说明卡要是被空白处点掉、被剧情顶掉，
+     或者旧存档没有 onboarded 字段，锁就一直挂着 —— 玩家看到的是
+     引导框整段消失、只剩目标上的高亮框，直到 30 秒兜底才回来。 */
+  try{if(typeof _openingSeq!=='undefined')_openingSeq=false;}catch(e){}
   /* 6 引导 + Live2D */
   await wait(320);
   try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
@@ -15482,15 +15539,17 @@ renderAll();
     try{
       /* 先把自动存档清掉再开新局，避免任何残留被下一次 load 读回来 */
       try{localStorage.removeItem(SAVE);}catch(e){}
-      _openingSeq=true;
+      _openingSeq=true;try{_openingUntil=Date.now()+6000;}catch(e){}
       window.__booting=true;
       try{document.body.classList.add('boot-mode');}catch(e){}
-      /* 12 秒保险：只在「没有新手说明等着弹」时解除开场锁。
-         以前不管状态直接清 _openingSeq，读剧情慢一点就会在说明卡弹出前
-         先画一帧引导，顺序正好反了。 */
+      /* 12 秒保险：说明卡还开着就等它关；关了就立刻解锁开场锁。
+         以前这里还要求 state.tut.onboarded 已置位，可说明卡只要不是从
+         「开始干活」按钮关掉的（点空白、被剧情顶掉、旧存档没这个字段），
+         onboarded 就一直是 undefined —— 开场锁挂到 30 秒兜底才松，
+         玩家接完单看到的就是「引导框整段消失、只剩高亮框」。 */
       setTimeout(()=>{try{
-        if(document.getElementById('mask')&&document.getElementById('mask').classList.contains('on'))return;
-        if(state.tut&&!state.tut.onboarded)return;
+        const _m=document.getElementById('mask');
+        if(_m&&_m.classList.contains('on'))return;
         _openingSeq=false;coachRefresh();
       }catch(e){}},12000);
       /* 更长的兜底：万一说明流程本身断了，也不要把玩家永久锁住。 */
@@ -16124,7 +16183,7 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 #btnMotion.off{opacity:.6;border-color:rgba(196,150,120,.3)!important;color:#93796a!important}
 
 /* ===== 版本号水印：全站一种写法、一种样子 =====
-   v0.12.0 · 01175
+   v0.12.0 · 01177
    - 标题页用 #tVer（在 .tMeta 里），游戏内用 #verMark（固定右下角）
    - 深底浅字胶囊，压在任何画面（含剧情卡/微信层）上都读得清 */
 #tVer,#verMark{
