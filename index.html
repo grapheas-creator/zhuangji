@@ -3407,6 +3407,23 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
   .tutGal .gal-box{padding:22px 26px 30px!important}
   .sp-card{padding:26px 28px 24px!important}
 </style>
+<style id="galInside">
+/* ===== 头像与文字全部收进花边内侧 ===== */
+/* 框线大约在边缘 20px 处、角花伸进来约 72px，所以内边距给到 38~44px */
+#plotEvent .gal-box{padding:42px 40px 46px 40px!important;box-sizing:border-box!important}
+#plotEvent .gal-box .gal-face{flex:0 0 62px!important;width:62px!important;height:62px!important;margin:0 6px 0 0!important}
+#plotEvent .gal-box .gal-face .gal-av{width:62px!important;height:62px!important;border-radius:10px!important}
+#plotEvent .gal-box .gal-body{padding-right:0!important;padding-top:2px!important}
+#plotEvent .gal-box .gal-name{margin-bottom:2px!important}
+#plotEvent .gal-box .gal-hint{right:34px!important;bottom:18px!important}
+/* 引导台词框 */
+.tutGal .gal-box{padding:38px 34px 40px!important;box-sizing:border-box!important}
+.tutGal .gal-face,.tutGal .gal-face .gal-av{width:56px!important;height:56px!important;flex:0 0 56px!important;border-radius:10px!important}
+.tutGal .gal-name{margin-bottom:2px!important}
+/* 剧情信件卡 */
+.sp-card{padding:40px 36px 34px!important;box-sizing:border-box!important}
+.sp-card .sp-av{width:56px!important;height:56px!important;border-radius:10px!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3500,7 +3517,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00528</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00529</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3682,7 +3699,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00528</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00529</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6682,7 +6699,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00528';
+const APP_BUILD='00529';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
