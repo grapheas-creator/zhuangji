@@ -3545,7 +3545,7 @@ body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;op
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00534</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00535</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3727,7 +3727,7 @@ body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;op
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00534</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00535</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6727,7 +6727,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00534';
+const APP_BUILD='00535';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14655,39 +14655,51 @@ function bootFadeIn(){
   }catch(e){}
 }
 function playStoryForToday(onDone){
-  /* 先看今天有没有「手机对话」小场景（陈默/韩经理/周芹） */
-  try{
-    state.story=state.story||{done:{},flags:{}};
-    state.story.seen=state.story.seen||{};
-    /* 第 2 天陈默来店里、第 6 天墨桀的表姐上门 —— 都是现实相遇；
-       第 4 天韩经理走微信（手机对话）。 */
-    const _plotByDay={2:'meet_chenmo',6:'meet_zhouqin'};
-    const _pid=_plotByDay[state.day];
-    if(_pid&&!state.story.seen['plot_'+_pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[_pid]&&typeof playPlotEvent==='function'){
-      state.story.seen['plot_'+_pid]=1;try{save();}catch(e){}
-      if(playPlotEvent(_pid,()=>{setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},200);}))return true;
-    }
-    const _byDay={1:'chat_chenmo_d1',4:'chat_hanjingli'};
-    const _sid=_byDay[state.day];
-    /* 第一天的微信只在「还没开始装机」时弹：已经接了单/装到一半的老存档，
-       不再把开场微信硬插到教程中间 */
-    const _tooLate=(_sid==='chat_chenmo_d1')&&(state.tut&&state.tut.done&&(state.tut.done.accept||state.tut.done.install));
-    if(_sid&&!_tooLate&&!state.story.seen['chat_'+_sid]&&typeof playChatScene==='function'){
-      if(playChatScene(_sid,()=>{setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},200);}))return true;
-    }
-  }catch(e){}
-  /* 第一天先演墨桀借钱/开张，关掉之后再走进陈默的剧情 */
+  /* ===== 场景调度：严格按顺序，一次只播一个 =====
+     1. 第 1 天开场（墨桀借钱开张）
+     2. 第 1 天陈默微信（下单）
+     3. 第 2 天陈默到店 / 第 6 天表姐上门（现实相遇）
+     4. 第 4 天韩经理微信
+     5. 剧情工单的接单卡
+     每一步播完回调里再进这个函数，走下一步。 */
   state.story=state.story||{done:{},flags:{}};
+  state.story.seen=state.story.seen||{};
+  const next=(delay)=>{setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},(delay||200));};
+
+  /* ---- 1. 开场 ---- */
   if(state.day===1&&!state.story.flags.opening){
     state.story.flags.opening=true;
     try{save();}catch(e){}
-    if(playPlotEvent('opening',()=>{setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},200);}))return true;
+    if(playPlotEvent('opening',()=>next(260)))return true;
   }
+
+  /* ---- 2. 第 1 天陈默微信（只在还没开始装机时） ---- */
+  if(state.day===1&&!state.story.seen['chat_chat_chenmo_d1']){
+    const started=!!(state.tut&&state.tut.done&&(state.tut.done.accept||state.tut.done.install));
+    if(!started&&typeof playChatScene==='function'&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
+      if(playChatScene('chat_chenmo_d1',()=>next(240)))return true;
+    }else if(started){
+      state.story.seen['chat_chat_chenmo_d1']=1;   /* 老存档：跳过 */
+    }
+  }
+
+  /* ---- 3. 现实相遇 ---- */
+  const _plotByDay={2:'meet_chenmo',6:'meet_zhouqin'};
+  const _pid=_plotByDay[state.day];
+  if(_pid&&!state.story.seen['plot_'+_pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[_pid]&&typeof playPlotEvent==='function'){
+    state.story.seen['plot_'+_pid]=1;try{save();}catch(e){}
+    if(playPlotEvent(_pid,()=>next(240)))return true;
+  }
+
+  /* ---- 4. 韩经理微信 ---- */
+  if(state.day===4&&!state.story.seen['chat_chat_hanjingli']&&typeof playChatScene==='function'&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_hanjingli){
+    if(playChatScene('chat_hanjingli',()=>next(240)))return true;
+  }
+
+  /* ---- 5. 剧情工单接单卡 ---- */
   let j=null;
   try{j=state.jobs.find(x=>x.story&&x.status==='open');}catch(e){}
   if(!j){if(onDone)onDone();return false;}
-  state.story=state.story||{done:{},flags:{}};
-  state.story.seen=state.story.seen||{};
   if(state.story.seen[j.storyId]){if(onDone)onDone();return false;}
   const sd=storyDef(j.storyId);
   if(!sd){if(onDone)onDone();return false;}
