@@ -3676,7 +3676,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00557</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00558</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3858,7 +3858,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00557</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00558</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6858,7 +6858,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00557';
+const APP_BUILD='00558';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -16152,7 +16152,10 @@ function playChatScene(id,onDone){
       clearTimeout(autoT);
       const n=String(txt||'').length;
       /* 文字越长停得越久：基础 900ms + 每字 55ms（快速阅读也能跟上） */
-      const wait=Math.max(1100,900+Math.min(3800,n*55));   /* 最短 1.1 秒，保证音效不重叠 */
+      /* 节奏：短句 0.7~0.9 秒，长句最多 2.2 秒，再乘一个随机抖动，
+         这样不会呆呆地等，也不会每条都一样长 */
+      const base=Math.max(700,Math.min(2200,650+n*36));
+      const wait=Math.round(base*(0.88+Math.random()*0.26));
       autoT=setTimeout(()=>{try{next();}catch(e){}},wait);
     };
     const next=()=>{
