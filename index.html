@@ -3790,7 +3790,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01124</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01127</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3973,7 +3973,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01124 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01127 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7058,7 +7058,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01124';
+const APP_BUILD='01127';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -11818,6 +11818,8 @@ function tutInstallEl(it){
 }
 function tutParts(){const t=state.tut||(state.tut={done:{},hidden:false});t.bought=t.bought||{};t.parts=t.parts||{};return t;}
 let _coachKey=null,_coachDrawnKey='',_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null,_coachEl=null,_coachPageSyncT=null,_coachPageSig='';
+/* 线性节拍用（必须声明：脚本是严格模式，未声明赋值会抛错，导致引导画不出来） */
+let _coachSettleUntil=0,_coachSettleT=0;
 
 
 /* 引导锁：第一天引导没走完时，只能点引导指的控件 */
@@ -11987,6 +11989,13 @@ let _coachVid=null,_coachVidKey='',_coachSpeakOn=true;
 let _tutVid=null,_tutMounted=false;
 function tutGalShow(step){
   try{
+    /* 硬闸门：场景/弹窗/加载页开着时，任何调用方都不许把引导框画出来。
+       这样「引导压在剧情上」不可能靠某条路径绕过去。 */
+    const m=document.getElementById('mask');
+    if((m&&m.classList.contains('on'))||
+       (typeof Scene!=='undefined'&&Scene.busy&&Scene.busy())||
+       document.getElementById('startLoad')||document.getElementById('chatPop')||
+       document.getElementById('plotEvent')||document.getElementById('storyPop'))return;
     const g=document.getElementById('tutGal');if(!g)return;
     const t=document.getElementById('tutText');if(t)t.textContent=(step&&step.text)||'';
     const vid=document.getElementById('tutVid');
@@ -12674,6 +12683,19 @@ function coachRefresh(){
   const step=coachStep();
   if(!step){coachHide();return;}
   if(_coachDismissed===step.k)return;
+  /* 线性节拍：步骤之间至少隔 240ms 再画下一个框，
+     避免「上一步的框还没收、下一步的字已经换掉」这种错位。 */
+  if(_coachKey!==step.k){
+    const _now=Date.now();
+    if(_now<(_coachSettleUntil||0)){
+      if(!_coachSettleT){
+        _coachSettleT=setTimeout(function(){_coachSettleT=0;try{coachRefresh();}catch(e){}},
+          Math.max(90,(_coachSettleUntil-_now))+20);
+      }
+      return;
+    }
+    _coachSettleUntil=_now+240;
+  }
   /* 先切页、再画框：这一轮负责切，切完重新进 refresh 才画 */
   if(_coachSyncPage(step)){
     /* 切页时不收卡片（收了再画 = 肉眼看到两次弹出） */
@@ -14481,6 +14503,7 @@ function _playScene(starter){
     attempt();
   });
 }
+function _seqWait(ms){return new Promise(function(r){setTimeout(r,ms);});}
 async function playStoryForToday(onDone){
   try{
     state.story=state.story||{done:{},flags:{}};
@@ -14491,6 +14514,7 @@ async function playStoryForToday(onDone){
     /* 1. 第 1 天开场（墨桀） */
     if(state.day===1&&!S.seen['plot_opening']){
       var ok1=await _playScene(function(cb){return playPlotEvent('opening',cb);});
+      await _seqWait(260);
       if(ok1){S.seen['plot_opening']=1;S.flags.opening=true;try{save();}catch(e){}}
     }
 
@@ -14499,6 +14523,7 @@ async function playStoryForToday(onDone){
       var started=!!(state.tut&&state.tut.done&&(state.tut.done.accept||state.tut.done.install));
       if(!started&&typeof playChatScene==='function'&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
         var ok2=await _playScene(function(cb){return playChatScene('chat_chenmo_d1',cb);});
+        await _seqWait(260);
         if(ok2){S.seen['chat_chat_chenmo_d1']=1;try{save();}catch(e){}}
       }else{
         S.seen['chat_chat_chenmo_d1']=1;try{save();}catch(e){}
@@ -14511,6 +14536,7 @@ async function playStoryForToday(onDone){
     if(pid&&!S.seen['plot_'+pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[pid]){
       S.seen['plot_'+pid]=1;try{save();}catch(e){}
       await _playScene(function(cb){return playPlotEvent(pid,cb);});
+      await _seqWait(260);
     }
 
     /* 4. 第 4 天韩经理微信 */
@@ -15352,6 +15378,17 @@ renderAll();
   coachHide = function(){
     const step = (typeof coachStep==='function')? coachStep():null;
     const scr = $id('titleScr');
+    /* 场景/弹窗/加载页开着时不能「排程」——必须立刻收，
+       否则会看到引导框压在剧情上面（排程那 60ms 里玩家就看到了）。 */
+    let _busy=false;
+    try{
+      const m=document.getElementById('mask');
+      _busy=!!((m&&m.classList.contains('on'))||
+        (typeof Scene!=='undefined'&&Scene.busy&&Scene.busy())||
+        document.getElementById('startLoad')||document.getElementById('chatPop')||
+        document.getElementById('plotEvent')||document.getElementById('storyPop'));
+    }catch(e){}
+    if(_busy){ hideNow(); COACH.key=null; return; }
     if(!step || (scr && !scr.classList.contains('hide'))){ hideNow(); COACH.key=null; return; }
     schedule(60);
   };
