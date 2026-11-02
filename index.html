@@ -3688,7 +3688,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01007</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01008</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3870,7 +3870,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01007 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01008 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6955,7 +6955,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01007';
+const APP_BUILD='01008';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14351,17 +14351,25 @@ function playStoryForToday(onDone){
      每一步播完回调里再进这个函数，走下一步。 */
   state.story=state.story||{done:{},flags:{}};
   state.story.seen=state.story.seen||{};
-  const next=(delay)=>{setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},(delay||200));};
+  /* 场景链令牌：如果同时有两条链在跑（重复触发），旧链的回调一律作废，
+     否则开场/微信会被播两遍。 */
+  const _token=Date.now()+'_'+Math.random();
+  window.__storyToken=_token;
+  const _alive=()=>window.__storyToken===_token;
+  const next=(delay)=>{setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},(delay||200));};
 
   /* ---- 1. 开场（没播成功就不算看过，下次还会补播） ---- */
-  if(state.day===1&&!state.story.seen['plot_opening']){
+  if(state.day===1&&!state.story.seen['plot_opening']&&!window.__openingPlaying){
+    window.__openingPlaying=true;
     const ok=playPlotEvent('opening',()=>{
+      window.__openingPlaying=false;
       try{state.story.seen['plot_opening']=1;state.story.flags.opening=true;save();}catch(e){}
       next(260);
     });
     if(ok)return true;
+    window.__openingPlaying=false;
     /* 暂时播不了（有别的场景/弹窗占着）：等一会再来，绝不跳过开场 */
-    setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){}},600);
+    setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);
     return true;
   }
 
@@ -14390,7 +14398,7 @@ function playStoryForToday(onDone){
 
   /* ---- 5. 剧情工单接单卡 ---- */
   if(typeof sceneBusy==='function'&&sceneBusy()){
-    setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){}},600);
+    setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);
     return true;
   }
   let j=null;
@@ -14400,7 +14408,7 @@ function playStoryForToday(onDone){
   const sd=storyDef(j.storyId);
   if(!sd){if(onDone)onDone();return false;}
   const ok=playStory(sd,j,onDone);
-  if(ok===false){setTimeout(()=>{try{playStoryForToday(onDone);}catch(e){}},600);}
+  if(ok===false){setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);}
   return true;
 }
 function maybeStoryPopup(){
