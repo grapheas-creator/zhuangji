@@ -3728,7 +3728,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01111</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01112</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3910,7 +3910,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01111 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01112 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6995,7 +6995,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01111';
+const APP_BUILD='01112';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -15858,7 +15858,7 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
 })();
 </script>
 <script>
-/* ===== 调试面板：地址后面加 ?debug=1 打开，用来在真机上看引导为什么不出 ===== */
+/* ===== 调试面板：?debug=1 ===== */
 (function(){
   try{
     if(location.search.indexOf('debug')<0)return;
@@ -15866,31 +15866,38 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
     window.addEventListener('error',function(e){try{window.__errs.push(String(e.message||e.error).slice(0,90));}catch(x){}});
     const box=document.createElement('div');
     box.id='dbgPanel';
-    box.style.cssText='position:fixed;left:6px;top:64px;z-index:100000;max-width:70vw;padding:8px 10px;'+
-      'background:rgba(20,12,8,.92);color:#ffd9c8;font:11px/1.5 monospace;border-radius:8px;'+
-      'white-space:pre-wrap;pointer-events:none;max-height:46vh;overflow:hidden';
+    box.style.cssText='position:fixed;left:6px;top:64px;z-index:100000;max-width:74vw;padding:8px 10px;'+
+      'background:rgba(20,12,8,.94);color:#ffd9c8;font:11px/1.45 monospace;border-radius:8px;'+
+      'white-space:pre-wrap;pointer-events:none;max-height:52vh;overflow:hidden';
     document.body.appendChild(box);
+    let force='-';
     setInterval(function(){
       try{
-        var st='';
-        try{var s=coachStep();st=s?s.k:'null';}catch(e){st='ERR:'+e.message;}
+        var g=function(fn,d){try{return fn();}catch(e){return d+'!'+e.message;}};
+        var stepK=g(function(){var s=coachStep();return s?s.k:'null';},'ERR');
         var tg=document.getElementById('tutGal');
-        var info={
-          step:st,
-          panel:(window.state&&state.panel)||'?',
-          mView:(typeof mView!=='undefined'?mView:'?'),
-          mode:(typeof isMobile==='function'&&isMobile()?'mobile':'desktop'),
-          tutGal:tg?tg.className:'无',
-          coach:(document.getElementById('coach')||{className:'无'}).className,
-          opSeq:(typeof _openingSeq!=='undefined'?_openingSeq:'?'),
-          scene:(window.Scene?JSON.stringify({p:Scene.playing,c:Scene.chain}):'?'),
-          load:!!document.getElementById('startLoad'),
-          mask:(document.getElementById('mask')||{classList:{contains:function(){return false}}}).classList.contains('on'),
-          errs:(window.__errs||[]).slice(-2).join(' || ')
-        };
-        box.textContent=Object.keys(info).map(function(k){return k+': '+info[k];}).join('\n');
+        var T=g(function(){return state.tut?JSON.stringify({done:Object.keys(state.tut.done||{}).length,hidden:!!state.tut.hidden,off:!!state.tut.guideOff}):'无';},'?');
+        var info=[
+          'step: '+stepK,
+          'panel: '+g(function(){return state.panel;},'?'),
+          'tutGal: '+(tg?tg.className:'无'),
+          'coachKey: '+g(function(){return String(_coachKey);},'?'),
+          'dismissed: '+g(function(){return String(_coachDismissed);},'?'),
+          'hold: '+g(function(){return Math.round(_coachHoldUntil-Date.now());},'?'),
+          'opSeq: '+g(function(){return _openingSeq;},'?'),
+          'chain: '+g(function(){return Scene.chain+'/'+Scene.playing;},'?'),
+          'tut: '+T,
+          'load: '+!!document.getElementById('startLoad'),
+          'force: '+force,
+          'errs: '+(window.__errs||[]).slice(-2).join(' | ')
+        ];
+        box.textContent=info.join('\n');
       }catch(e){box.textContent='dbg ERR '+e.message;}
     },700);
+    /* 每 2 秒强行刷新一次引导，看是「没被调用」还是「调用也画不出」 */
+    setInterval(function(){
+      try{ coachRefresh(); force='called'; }catch(e){ force='ERR:'+e.message; }
+    },2000);
   }catch(e){}
 })();
 </script>
