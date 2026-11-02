@@ -3870,7 +3870,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01165</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01166</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4054,7 +4054,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01165 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01166 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7139,7 +7139,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01165';
+const APP_BUILD='01166';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14626,6 +14626,8 @@ async function runBootIntro(){
   const S=state.story.seen;
   const showLoad=()=>{
     try{
+      const _bs=document.getElementById('bootSplash');
+      if(_bs){_bs.remove();}                 /* 双保险：任何时刻只允许一个加载页 */
       if(document.getElementById('startLoad'))return;
       const el=document.createElement('div');
       el.id='startLoad';
@@ -15313,6 +15315,12 @@ renderAll();
       try{localStorage.removeItem(SAVE);}catch(e){}
       _openingSeq=true;
       window.__booting=true;
+      /* 网页启动页（#bootSplash，自带一条进度条）还在的话立刻清掉：
+         否则会和开局加载页同时出现，看起来像两个加载页。 */
+      try{
+        const bs=document.getElementById('bootSplash');
+        if(bs){bs.classList.add('out');setTimeout(()=>{try{bs.remove();}catch(e){}},60);}
+      }catch(e){}
       try{document.body.classList.add('boot-mode');}catch(e){}
       setTimeout(()=>{try{_openingSeq=false;coachRefresh();}catch(e){}},12000);
       newGame();
