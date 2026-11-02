@@ -3631,6 +3631,24 @@ body .modal .warnMain{color:#9a4a10!important}
 #plotEvent .gal-box .gal-name span{
   font-weight:400!important;font-size:inherit!important}
 </style>
+<style id="galSettings">
+#setSheet{position:fixed;inset:0;z-index:100050;background:rgba(40,26,20,.42);display:flex;
+  align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease;padding:20px}
+#setSheet.on{opacity:1}
+#setSheet .setCard{width:min(86vw,340px);background:linear-gradient(180deg,#fffdf9,#fdf1e6);
+  border:1px solid rgba(214,150,120,.35);border-radius:18px;padding:18px 18px 14px;
+  box-shadow:0 26px 60px -30px rgba(120,70,50,.8);font-family:'WCCute','PingFang SC',sans-serif}
+#setSheet .setHd{font-size:16px;color:#5b4437;letter-spacing:2px;margin-bottom:12px}
+#setSheet .setRow{display:flex;align-items:center;gap:10px;margin:12px 0}
+#setSheet .setRow span{width:38px;font-size:13px;color:#6b5344}
+#setSheet .setRow input[type=range]{flex:1;-webkit-appearance:none;height:6px;border-radius:999px;
+  background:linear-gradient(90deg,#ffc3d5,#ffe3cf);outline:none}
+#setSheet .setRow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:#ff9fb8;border:2px solid #fff;box-shadow:0 3px 8px rgba(200,110,140,.6)}
+#setSheet .setRow b{width:30px;text-align:right;font-size:12px;color:#8c4351;font-weight:400}
+#setSheet .setActs{display:flex;gap:10px;margin-top:14px}
+#setSheet .setActs button{flex:1;padding:10px;border-radius:12px;font-family:inherit}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3728,7 +3746,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01113</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01114</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3739,6 +3757,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
   </div>
   <div class="hbtns">
     <button id="btnMute" title="音效与音乐开关">🔊</button>
+    <button id="btnSet" title="设置">⚙</button>
     <button id="btnHistory">记录</button>
     <button id="btnLife">生活</button>
     <button id="btnSave">存档</button>
@@ -3910,7 +3929,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01113 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01114 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6995,7 +7014,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01113';
+const APP_BUILD='01114';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -12088,7 +12107,7 @@ function coachSay(key,text){
     const norm=String(key||'').split('@')[0];
     const uri=window.COACH_VOICE&&window.COACH_VOICE[norm];
     if(uri){
-      if(_coachAudioKey!==norm){if(_coachAudio)_coachAudio.pause();_coachAudio=new Audio(uri);_coachAudioKey=norm;}
+      if(_coachAudioKey!==norm){if(_coachAudio)_coachAudio.pause();_coachAudio=new Audio(uri);try{_coachAudio.volume=Math.min(1,(typeof VOL!=='undefined'?VOL.voice:1));}catch(e){};_coachAudioKey=norm;}
       try{_coachAudio.currentTime=0;const pr=_coachAudio.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
       return;
     }
@@ -14613,6 +14632,52 @@ function playDaySummary(st,onDone){
   ov.onclick=e=>{if(e.target===ov)finish();};
 }
 document.getElementById('btnMute').onclick=aeToggleMute;
+/* ================= 设置页：音乐 / 音效 / 语音 音量 ================= */
+const VOL={music:0.6,sfx:0.8,voice:1.0};
+function volLoad(){try{const r=JSON.parse(localStorage.getItem('pcbs_vol')||'{}');
+  if(typeof r.music==='number')VOL.music=r.music;
+  if(typeof r.sfx==='number')VOL.sfx=r.sfx;
+  if(typeof r.voice==='number')VOL.voice=r.voice;}catch(e){}}
+function volSave(){try{localStorage.setItem('pcbs_vol',JSON.stringify(VOL));}catch(e){}}
+function volApply(){
+  try{
+    if(AE.musicGain)AE.musicGain.gain.value=0.16*(VOL.music/0.6);
+    if(AE.sfxGain)AE.sfxGain.gain.value=0.7*(VOL.sfx/0.8);
+    if(AE.master)AE.master.gain.value=0.55*Math.max(0.35,Math.max(VOL.music,VOL.sfx,VOL.voice));
+  }catch(e){}
+  try{if(_coachAudio)_coachAudio.volume=Math.min(1,VOL.voice);}catch(e){}
+}
+function openSettings(){
+  const old=document.getElementById('setSheet');if(old)old.remove();
+  const ov=document.createElement('div');ov.id='setSheet';
+  const row=(id,label,val)=>'<div class="setRow"><span>'+label+'</span>'+
+    '<input type="range" min="0" max="100" value="'+Math.round(val*100)+'" data-vol="'+id+'">'+
+    '<b id="setVal_'+id+'">'+Math.round(val*100)+'</b></div>';
+  ov.innerHTML='<div class="setCard"><div class="setHd">设置</div>'+
+    row('music','音乐',VOL.music)+row('sfx','音效',VOL.sfx)+row('voice','语音',VOL.voice)+
+    '<div class="setActs"><button class="mini" id="setTest">试听</button>'+
+    '<button class="primary" id="setOk">完成</button></div></div>';
+  document.body.appendChild(ov);
+  requestAnimationFrame(()=>ov.classList.add('on'));
+  ov.querySelectorAll('input[data-vol]').forEach(inp=>{
+    inp.oninput=()=>{
+      const k=inp.dataset.vol,v=parseInt(inp.value,10)/100;
+      VOL[k]=v;const lab=document.getElementById('setVal_'+k);if(lab)lab.textContent=Math.round(v*100);
+      volApply();volSave();
+    };
+  });
+  const t=document.getElementById('setTest');
+  if(t)t.onclick=()=>{try{AE.ctx&&AE.ctx.resume();SFX.msgOut();}catch(e){}};
+  const ok=document.getElementById('setOk');
+  if(ok)ok.onclick=()=>{ov.classList.remove('on');setTimeout(()=>ov.remove(),220);};
+  ov.onclick=(e)=>{if(e.target===ov){ov.classList.remove('on');setTimeout(()=>ov.remove(),220);}};
+}
+volLoad();
+try{
+  const sb=document.getElementById('btnSet');
+  if(sb)sb.onclick=()=>{try{AE.ctx&&AE.ctx.resume();}catch(e){}openSettings();};
+}catch(e){}
+
 try{document.getElementById('debtTxt').onclick=repayDebt;}catch(e){}
 document.addEventListener('pointerdown',aeResume,{once:true,passive:true});
 document.addEventListener('click',e=>{
