@@ -3688,7 +3688,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01008</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01009</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3870,7 +3870,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01008 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01009 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6955,7 +6955,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01008';
+const APP_BUILD='01009';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14361,13 +14361,19 @@ function playStoryForToday(onDone){
   /* ---- 1. 开场（没播成功就不算看过，下次还会补播） ---- */
   if(state.day===1&&!state.story.seen['plot_opening']&&!window.__openingPlaying){
     window.__openingPlaying=true;
+    /* 先落盘「已看」：万一中途刷新/切后台，回来不会再播一遍 */
+    let _prevSeen=state.story.seen['plot_opening'];
+    state.story.seen['plot_opening']=1;
+    try{save();}catch(e){}
     const ok=playPlotEvent('opening',()=>{
       window.__openingPlaying=false;
       try{state.story.seen['plot_opening']=1;state.story.flags.opening=true;save();}catch(e){}
       next(260);
     });
     if(ok)return true;
+    /* 没播出来：回滚标记，下次还能补播 */
     window.__openingPlaying=false;
+    state.story.seen['plot_opening']=_prevSeen;try{save();}catch(e){}
     /* 暂时播不了（有别的场景/弹窗占着）：等一会再来，绝不跳过开场 */
     setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);
     return true;
@@ -14939,6 +14945,7 @@ renderAll();
       _openingSeq=true;
       setTimeout(()=>{try{_openingSeq=false;coachRefresh();}catch(e){}},12000);
       newGame();
+      window.__inGame=true;
       try{window.__gameNo=(window.__gameNo||0)+1;}catch(e){}
       /* 引导模式：跟着走 = 全程只能用高亮处的操作；自己玩 = 不弹引导 */
       state.tut=state.tut||{done:{},hidden:false};
@@ -15819,6 +15826,9 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
     }).then(function(d){
       var remote=d&&String(d.build||'');
       if(!remote||remote===cur){try{sessionStorage.setItem('wczj_try','0');}catch(e){}return;}
+      /* 正在玩（开局之后）不自动刷新：中途刷新会让剧情从头再来一遍。
+         等回到标题页或下次打开再生效。 */
+      if(window.__inGame){ try{sessionStorage.setItem('wczj_pending',remote);}catch(e){} return; }
       /* 允许多次重试直到拿到最新：万一 Reload 拿到的还是 CDN 里的中间版本，
          下轮会换个随机参数再来，最多 5 次，避免卡在旧版本或死循环。 */
       let tries=0;
