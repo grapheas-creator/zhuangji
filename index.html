@@ -3704,6 +3704,23 @@ body .modal .warnMain{color:#9a4a10!important}
 .story-pop .sp-av img{object-fit:contain!important;background:#f1e6da!important}
 #plotEvent .gal-av{object-fit:contain!important;background:#f1e6da!important}
 </style>
+<style id="galCreamKillBrown">
+/* ===== 彻底清掉棕色/金橙：用比原规则更高的特异性 + !important ===== */
+/* 工单卡（含 .job.story / .game / .work 这些覆盖版本） */
+html body .job.story,html body .job.game,html body .job.work,
+html body .job{background:linear-gradient(160deg,#fffdf9,#fdf1e6 60%)!important;
+  border-color:rgba(214,150,120,.30)!important;box-shadow:0 12px 26px -20px rgba(160,100,80,.5)!important}
+html body .job::after{display:none!important}   /* 原橙色光晕 */
+html body .job .nm,html body .job .top>div,html body .job .who{color:#4b3a2f!important}
+html body .job .money{color:#c2456b!important;background:rgba(242,138,164,.12)!important}
+html body .job .softline{background:linear-gradient(90deg,rgba(242,138,164,.16),rgba(242,138,164,.04))!important}
+html body .job ul li{color:#7a6353!important}
+html body .job ul li::before{background:linear-gradient(180deg,#ffc3d5,rgba(242,138,164,.5))!important}
+/* 打烊按钮（金橙） */
+html body header .hbtns button.primary{
+  background:linear-gradient(180deg,#ffb3c6,#f286a6)!important;color:#5c1f30!important;
+  border-color:#ffc2d2!important;box-shadow:0 8px 20px -12px rgba(220,110,140,.9)!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3801,7 +3818,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01132</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01133</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3984,7 +4001,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01132 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01133 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7069,7 +7086,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01132';
+const APP_BUILD='01133';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
