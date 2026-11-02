@@ -3424,6 +3424,26 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 .sp-card{padding:40px 36px 34px!important;box-sizing:border-box!important}
 .sp-card .sp-av{width:56px!important;height:56px!important;border-radius:10px!important}
 </style>
+<style id="galSpFix">
+/* 剧情卡排版修正：头像方形缩小、字号收紧、右侧天数不挤 */
+.story-pop .sp-card,.sp-card{font-family:'WCCute',sans-serif!important}
+.story-pop .sp-hd{display:flex!important;align-items:center!important;gap:10px!important;
+  padding-right:64px!important;margin-bottom:12px!important}
+.story-pop .sp-av{width:52px!important;height:52px!important;border-radius:12px!important;
+  flex:0 0 52px!important;overflow:hidden!important;display:flex;align-items:center;justify-content:center;
+  font-size:22px!important;font-weight:700!important}
+.story-pop .sp-av img{width:100%!important;height:100%!important;object-fit:cover!important;display:block}
+.story-pop .sp-who{font-size:15px!important;font-weight:800!important;color:#4b3a2f!important;line-height:1.3}
+.story-pop .sp-role{font-size:10.5px!important;color:#93796a!important;margin-top:2px}
+.story-pop .sp-day{position:absolute!important;right:34px!important;top:34px!important;
+  font-size:10.5px!important;color:#b4876f!important}
+.story-pop .sp-lines{display:flex!important;flex-direction:column!important;gap:10px!important}
+.story-pop .sp-line{font-size:15px!important;line-height:1.75!important;color:#4b3a2f!important}
+.story-pop .sp-tip{font-size:12px!important;line-height:1.7!important;margin-top:12px!important}
+.story-pop .sp-job{font-size:12.5px!important;margin-top:12px!important}
+.story-pop .sp-acts{margin-top:14px!important}
+.story-pop .sp-card{position:relative!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3517,7 +3537,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00531</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00532</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3699,7 +3719,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00531</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00532</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6699,7 +6719,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00531';
+const APP_BUILD='00532';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -8766,9 +8786,8 @@ function refCpuName(cs){if(cs<=0)return '任意';
 const STORY=[];
 STORY[1]={day:1,id:'c1d1',who:'陈默',role:'高中同学',av:'陈',col:'#5b8cff',
     lines:[
-         '老同学，好久没联系了。我去年从厂里出来，现在给人拍短视频，手机剪不动了。',
-         '手上就一千块。显卡能不能先不买？听说现在 CPU 自己带显卡，剪 1080p 够用。',
-         '配件我不挑，能亮、别剪到一半卡住就行。',
+         '配置就按微信里说的来，单子给你挂上了。',
+         '能亮、别剪到一半卡住就行，剩下的你看着配。',
         ],
   tip:'第一单：带核显的 CPU 能省掉一张显卡的钱。预算卡在 ¥1000，二手件这时候不丢人。',
   job:{cat:'办公机',tier:0,name:'新手单 · 老同学的第一台剪辑机',
@@ -14578,7 +14597,13 @@ function playStory(sd,j,onDone){
   const ov=document.createElement('div');
   ov.className='story-pop';ov.id='storyPop';
   ov.innerHTML=`<div class="sp-card">
-    <div class="sp-hd"><div class="sp-av" style="background:${sd.col||'#5b8cff'}">${sd.av||'客'}</div>
+    <div class="sp-hd">${(function(){
+      try{
+        const _im=(typeof CHAR_AVATAR!=='undefined')&&CHAR_AVATAR[sd.who];
+        if(_im)return '<div class="sp-av"><img src="'+_im+'" alt=""></div>';
+      }catch(e){}
+      return '<div class="sp-av" style="background:'+(sd.col||'#5b8cff')+'">'+(sd.av||'客')+'</div>';
+    })()}
       <div><div class="sp-who">${sd.who||'客户'}</div><div class="sp-role">${sd.role||''}</div></div>
       <div class="sp-day">第 ${state.day} 天</div></div>
     <div class="sp-lines">${lines.map((x,i)=>`<div class="sp-line" style="animation-delay:${(0.1+i*0.26).toFixed(2)}s">${x}</div>`).join('')}</div>
@@ -14662,6 +14687,11 @@ function playStoryForToday(onDone){
   return true;
 }
 function maybeStoryPopup(){
+  /* 第一天：先看微信，再弹接单卡，别反过来 */
+  try{
+    if(state.day===1&&state.story&&state.story.seen&&!state.story.seen['chat_chat_chenmo_d1']&&
+       typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1&&!state.tut?.guideOff)return;
+  }catch(e){}
   try{
     if(!state||!state.jobs)return;
     if(_daySwitching)return;   /* 换天过场没结束，剧情一律等 */
