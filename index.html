@@ -3656,6 +3656,20 @@ body .modal .warnMain{color:#9a4a10!important}
   text-shadow:none!important}
 #coachVoice:hover,.tutBtn.ghost:hover{background:linear-gradient(180deg,#fff6f9,#ffe8ef)!important}
 </style>
+<style id="galVoiceBtn2">
+/* 语音/跳过：原来的规则是 `.tutGal .tutActs button.tutBtn.ghost`（特异性比我的高），
+   所以上一版没盖住。这里用同样的选择器、同样的 !important，靠后取胜。 */
+.tutGal .tutActs button.tutBtn.ghost{
+  background:linear-gradient(180deg,#fffdfa,#fdf1e6)!important;
+  color:#8c4351!important;border:1px solid rgba(242,138,164,.55)!important;
+  border-radius:999px!important;font-family:'WCCute','PingFang SC',sans-serif!important;
+  box-shadow:0 8px 18px -12px rgba(200,110,140,.75)!important}
+.tutGal .tutActs button.tutBtn.ghost:active{background:linear-gradient(180deg,#fff6f9,#ffe8ef)!important}
+.tutGal .tutActs button.tutBtn.main{
+  background:linear-gradient(180deg,#ffb6c8,#f28aa4)!important;
+  color:#5c1f30!important;border:1px solid #ffc2d2!important;border-radius:999px!important;
+  font-family:'WCCute','PingFang SC',sans-serif!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3753,7 +3767,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01119</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01120</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3936,7 +3950,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01119 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01120 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7021,7 +7035,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01119';
+const APP_BUILD='01120';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
