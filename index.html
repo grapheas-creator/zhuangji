@@ -3801,7 +3801,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01128</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01129</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3984,7 +3984,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01128 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01129 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7069,7 +7069,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01128';
+const APP_BUILD='01129';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -12185,9 +12185,11 @@ function coachSay(key,text){
     };
     if(blocked())return;
     const norm=String(key||'').split('@')[0];
+    if(coachSay._lastKey===norm&&Date.now()-(coachSay._lastAt||0)<2500)return;
     const uri=window.COACH_VOICE&&window.COACH_VOICE[norm];
     if(uri){
       if(_coachAudioKey!==norm){if(_coachAudio)_coachAudio.pause();_coachAudio=new Audio(uri);try{_coachAudio.volume=Math.min(1,(typeof VOL!=='undefined'?VOL.voice:1));}catch(e){};_coachAudioKey=norm;}
+      coachSay._lastKey=norm;coachSay._lastAt=Date.now();
       try{_coachAudio.currentTime=0;const pr=_coachAudio.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
       return;
     }
@@ -15104,7 +15106,10 @@ function maybeOnboard(){
         不用记流程：清单会告诉你现在该做什么。<br>
         客户给的部件费是预算，花得越少赚得越多——但别省到跑不动客户的软件。
       </div>`,
-      ()=>{try{state.tut=state.tut||{};state.tut.onboarded=1;save();}catch(e){}try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},600);/* 引导框画出来后，延时 0.9 秒再念第一条语音，避免和弹窗关闭动画抢 */});
+      ()=>{try{state.tut=state.tut||{};state.tut.onboarded=1;save();}catch(e){}try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},600);
+        /* 弹窗关掉后延时 0.9 秒补念第一条：画框那条若被弹窗挡掉，这里兜住；
+           已经念过则被 coachSay 的 2.5 秒去重挡掉，不会念两遍。 */
+        setTimeout(function(){try{var _s=coachStep();if(_s&&typeof coachSay==='function')coachSay(_s.k,_s.title+'。'+_s.text);}catch(e){}},900);});
     const no=document.getElementById('mNo');if(no)no.style.display='none';
     const yes=document.getElementById('mYes');if(yes)yes.textContent='开始干活';
   },600);
