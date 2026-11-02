@@ -3664,7 +3664,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00552</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00553</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3846,7 +3846,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00552</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00553</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6846,7 +6846,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00552';
+const APP_BUILD='00553';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -10146,9 +10146,15 @@ const SFX={
   fail(){aeResume();const t=AE.ctx?AE.ctx.currentTime:0;aeTone(220,0.22,'sawtooth',0.16,150,t);aeTone(180,0.26,'sawtooth',0.14,120,t+0.12);},
   whoosh(){aeResume();aeNoise(0.35,0.10,500);},
   pop(){aeResume();aeTone(420,0.08,'sine',0.16,620);},
-  /* 微信消息音：短促上扬的「咻」，只在微信剧情里用 */
-  msgOut(){aeResume();const t=AE.ctx?AE.ctx.currentTime:0;
-    aeTone(660,0.07,'triangle',0.16,880,t);},
+  /* 微信消息音：短促上扬的「咻」，只在微信剧情里用。
+     连着来消息时加 150ms 最小间隔，避免「咻咻」叠成一片。 */
+  msgOut(){
+    const now=(typeof performance!=='undefined'?performance.now():Date.now());
+    if(SFX._msgAt&&now-SFX._msgAt<150)return;
+    SFX._msgAt=now;
+    aeResume();const t=AE.ctx?AE.ctx.currentTime:0;
+    aeTone(660,0.07,'triangle',0.16,880,t);
+  },
   /* 跑分：一段上扫 + 滴答，跑完来一个上扬和弦 */
   bench(){
     aeResume();const ctx=AE.ctx;if(!ctx)return;const t=ctx.currentTime;
