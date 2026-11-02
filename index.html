@@ -3832,7 +3832,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01134</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01135</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4015,7 +4015,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01134 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01135 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7100,7 +7100,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01134';
+const APP_BUILD='01135';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -11953,7 +11953,15 @@ function coachStep(){
        所以：整机性能已经达标就直接跳过这一步。 */
     if(it.cat==='gpu'&&!p.bought.gpu&&!p.parts.gpu){
       const needGPU=(function(){
-        try{const jj=job();if(!jj||!jj.target)return false;return (jj.target.ts||0)>totalScore().ts;}catch(e){return false;}
+        try{
+          const jj=job();if(!jj||!jj.target)return false;
+          const t=jj.target;
+          /* 核显单（igp 标记，或压根没有 3DMark 门槛）一律不需要显卡，
+             不要再拿「参考机分数」去比，否则装完机箱会跳回买显卡这一步来回闪。 */
+          if(t.igp||(t.ts||0)<=0)return false;
+          if(lvlName&&/核显/.test(String(lvlName(jj)||'')))return false;
+          return (t.ts||0)>totalScore().ts;
+        }catch(e){return false;}
       })();
       if(!needGPU){p.bought.gpu=true;continue;}
     }
