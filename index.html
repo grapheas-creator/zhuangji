@@ -3688,7 +3688,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01100</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01104</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3870,7 +3870,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01100 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01104 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6955,7 +6955,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01100';
+const APP_BUILD='01104';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14325,7 +14325,16 @@ function bootFadeIn(){
     }));
   }catch(e){}
 }
-function playStoryForToday(onDone){
+function playStoryForToday(onDone,_cont){
+  /* 单入口保护：一次性剧情链只能有一条。
+     以前 startNew 和 maybeStoryPopup 会各起一条链，后一条把前一条的回调作废，
+     结果开场播完后「已看」没写进去，下一次又播一遍。
+     _cont=true 是本链自己的内部继续，不算新入口。 */
+  if(!_cont){
+    const _now=Date.now();
+    if(Scene.chain&&(Scene.playing||_now-(Scene.chainAt||0)<2500))return true;
+    Scene.chainAt=_now;
+  }
   /* ===== 场景调度：严格按顺序，一次只播一个 =====
      1. 第 1 天开场（墨桀借钱开张）
      2. 第 1 天陈默微信（下单）
@@ -14338,23 +14347,19 @@ function playStoryForToday(onDone){
   /* 场景链序号：并发触发只留最后一条链，旧链回调作废。 */
   const _id=++Scene.seq;Scene.chain=true;
   const _alive=()=>_id===Scene.seq&&Scene.chain;
-  const next=(delay)=>{setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){if(onDone)onDone();}},(delay||200));};
+  const next=(delay)=>{setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone,true);}catch(e){if(onDone)onDone();}},(delay||200));};
 
-  /* ---- 1. 开场（没播成功就不算看过，下次还会补播） ---- */
+  /* ---- 1. 开场 ----
+     只在这里开一次：播成功 → 关闭回调里写「已看」并继续下一步；
+     打不开（已有场景在播）→ 什么都不做，交给那条链自己的回调。
+     以前这里做了「先写已看 → 失败回滚 → 600ms 重试」，重试正好在开场
+     还开着的时候触发，等它关掉后就又播了一遍 —— 已删掉这套机制。 */
   if(state.day===1&&!state.story.seen['plot_opening']&&!Scene.playing){
-    /* 先落盘「已看」：万一中途刷新/切后台，回来不会再播一遍 */
-    let _prevSeen=state.story.seen['plot_opening'];
-    state.story.seen['plot_opening']=1;
-    try{save();}catch(e){}
     const ok=playPlotEvent('opening',()=>{
       try{state.story.seen['plot_opening']=1;state.story.flags.opening=true;save();}catch(e){}
       next(260);
     });
     if(ok)return true;
-    /* 没播出来：回滚标记，下次还能补播 */
-    state.story.seen['plot_opening']=_prevSeen;try{save();}catch(e){}
-    /* 暂时播不了（有别的场景/弹窗占着）：等一会再来，绝不跳过开场 */
-    setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);
     return true;
   }
 
@@ -14383,7 +14388,7 @@ function playStoryForToday(onDone){
 
   /* ---- 5. 剧情工单接单卡 ---- */
   if(typeof sceneBusy==='function'&&sceneBusy()){
-    setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);
+    setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone,true);}catch(e){}},600);
     return true;
   }
   let j=null;
@@ -14393,7 +14398,7 @@ function playStoryForToday(onDone){
   const sd=storyDef(j.storyId);
   if(!sd){Scene.end();if(onDone)onDone();return false;}
   const ok=playStory(sd,j,()=>{Scene.end();if(onDone)onDone();});
-  if(ok===false){setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone);}catch(e){}},600);}
+  if(ok===false){setTimeout(()=>{try{if(!_alive())return;playStoryForToday(onDone,true);}catch(e){}},600);}
   return true;
 }
 function maybeStoryPopup(){
@@ -14421,12 +14426,9 @@ function maybeStoryPopup(){
     }
     const scr=document.getElementById('titleScr');
     if(scr&&!scr.classList.contains('hide'))return;
-    /* 兜底：正常路径没走到开张时，这里补上 */
+    /* （已删除这里的旧兜底：它会在 playStoryForToday 的开场还没播完时
+        自己再播一遍 opening；开场统一由 playStoryForToday 负责。） */
     state.story=state.story||{done:{},flags:{}};
-    if(state.day===1&&!state.story.flags.opening){
-      state.story.flags.opening=true;save();
-      if(playPlotEvent('opening',()=>{setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},200);}))return;
-    }
     /* 第一天的开张（墨桀）还没开始播之前，陈默的剧情一律往后排 */
     if(state.day===1&&state.story&&state.story.flags&&!state.story.flags.opening)return;
     const j=state.jobs.find(x=>x.story&&x.status==='open');
