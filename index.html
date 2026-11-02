@@ -3571,6 +3571,18 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
   text-shadow:none!important}
 .toast.on{color:#8c4351!important}
 </style>
+<style id="galAvFix">
+/* 头像防压缩：固定正方形，禁止被 flex 挤扁 */
+.chatPop .wxBody .chatRow .cav{
+  display:block!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+  max-width:40px!important;max-height:40px!important;flex:0 0 40px!important;
+  aspect-ratio:1/1!important;object-fit:cover!important;object-position:center top!important;
+  border-radius:6px!important}
+.story-pop .sp-av{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;
+  flex:0 0 52px!important;aspect-ratio:1/1!important;overflow:hidden!important;border-radius:12px!important}
+.story-pop .sp-av img{display:block!important;width:52px!important;height:52px!important;
+  object-fit:cover!important;object-position:center top!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3664,7 +3676,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00554</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00555</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3846,7 +3858,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00554</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00555</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6846,7 +6858,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00554';
+const APP_BUILD='00555';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
