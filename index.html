@@ -3827,7 +3827,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01174</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01175</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4011,7 +4011,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01174</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01175</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7096,10 +7096,10 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01174';
+const APP_BUILD='01175';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
-/* 水印上统一的写法：v0.12.0 · 01174 */
+/* 水印上统一的写法：v0.12.0 · 01175 */
 const APP_VER_TXT=APP_VER+' · '+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
 try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
@@ -9168,7 +9168,7 @@ STORY[1]={day:1,id:'c1d1',who:'陈默',role:'高中同学',av:'陈',col:'#5b8cff
          '配置就按微信里说的来，单子给你挂上了。',
          '能亮、别剪到一半卡住就行，剩下的你看着配。',
         ],
-  tip:'第一单：带核显的 CPU 能省掉一张显卡的钱。预算卡在 ¥1000，二手件这时候不丢人。',
+  tip:'第一单：带核显的 CPU 能省掉一张显卡的钱。预算 1000 以内，二手件这时候不丢人。',
   job:{cat:'办公机',tier:0,name:'新手单 · 老同学的第一台剪辑机',
     sw:'剪映 1080p 简单剪辑（核显可用）',level:'m',
     target:{ts:0,cs:3000,ram:8,igp:1,igpText:'核显够用'},newOnly:false,tight:true,
@@ -9458,13 +9458,12 @@ STORY[18]={day:18,id:'c3d6',who:'房东',role:'铺面房东',av:'房',col:'#ff92
 /* ================= 剧情插曲：第三天打烊后，技嘉推销员上门 ================= */
 /* 剧情立绘：目前只有墨桀有图，其它角色用字母圆牌 */
 /* 剧情插图：开张那天（白天），所有剧情共用这张底图 */
-/* 首单提示里的钱数跟着工单走。
-   以前提示写死「预算卡在 ¥1000」，可这单部件费其实只有 ¥620——
-   玩家照着提示花到 1000，等于自己贴 380 进去。 */
+/* 首单提示：只说「预算 1000 以内」，不再报这单的具体部件费——
+   玩家看的是花多少合适，不是账本。 */
 try{
   var _s1=STORY[1];
   if(_s1&&_s1.job){
-    _s1.tip='第一单：带核显的 CPU 能省掉一张显卡的钱。预算 1000 以内，这单部件费 ¥'+_s1.job.partBudget+'，二手件这时候不丢人。';
+    _s1.tip='第一单：带核显的 CPU 能省掉一张显卡的钱。预算 1000 以内，二手件这时候不丢人。';
   }
 }catch(e){}
 
@@ -16125,7 +16124,7 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 #btnMotion.off{opacity:.6;border-color:rgba(196,150,120,.3)!important;color:#93796a!important}
 
 /* ===== 版本号水印：全站一种写法、一种样子 =====
-   v0.12.0 · 01174
+   v0.12.0 · 01175
    - 标题页用 #tVer（在 .tMeta 里），游戏内用 #verMark（固定右下角）
    - 深底浅字胶囊，压在任何画面（含剧情卡/微信层）上都读得清 */
 #tVer,#verMark{
