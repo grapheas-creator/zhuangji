@@ -3577,7 +3577,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00541</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00542</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3759,7 +3759,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00541</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00542</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6759,7 +6759,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00541';
+const APP_BUILD='00542';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -16082,10 +16082,11 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
           }catch(e){}
           var t=document.createElement('div');
           t.textContent='游戏已更新到 v'+cur;
-          t.style.cssText='position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:100000;'+
-            'padding:10px 18px;border-radius:999px;background:linear-gradient(180deg,#ffdfe7,#ffcfdc);'+
-            'color:#8c4351;font:700 13px/1.4 "PingFang SC",sans-serif;'+
-            'box-shadow:0 12px 28px -14px rgba(180,90,110,.8);border:1px solid rgba(242,138,164,.6);'+
+          t.style.cssText='position:fixed;left:50%;top:13%;transform:translateX(-50%);z-index:100000;'+
+            'padding:11px 22px;border-radius:14px;background:linear-gradient(180deg,#fffdfa,#fdf2e7);'+
+            'color:#8c4351;font:400 14px/1.5 "WCCute","PingFang SC",sans-serif;letter-spacing:.5px;'+
+            'box-shadow:0 14px 30px -16px rgba(160,90,110,.6);'+
+            'border:1px solid rgba(242,138,164,.55);'+
             'pointer-events:none;opacity:0;transition:opacity .3s ease';
           document.body.appendChild(t);
           requestAnimationFrame(function(){t.style.opacity='1';});
@@ -16109,10 +16110,11 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
       try{
         var b=document.createElement('div');
         b.textContent='发现新版本 v'+remote+'，正在更新…';
-        b.style.cssText='position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:100000;'+
-          'padding:10px 18px;border-radius:999px;background:rgba(60,40,35,.92);color:#fff6ec;'+
-          'font:700 13px/1.4 "PingFang SC",sans-serif;box-shadow:0 12px 28px -14px rgba(0,0,0,.8);'+
-          'pointer-events:none';
+        b.style.cssText='position:fixed;left:50%;top:13%;transform:translateX(-50%);z-index:100000;'+
+          'padding:11px 22px;border-radius:14px;background:linear-gradient(180deg,#fffdfa,#fdf2e7);'+
+          'color:#8c4351;font:400 14px/1.5 "WCCute","PingFang SC",sans-serif;letter-spacing:.5px;'+
+          'box-shadow:0 14px 30px -16px rgba(160,90,110,.6);'+
+          'border:1px solid rgba(242,138,164,.55);pointer-events:none';
         document.body.appendChild(b);
       }catch(e){}
       setTimeout(function(){
