@@ -3864,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01160</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01161</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4048,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01160 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01161 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7133,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01160';
+const APP_BUILD='01161';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -9752,9 +9752,7 @@ const Scene={
   playing:null,chain:false,seq:0,
   chrome(on){document.body.classList.toggle('scene-mode',!on);if(on)try{renderAll();}catch(e){}},
   enter(kind){this.playing=kind;this.chrome(false);try{coachHide();}catch(e){}
-    /* 任何一个场景打开，都说明已经过了加载阶段：直接撤掉加载页，
-       免得它盖住层级更低的弹层（接单卡曾经 z=78 被它挡死）。 */
-    try{var _ld=document.getElementById('startLoad');if(_ld){_ld.style.opacity='0';setTimeout(function(){try{_ld.remove();}catch(e){}},420);}}catch(e){}},
+    /* 加载页只由开局流程撤，场景层不碰它（否则顺序会被打乱） */},
   exit(){this.playing=null;setTimeout(()=>{
     if(!this.busy()&&document.body.classList.contains('scene-mode'))this.chrome(true);
     /* 场景结束后补一次引导刷新，让被收起的框回来 */
@@ -15564,11 +15562,9 @@ try{
         /* 链卡死（chain=true 但没有任何场景在播、且超过 4 秒）也要能揭开，
            否则玩家会永远停在“正在生火开张”这行字上。 */
         const _stuck=Scene.chain&&!Scene.playing&&Date.now()-(Scene.chainAt||0)>4000;
-        const _mdl=document.getElementById('mask');
-        const _modalOn=!!(_mdl&&_mdl.classList.contains('on'));
-        /* 开局流程进行中（__booting）或说明框开着时，绝不撤加载页，
-           否则「开始干活」会浮在游戏主界面上，看起来像又跳回去了。 */
-        if((!Scene.busy()||_stuck)&&!window.__booting&&!_modalOn&&Date.now()-(window.__loadAt||0)>1200){
+        /* 常规路径由开局流程负责撤加载页；这里只在「流程卡死」时兜底：
+           超过 20 秒还没撤，且没有场景在播。 */
+        if((!Scene.busy()||_stuck)&&!window.__booting&&Date.now()-(window.__loadAt||0)>20000){
           if(_stuck)Scene.chain=false;
           ld.style.opacity='0';
           setTimeout(()=>{try{ld.remove();}catch(e){}if(!Scene.busy())try{Scene.chrome(true);}catch(e){}
