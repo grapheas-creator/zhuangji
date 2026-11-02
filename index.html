@@ -3864,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01158</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01159</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4048,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01158 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01159 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7133,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01158';
+const APP_BUILD='01159';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -15280,16 +15280,36 @@ renderAll();
         }catch(e){}
 
       };
-      /* 加载页至少停留 1 秒，再开始剧情，否则一闪而过像闪屏 */
+      /* ===== 开局顺序：写成一条直线，不用定时器拼 =====
+         1. 加载页至少 1 秒
+         2. 「开始干活」说明（等玩家点）
+         3. 开场 → 陈默微信 → 接单卡
+         4. 撤加载页 → 拉起引导
+         用 await 串起来，任何一步都不会被另一条路径插队。 */
       try{window.__loadAt=Date.now();}catch(e){}
-      /* 顺序改成：加载页 → 「开始干活」说明 → 点完才开始剧情 → 剧情完进引导 */
-      setTimeout(()=>{
-        const _run=()=>{try{playStoryForToday(_reveal);}catch(e){_reveal();}};
+      if(window.__booting)return; window.__booting=true;
+      (async function(){
+        const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
         try{
-          if(typeof maybeOnboard==='function')maybeOnboard(_run);
-          else _run();
-        }catch(e){_run();}
-      },1000);
+          await wait(1000);
+          await new Promise(resolve=>{
+            try{
+              if(typeof maybeOnboard==='function')maybeOnboard(resolve);
+              else resolve();
+            }catch(e){resolve();}
+          });
+          await new Promise(resolve=>{
+            try{playStoryForToday(()=>resolve());}catch(e){resolve();}
+          });
+          try{_reveal();}catch(e){}
+          await wait(220);
+          try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
+        }catch(e){
+          try{_reveal();}catch(x){}
+        }finally{
+          window.__booting=false;
+        }
+      })();
       /* 教练提示要排在剧情、新手说明后面，由 maybeOnboard 的关闭回调来触发 */
     }
   };
