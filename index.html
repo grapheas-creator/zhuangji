@@ -3582,6 +3582,15 @@ body .chip.on{background:linear-gradient(180deg,#ffd9e4,#ffc3d5)!important;color
 body #actionBar{background:linear-gradient(180deg,rgba(255,253,250,.97),rgba(253,241,230,.97))!important;
   border-top:1px solid rgba(214,150,120,.28)!important}
 </style>
+<style id="galModalInk">
+/* 弹窗正文太浅，换成清楚的暖棕；关键数字加深 */
+body .modal .body{color:#5a4436!important}
+body .modal .body b,body .modal .body strong{color:#3f2d22!important;font-weight:800!important}
+body .modal .body .pj,body .modal .body .money{color:#c2456b!important;font-weight:800!important}
+body .modal .warnSub{color:#7a5432!important}
+body .modal .warnTip{color:#6f5340!important}
+body .modal .warnMain{color:#9a4a10!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3679,7 +3688,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01005</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01006</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3861,7 +3870,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01005 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01006 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6946,7 +6955,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01005';
+const APP_BUILD='01006';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
