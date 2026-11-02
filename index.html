@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01178</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01179</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01178</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01179</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,10 +7111,10 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01178';
+const APP_BUILD='01179';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
-/* 水印上统一的写法：v0.12.0 · 01178 */
+/* 水印上统一的写法：v0.12.0 · 01179 */
 const APP_VER_TXT=APP_VER+' · '+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
 try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
@@ -11258,7 +11258,10 @@ function renderBenchPhoto(host){
   host.dataset.bpSig=ph.src;
   try{
     const im=host.querySelector('.benchPhotoBox img');
-    if(im&&typeof part==='function'&&part('cpu')&&typeof build!=='undefined'&&!build.paste){
+    /* 散热器已经压上去了就别再给「点这里涂硅脂」的入口：
+       客户抬来的整机本来就是装好的，点一下还能涂硅脂，等于回到拆机。
+       散热器装着的时候要涂硅脂，必须先拆。 */
+    if(im&&typeof part==='function'&&part('cpu')&&typeof build!=='undefined'&&!build.paste&&!build.cooler){
       im.style.cursor='pointer';
       im.title='点这里涂硅脂';
       im.onclick=()=>{try{if(typeof applyPaste==='function')applyPaste();}catch(e){}};
@@ -13870,6 +13873,7 @@ function applyPaste(){
   if(!part('cpu')){toast('先装 CPU');return;}
   if(build.paste){toast('已经涂过了');return;}
   if(build.cooler){toast('先拆下散热器，再涂硅脂');return;}
+  if(build.case){toast('整机已经进机箱了，要涂得先拆出来');return;}
   build.paste=true;
   try{SFX.click();}catch(e){}
   toast('硅脂涂好了，可以压散热器了');
@@ -16193,7 +16197,7 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 #btnMotion.off{opacity:.6;border-color:rgba(196,150,120,.3)!important;color:#93796a!important}
 
 /* ===== 版本号水印：全站一种写法、一种样子 =====
-   v0.12.0 · 01178
+   v0.12.0 · 01179
    - 标题页用 #tVer（在 .tMeta 里），游戏内用 #verMark（固定右下角）
    - 深底浅字胶囊，压在任何画面（含剧情卡/微信层）上都读得清 */
 #tVer,#verMark{
