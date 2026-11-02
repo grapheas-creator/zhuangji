@@ -320,7 +320,7 @@ max-width:92%;text-align:center;box-shadow:0 14px 32px -16px rgba(160,90,110,.65
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .mask{position:fixed;inset:0;background:rgba(6,8,12,.74);display:none;
 align-items:center;justify-content:center;z-index:50;padding:16px}
-.mask.on{display:flex}#mask{z-index:75}#smask{z-index:65}.toast{z-index:85}
+.mask.on{display:flex}#mask{z-index:1100}#smask{z-index:65}.toast{z-index:85}
 /* 有上层弹窗时：下层不许滚、不许点 */
 body.modal-open{overflow:hidden;touch-action:none;overscroll-behavior:contain}
 body.modal-open #actionBar,
@@ -3649,6 +3649,15 @@ body .modal .warnMain{color:#9a4a10!important}
 #setSheet .setActs{display:flex;gap:10px;margin-top:14px}
 #setSheet .setActs button{flex:1;padding:10px;border-radius:12px;font-family:inherit}
 </style>
+<style id="galVoiceBtn">
+/* 语音/跳过按钮：棕底 → 奶油樱花 */
+#coachVoice,.tutBtn.ghost{background:linear-gradient(180deg,#fffdfa,#fdf1e6)!important;
+  border:1px solid rgba(242,138,164,.55)!important;color:#8c4351!important;
+  border-radius:999px!important;font-family:'WCCute','PingFang SC',sans-serif!important;
+  font-weight:400!important;box-shadow:0 8px 18px -12px rgba(200,110,140,.75)!important;
+  text-shadow:none!important}
+#coachVoice:hover,.tutBtn.ghost:hover{background:linear-gradient(180deg,#fff6f9,#ffe8ef)!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3746,7 +3755,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01115</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01117</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3929,7 +3938,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01115 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01117 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7014,7 +7023,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01115';
+const APP_BUILD='01117';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -11265,6 +11274,7 @@ function closeMask(el){
     try{setTimeout(()=>coachRefresh(),60);}catch(e){} },240);
 }
 function modal(t,b,ok){
+  try{if(typeof coachHide==='function')coachHide();}catch(e){}
   const yesEl=document.getElementById('mYes'),noEl=document.getElementById('mNo');
   if(yesEl){yesEl.textContent='确认';yesEl.disabled=false;}
   if(noEl)noEl.style.display='';
