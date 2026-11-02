@@ -3545,7 +3545,7 @@ body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;op
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00533</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00534</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3727,7 +3727,7 @@ body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;op
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00533</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00534</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6727,7 +6727,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00533';
+const APP_BUILD='00534';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -15955,24 +15955,61 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
 }catch(e){}})();
 </script>
 <script>
-/* ===== 自动更新：打开页面时对比线上版本号，不同就强制刷新一次 =====
-   GitHub Pages 给 HTML 固定 10 分钟缓存，改不了响应头，
-   所以这里主动去拿 version.json（no-store 绕过缓存）比对：
-   版本不一致 → 换成带 ?v=新版本 的地址重载，新地址不在旧缓存里，必定拿到新文件。
-   用 sessionStorage 记录「已经因为某版本重载过」，避免死循环。 */
+/* ===== 自动更新 =====
+   1) 打开页面先拿 version.json（no-store 绕过缓存）比对版本
+   2) 不一致 → 显示「发现新版本，正在更新…」→ 换带 ?v= 的地址重载
+   3) 重载后弹出「游戏已更新到 vX」提示条，几秒后自动消失 */
 (function(){
   try{
     var cur=(typeof APP_BUILD==='string')?APP_BUILD:'';
     if(!cur)return;
-    var KEY='wczj_reloaded_for';
+    var KEY='wczj_reloaded_for', DONEFLAG='wczj_updated_to';
+
+    /* ---- 刚更新完：给一条提示 ---- */
+    try{
+      var done=sessionStorage.getItem(DONEFLAG);
+      if(done&&done===cur){
+        sessionStorage.removeItem(DONEFLAG);
+        setTimeout(function(){
+          try{
+            if(typeof toast==='function'){toast('游戏已更新到 v'+cur);return;}
+          }catch(e){}
+          var t=document.createElement('div');
+          t.textContent='游戏已更新到 v'+cur;
+          t.style.cssText='position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:100000;'+
+            'padding:10px 18px;border-radius:999px;background:linear-gradient(180deg,#ffdfe7,#ffcfdc);'+
+            'color:#8c4351;font:700 13px/1.4 "PingFang SC",sans-serif;'+
+            'box-shadow:0 12px 28px -14px rgba(180,90,110,.8);border:1px solid rgba(242,138,164,.6);'+
+            'pointer-events:none;opacity:0;transition:opacity .3s ease';
+          document.body.appendChild(t);
+          requestAnimationFrame(function(){t.style.opacity='1';});
+          setTimeout(function(){t.style.opacity='0';setTimeout(function(){try{t.remove();}catch(e){}},400);},2600);
+        },1200);
+      }
+    }catch(e){}
+
+    /* ---- 检查新版本 ---- */
     fetch('version.json?ts='+Date.now(),{cache:'no-store'}).then(function(r){
       if(!r.ok)throw 0;return r.json();
     }).then(function(d){
       var remote=d&&String(d.build||'');
       if(!remote||remote===cur)return;
       try{ if(sessionStorage.getItem(KEY)===remote)return; sessionStorage.setItem(KEY,remote); }catch(e){}
-      var u=location.pathname+'?v='+encodeURIComponent(remote);
-      try{ location.replace(u); }catch(e){ location.href=u; }
+      try{sessionStorage.setItem(DONEFLAG,remote);}catch(e){}
+      /* 先给个提示，再刷新 */
+      try{
+        var b=document.createElement('div');
+        b.textContent='发现新版本 v'+remote+'，正在更新…';
+        b.style.cssText='position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:100000;'+
+          'padding:10px 18px;border-radius:999px;background:rgba(60,40,35,.92);color:#fff6ec;'+
+          'font:700 13px/1.4 "PingFang SC",sans-serif;box-shadow:0 12px 28px -14px rgba(0,0,0,.8);'+
+          'pointer-events:none';
+        document.body.appendChild(b);
+      }catch(e){}
+      setTimeout(function(){
+        var u=location.pathname+'?v='+encodeURIComponent(remote);
+        try{ location.replace(u); }catch(e){ location.href=u; }
+      },900);
     }).catch(function(){});
   }catch(e){}
 })();
