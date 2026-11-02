@@ -20,6 +20,15 @@
 --txt:#f6f1e7;--sub:#c2b6a3;--dim:#9c8e79;--acc:#ffa94d;--acc2:#ffc078;--gold:#ffd27a;--green:#7de0a8;--red:#ff7466;--pink:#ff9ac7;
 --office:#6cc5d8;--game:#ff9268;--work:#7de0a8;--r1:18px;--r2:13px;--hd:64px}
 *{box-sizing:border-box}html,body{margin:0}
+/* ---------- 整页当游戏画面处理：长按不选中文字、不弹「保存图片/复制图像」 ----------
+   以前没有这层，手机上长按背景图会弹浏览器菜单，能把整张 CG 存下来。 */
+html,body{-webkit-touch-callout:none}
+body{-webkit-user-select:none;user-select:none}
+body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
+/* 图片不吃指针事件：长按落到父元素上，浏览器就不会认成「一张可保存的图」 */
+img{-webkit-user-drag:none;pointer-events:none}
+/* 该能选的地方照旧：输入框、可编辑区域、需要复制的手输网址 */
+input,textarea,[contenteditable="true"],.qqLink{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
 /* ---------- 低特效模式（夸克 / UC / QQ 浏览器） ---------- */
 .lowfx *{animation:none!important;transition:none!important}
 .lowfx .titleScr,.lowfx .titleScr *{filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
@@ -7110,7 +7119,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01170';
+const APP_BUILD='01171';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -16449,6 +16458,25 @@ tip:'修或者换，都算一单；表姐这条线还会带来别的活。'};
       try{ coachRefresh(); force='called'; }catch(e){ force='ERR:'+e.message; }
     },2000);
   }catch(e){}
+})();
+</script>
+
+<script>
+/* 长按兜底：Chrome 安卓派发 contextmenu 时直接吞掉；输入框与可复制网址放行。 */
+(function(){
+  var ok=function(el){
+    try{
+      if(!el||el.nodeType!==1)return false;
+      var n=el.tagName;
+      if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT')return true;
+      if(el.isContentEditable)return true;
+      return !!(el.closest&&el.closest('.qqLink,input,textarea,[contenteditable="true"]'));
+    }catch(e){return false;}
+  };
+  var block=function(e){try{if(!ok(e.target))e.preventDefault();}catch(err){}};
+  document.addEventListener('contextmenu',block,true);
+  document.addEventListener('dragstart',block,true);
+  document.addEventListener('selectstart',block,true);
 })();
 </script>
 </body>
