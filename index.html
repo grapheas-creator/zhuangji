@@ -3864,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01161</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01162</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4048,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01161 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01162 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7133,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01161';
+const APP_BUILD='01162';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -14608,6 +14608,66 @@ function _playScene(starter){
   });
 }
 function _seqWait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+/* ===== 开局顺序（唯一一条线）=====
+   屏幕上只有五种层：剧情 / 游戏底页 / 引导 / 页面锁 / 加载页。
+   1 开头剧情  2 加载页  3 陈默微信  4 接单卡
+   5 撤加载页 → 底页 + 「开始干活」+ 页面锁
+   6 点开始干活 → 引导框 + Live2D
+*/
+async function runBootIntro(){
+  const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
+  state.story=state.story||{};state.story.seen=state.story.seen||{};
+  const S=state.story.seen;
+  const showLoad=()=>{
+    try{
+      if(document.getElementById('startLoad'))return;
+      const el=document.createElement('div');
+      el.id='startLoad';
+      el.innerHTML='<div class="sl-bg"></div><div class="sl-veil"></div>'+
+        '<div class="sl-inner"><div class="sl-logo">旺财装机店</div>'+
+        '<div class="sl-sub">一间小店 · 一台台机器 · 一单单生意</div>'+
+        '<div class="sl-bar"><i></i></div><div class="sl-tip">正在生火开张…</div></div>';
+      document.body.appendChild(el);window.__loadAt=Date.now();
+    }catch(e){}
+  };
+  const hideLoad=()=>{
+    try{
+      const el=document.getElementById('startLoad');if(!el)return;
+      el.style.opacity='0';setTimeout(()=>{try{el.remove();}catch(e){}},420);
+    }catch(e){}
+  };
+
+  /* 1 开头剧情 */
+  if(state.day===1&&!S['plot_opening']){
+    const ok=await _playScene(cb=>playPlotEvent('opening',cb));
+    if(ok){S['plot_opening']=1;state.story.flags.opening=true;try{save();}catch(e){}}
+  }
+  /* 2 加载页（剧情刚结束就出现） */
+  showLoad();await wait(650);
+  /* 3 陈默微信 */
+  if(state.day===1&&!S['chat_chat_chenmo_d1']&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
+    const ok=await _playScene(cb=>playChatScene('chat_chenmo_d1',cb));
+    if(ok){S['chat_chat_chenmo_d1']=1;try{save();}catch(e){}}
+  }
+  /* 4 接单卡 */
+  try{
+    const j=state.jobs&&state.jobs.find(x=>x.story&&x.status==='open');
+    if(j&&!S[j.storyId]){const sd=storyDef(j.storyId);if(sd)await _playScene(cb=>playStory(sd,j,cb));}
+  }catch(e){}
+  /* 5 撤加载页 → 底页 + 开工说明（页面锁生效） */
+  hideLoad();await wait(420);
+  try{Scene.end();}catch(e){}
+  try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
+  await new Promise(resolve=>{
+    try{
+      if(state.tut&&state.tut.onboarded){resolve();return;}
+      if(typeof maybeOnboard==='function')maybeOnboard(resolve);else resolve();
+    }catch(e){resolve();}
+  });
+  /* 6 引导 + Live2D */
+  await wait(320);
+  try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
+}
 async function playStoryForToday(onDone){
   try{
     state.story=state.story||{done:{},flags:{}};
@@ -15259,57 +15319,15 @@ renderAll();
         if(m){m.classList.remove('bootIn');void m.offsetWidth;m.classList.add('bootIn');
           setTimeout(()=>{try{m.classList.remove('bootIn');}catch(e){}},700);}
       }catch(e){}
-      /* 开局先压一层黑幕：标题页收起后不要立刻露出游戏主界面，
-         等开场剧情播完再揭开，避免「底页闪一下才出剧情」。 */
-      let _veil=null;
-      try{
-        _veil=document.createElement('div');
-        _veil.id='startLoad';
-        _veil.innerHTML='<div class="sl-bg"></div><div class="sl-veil"></div>'+
-          '<div class="sl-inner"><div class="sl-logo">旺财装机店</div>'+
-          '<div class="sl-sub">一间小店 · 一台台机器 · 一单单生意</div>'+
-          '<div class="sl-bar"><i></i></div>'+
-          '<div class="sl-tip">正在生火开张…</div></div>';
-        document.body.appendChild(_veil);
-      }catch(e){}
-      const _reveal=()=>{
-        try{Scene.end();}catch(e){}
-        try{
-          if(_veil){_veil.style.opacity='0';setTimeout(()=>{try{_veil.remove();}catch(e){}},420);}
-        }catch(e){}
+      /* 开局：只调用一次 runBootIntro，顺序全部写在那里面 */
+      try{window.__booting=true;}catch(e){}
+      setTimeout(function(){
+        Promise.resolve()
+          .then(function(){return (typeof runBootIntro==='function')?runBootIntro():null;})
+          .catch(function(){})
+          .then(function(){try{window.__booting=false;}catch(e){}});
+      },1000);
 
-      };
-      /* ===== 开局顺序：写成一条直线，不用定时器拼 =====
-         1. 加载页至少 1 秒
-         2. 「开始干活」说明（等玩家点）
-         3. 开场 → 陈默微信 → 接单卡
-         4. 撤加载页 → 拉起引导
-         用 await 串起来，任何一步都不会被另一条路径插队。 */
-      try{window.__loadAt=Date.now();}catch(e){}
-      window.__booting=true;
-      (async function(){
-        const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
-        try{
-          await wait(1000);
-          await new Promise(resolve=>{
-            try{
-              if(typeof maybeOnboard==='function')maybeOnboard(resolve);
-              else resolve();
-            }catch(e){resolve();}
-          });
-          await new Promise(resolve=>{
-            try{playStoryForToday(()=>resolve());}catch(e){resolve();}
-          });
-          try{_reveal();}catch(e){}
-          await wait(220);
-          try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
-        }catch(e){
-          try{_reveal();}catch(x){}
-        }finally{
-          window.__booting=false;
-        }
-      })();
-      /* 教练提示要排在剧情、新手说明后面，由 maybeOnboard 的关闭回调来触发 */
     }
   };
   const begin=(mode)=>{
