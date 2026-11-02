@@ -3099,10 +3099,6 @@ body{
   text-shadow:0 1px 0 rgba(255,255,255,.7)!important;
   box-shadow:0 12px 28px -14px rgba(160,80,90,.75)!important}
 #titleScr .tbtn:active{transform:translateY(1px) scale(.995)!important}
-/* 版本号：压到几乎看不见 */
-#tVer,.verTag,#ver{opacity:.28!important;font-size:9px!important;letter-spacing:.5px!important;
-  color:#4b3a2f!important;text-shadow:none!important;background:none!important;
-  border:0!important;padding:0!important}
 </style>
 <style id="galWarn">
 /* ===== 危险操作提示：从灰字改成琥珀警示块 ===== */
@@ -3714,27 +3710,8 @@ html body .titleScr .tKicker{color:#fff7ec!important;
 html body .titleScr .tDesc{color:#fff3e4!important;
   text-shadow:0 1px 2px rgba(120,80,40,.5),0 2px 10px rgba(120,80,40,.4)!important;
   font-size:12.5px!important;letter-spacing:2px!important}
-/* 版本号 / 作者：做成可读的水印胶囊 */
-html body .titleScr .tVer,html body .titleScr .tMark{
-  color:#fff6ea!important;background:rgba(72,48,38,.42)!important;
-  border:1px solid rgba(255,240,225,.28)!important;border-radius:999px!important;
-  padding:3px 10px!important;font-size:10.5px!important;letter-spacing:.5px!important;
-  text-shadow:0 1px 2px rgba(0,0,0,.35)!important;backdrop-filter:blur(4px);
-  font-family:'WCCute','PingFang SC',sans-serif!important}
-html body .titleScr .tMark{opacity:.92}
 </style>
 <style id="galVerReadable">
-/* 版本号水印：加大、加深底、用系统字体（小字号下更清楚） */
-html body .titleScr .tVer{
-  background:rgba(52,34,26,.78)!important;
-  color:#fffdf8!important;
-  font-family:'PingFang SC','Helvetica Neue',sans-serif!important;
-  font-size:11.5px!important;font-weight:600!important;letter-spacing:.6px!important;
-  padding:4px 11px!important;border-radius:999px!important;
-  border:1px solid rgba(255,240,225,.42)!important;
-  text-shadow:0 1px 2px rgba(0,0,0,.55)!important;
-  box-shadow:0 3px 10px -4px rgba(0,0,0,.5)!important;
-  backdrop-filter:blur(6px)!important}
 html body .titleScr .tMark{
   background:rgba(52,34,26,.66)!important;color:#fff7ec!important;
   font-family:'PingFang SC',sans-serif!important;font-size:11px!important;
@@ -3850,7 +3827,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01169</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01172</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4034,7 +4011,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01169 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01172</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7119,12 +7096,14 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01171';
+const APP_BUILD='01172';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
+/* 水印上统一的写法：v0.12.0 · 01172 */
+const APP_VER_TXT=APP_VER+' · '+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
-try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_FULL+' · JS';
-var _t=document.getElementById('verTag');if(_t)_t.textContent=APP_FULL+' · JS';})();}catch(e){}
+try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
+var _t=document.getElementById('verTag');if(_t)_t.textContent=APP_VER_TXT;})();}catch(e){}
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
 function syncModalLock(){
@@ -15394,7 +15373,7 @@ document.addEventListener('visibilitychange',()=>{
 });
 document.getElementById('tbMask').onclick=e=>{if(e.target.id==='tbMask'){const o=state.tb;if(o){o.closed=true;save();}tbRender();}};
 document.getElementById('tbMini').onclick=()=>{const o=state.tb;if(o){o.closed=false;save();tbRender();}};
-try{const vm=document.getElementById('verMark');if(vm)vm.textContent=APP_VER+' · '+APP_BUILD;}catch(e){}
+try{const vm=document.getElementById('verMark');if(vm)vm.textContent=APP_VER_TXT;}catch(e){}
 /* 标题页花瓣：26 片，随机位置/速度/大小 */
 try{
   (function(){
@@ -15460,10 +15439,11 @@ function maybeOnboard(after){
     const yes=document.getElementById('mYes');if(yes)yes.textContent='开始干活';
   },600);
 }
-function hideTitle(){const t=document.getElementById('titleScr');if(t)t.classList.add('hide');}
+function hideTitle(){const t=document.getElementById('titleScr');if(t)t.classList.add('hide');try{document.body.classList.remove('title-open');}catch(e){}}
 function showTitle(){
   const t=document.getElementById('titleScr');if(!t)return;
-  const ver=document.getElementById('tVer');if(ver)ver.textContent=APP_FULL+' · JS';
+  try{document.body.classList.add('title-open');}catch(e){}
+  const ver=document.getElementById('tVer');if(ver)ver.textContent=APP_VER_TXT;
   const hint=document.getElementById('tSaveHint');
   if(hint){
     try{
@@ -15478,7 +15458,7 @@ applyState(state,build);
 (function stampVer(){
   try{
     document.title='旺财装机店 '+APP_FULL;
-    const t=document.getElementById('verTag');if(t)t.textContent=APP_FULL+' · JS';
+    const t=document.getElementById('verTag');if(t)t.textContent=APP_VER_TXT;
     const m=document.getElementById('verLine');if(m)m.textContent='当前版本 '+APP_FULL;
   }catch(e){}
 })();
@@ -15819,7 +15799,7 @@ setTimeout(function(){
       var b=document.getElementById('tStart');
       if(b&&!b.__fallback){b.__fallback=1;b.onclick=function(){alert('脚本加载失败：请强制刷新页面（或换浏览器）');};}
     }else if(t&&window.__BOOT_OK){
-      t.textContent=(typeof APP_FULL==='string'?APP_FULL:'v0.12.0.x')+' · JS';
+      t.textContent=(typeof APP_VER_TXT==='string'?APP_VER_TXT:(typeof APP_FULL==='string'?APP_FULL:'v0.12.0.x'));
     }
   }catch(e){}
 },1600);
@@ -16133,6 +16113,29 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 /* 动效开关按钮：跟节流按钮同款，关闭时压暗 */
 #btnMotion{opacity:.92}
 #btnMotion.off{opacity:.6;border-color:rgba(196,150,120,.3)!important;color:#93796a!important}
+
+/* ===== 版本号水印：全站一种写法、一种样子 =====
+   v0.12.0 · 01172
+   - 标题页用 #tVer（在 .tMeta 里），游戏内用 #verMark（固定右下角）
+   - 深底浅字胶囊，压在任何画面（含剧情卡/微信层）上都读得清 */
+#tVer,#verMark{
+  font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif!important;
+  font-size:10.5px!important;font-weight:600!important;letter-spacing:.5px!important;
+  line-height:1!important;font-variant-numeric:tabular-nums;
+  color:#fffdf8!important;background:rgba(52,34,26,.72)!important;
+  border:1px solid rgba(255,240,225,.34)!important;border-radius:999px!important;
+  padding:4px 9px!important;margin:0!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.45)!important;
+  box-shadow:0 2px 8px -3px rgba(0,0,0,.4)!important;
+  backdrop-filter:blur(4px);opacity:1!important;
+}
+#verMark{
+  position:fixed!important;right:10px!important;z-index:1200!important;
+  bottom:calc(var(--navh,0px) + env(safe-area-inset-bottom,0px) + 8px)!important;
+  pointer-events:none!important;user-select:none;
+}
+/* 标题页右下角已经有 #tVer 了，别叠两层 */
+body.title-open #verMark{display:none!important}
 </style>
 <script>
 /* ================= 手机对话剧情 =================
