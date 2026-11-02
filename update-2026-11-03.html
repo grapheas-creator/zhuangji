@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>旺财装机店 · 更新交代 2026-11-03</title>
+<style>
+  :root{--ink:#4b3a2f;--muted:#7d6555;--pink:#e0668a;--cream:#fffdfa;--line:rgba(196,150,120,.35)}
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#fdf1e6,#fffdfa 40%);color:var(--ink);
+    font:15px/1.9 "PingFang SC","Noto Sans SC",sans-serif;padding:32px 16px 56px}
+  main{max-width:760px;margin:0 auto;background:rgba(255,253,250,.92);border:1px solid var(--line);
+    border-radius:20px;padding:32px 28px;box-shadow:0 24px 60px -36px rgba(120,80,60,.6)}
+  h1{font-size:24px;margin:0 0 6px;letter-spacing:1px}
+  .meta{color:var(--muted);font-size:13px;margin-bottom:24px}
+  h2{font-size:17px;margin:28px 0 8px;padding-left:10px;border-left:4px solid #f2a6bb;line-height:1.4}
+  p{margin:8px 0}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:4px 0}
+  code{background:#fdf1e6;border:1px solid #f3ddca;border-radius:5px;padding:1px 5px;font-size:.92em}
+  .tag{display:inline-block;background:linear-gradient(180deg,#ffd9e4,#ffc3d5);color:#8c4351;
+    border-radius:999px;padding:2px 12px;font-size:12px;font-weight:700;margin-right:6px}
+  .note{background:#fdf8f2;border:1px solid #f0dfce;border-radius:12px;padding:12px 14px;color:var(--muted);font-size:13px}
+  a{color:var(--pink)}
+</style>
+</head>
+<body>
+<main>
+  <h1>旺财装机店 · 更新交代</h1>
+  <div class="meta">2026-11-03　版本 <b>v0.12.0.01170</b>（上一版 01169）　适用：DSH 侧栏插件 / 桌面单文件版</div>
+
+  <div class="note">这次主要修手机端新手教程的显示顺序、引导位置和滚动，另外把陈默头像和微信旁白框重做了一遍。存档格式未改，旧存档可以继续读。</div>
+
+  <h2>1. 新手说明卡不再抢在引导后面</h2>
+  <p>开局读剧情超过 12 秒时，原来的 12 秒保险会提前解除开场锁，引导卡先露一帧，「欢迎来到旺财装机店」反而排在后面。现在说明卡出现前会一直锁住引导；12 秒保险只在没有说明卡等着弹时解除，另加 30 秒兜底防止卡死。</p>
+
+  <h2>2. 引导条贴到底部页签上方</h2>
+  <p>引导卡不再固定顶部，也不再悬在操作栏上方留一大段空。默认只留底部页签高度，贴在页签正上方；只有「交付 / 检查 / 打烊」这些要点操作栏的步骤，才把卡片临时抬到操作栏上面。</p>
+
+  <h2>3. 目标会自动滚到卡片上方</h2>
+  <p>修了安全区计算的 bug：以前拿全屏层 <code>#tutGal</code> 的高度当卡片高度，底部安全区被算成负数。现在用 <code>.gal-box</code> 的实际顶边计算，并给页面多留 420px 可滚空间。引导换步时会把当前目标滚到卡片上方。</p>
+
+  <h2>4. 旺财立绘左右换边</h2>
+  <p>立绘不再固定死在左边。目标在屏幕右半边，旺财站左边；目标在左半边，旺财站右边。纵向固定在引导卡上方，不再压住要点的按钮。</p>
+
+  <h2>5. 涂完硅脂会弹出「已涂硅脂」主板图</h2>
+  <ul>
+    <li>涂硅脂后原来只刷新工作台小图，没有全屏展示；</li>
+    <li>H81M 是双内存槽，查图键是 <code>p8b75_2</code>，而硅脂图只有 <code>p8b75</code>，一直回退成干净 CPU 图。</li>
+  </ul>
+  <p>现在 <code>p8b75_2</code> 会回退到 <code>p8b75</code>，涂完弹出 1.6 秒全屏实拍，标签「已涂硅脂 · 薄薄抹开」，收起后再进入买内存。</p>
+
+  <h2>6. 陈默头像不再压扁</h2>
+  <p>旧头像原图脸宽约 170px、高约 115px，比例接近 1.48:1，在 40px 聊天头像里看起来是横向拉宽的。现在直接从同一角色的全身立绘上裁胸口像（220×220，奶油底），发型、表情、蓝衬衫、白 T、画风保持一致，头部比例恢复正常。</p>
+
+  <h2>7. 微信旁白框与剧情框同款</h2>
+  <p><code>.wxNarBox</code> 按剧情/引导框的实测参数重排：336×182、<code>padding:38px 34px 40px</code>、九层花边 64px 角 / 45px 边、正文 15.5px / 1.75、圆角 14px、无边框。「陈默发来一段视频…」两行完整落在框内。</p>
+
+  <h2>验证</h2>
+  <ul>
+    <li>360×800 CSS、DPR 4，Edge 156，真实触摸/点击。</li>
+    <li>慢速跑到 13.0 秒（越过 12 秒保险）时，说明卡先出现，出现瞬间 <code>#tutGal=0</code>、<code>#coach=0</code>。</li>
+    <li>第一步「买主板」目标自动滚到卡片上方；目标在右侧时立绘站左侧。</li>
+    <li>涂硅脂前标签「待涂硅脂」，点击后全屏图数据长度 43511 → 82343，标签「已涂硅脂 · 薄薄抹开」，1.6 秒后进入 <code>buy:ram</code>。</li>
+    <li>陈默头像 220×220，聊天 40×40、剧情卡 52×52，正方形不拉伸。</li>
+    <li>微信旁白框 336×182、文字区 268×104。</li>
+  </ul>
+
+  <h2>怎么更新</h2>
+  <ul>
+    <li><b>DSH 插件</b>：刷新 DSH 页面，点工具栏「重新载入」。旧 iframe 可能继续用缓存，必须重新载入。</li>
+    <li><b>桌面</b>：双击新版单文件 <code>旺财装机店-v0.12.0.01170-手机修复.html</code>。</li>
+    <li>如果还是旧画面，先把所有旧标签页关掉，再整页 Ctrl+F5。</li>
+  </ul>
+
+  <p class="meta" style="margin-top:26px">版本号 01169 → 01170，线上 <code>version.json</code> 已同步，旧版打开时会提示更新。</p>
+</main>
+</body>
+</html>
