@@ -3864,7 +3864,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01154</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01157</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4048,7 +4048,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01154 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01157 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7133,7 +7133,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01154';
+const APP_BUILD='01157';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -11919,6 +11919,10 @@ let _coachSettleUntil=0,_coachSettleT=0;
 /* 引导锁：第一天引导没走完时，只能点引导指的控件 */
 function tutLocked(){
   try{
+    /* 标题页、加载页阶段不算新手期：这时必须能点「开始新游戏」 */
+    const scr=document.getElementById('titleScr');
+    if(scr&&!scr.classList.contains('hide'))return false;
+    if(document.getElementById('startLoad'))return false;
     if(state.day!==1)return false;
     const tu=state.tut||{};
     if(tu.guideOff)return false;
@@ -11929,6 +11933,23 @@ function tutLocked(){
 function tutTargetEl(){
   try{const s=coachStep();if(!s||typeof s.sel!=='function')return null;return s.sel();}catch(e){return null;}
 }
+/* 新手期间严格锁：只有「引导指的那一个控件」可以点，其余点击一律拦掉 */
+document.addEventListener('click',function(e){
+  try{
+    if(typeof tutLocked!=='function'||!tutLocked())return;
+    const t=e.target;
+    if(!t||!t.closest)return;
+    /* 剧情/微信/接单卡/引导/弹窗/设置 都属于「引导允许的界面」 */
+    if(t.closest('#coach,#tutGal,#tutPortrait,#mask,#setSheet,#dbgPanel,.tutActs,'+
+                 '#plotEvent,#chatPop,#storyPop,.gal-box,.gal-next'))return;
+    const tgt=(typeof tutTargetEl==='function')?tutTargetEl():null;
+    if(tgt&&(tgt===t||tgt.contains(t)))return;
+    /* 允许滚动容器本身，避免整页卡死 */
+    if(t.closest('#leftBody,#storeList,.list,.wxBody,#chatBody')){ /* 列表内滚动仍可触发，但点具体控件会被下面拦 */ }
+    e.stopPropagation();e.preventDefault();
+    try{if(typeof toast==='function')toast('先跟着旺财的提示操作');}catch(x){}
+  }catch(err){}
+},true);
 document.addEventListener('click',function(e){
   if(!tutLocked())return;
   const el=e.target&&e.target.closest?e.target.closest('[data-buy],[data-install],[data-sell],[data-more]'):null;
@@ -15178,12 +15199,12 @@ try{
   }catch(_){}
 }
 
-function maybeOnboard(){
+function maybeOnboard(after){
   /* 每开一局都讲一次（存在本局 state 里），刷新页面后新开也会再看到；
      以前用 localStorage 永久记住，刷新一次就再也不出现了。 */
   let seen=false;
   try{seen=!!(state.tut&&state.tut.onboarded);}catch(e){}
-  if(seen){_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},240);return;}
+  if(seen){_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},240);if(after)after();return;}
   setTimeout(()=>{
     modal('欢迎来到旺财装机店',
       `<div style="line-height:1.85">
@@ -15197,7 +15218,8 @@ function maybeOnboard(){
       ()=>{try{state.tut=state.tut||{};state.tut.onboarded=1;save();}catch(e){}try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},600);
         /* 弹窗关掉后延时 0.9 秒补念第一条：画框那条若被弹窗挡掉，这里兜住；
            已经念过则被 coachSay 的 2.5 秒去重挡掉，不会念两遍。 */
-        setTimeout(function(){try{var _s=coachStep();if(_s&&typeof coachSay==='function')coachSay(_s.k,_s.title+'。'+_s.text);}catch(e){}},900);});
+        setTimeout(function(){try{var _s=coachStep();if(_s&&typeof coachSay==='function')coachSay(_s.k,_s.title+'。'+_s.text);}catch(e){}},900);
+      if(after)setTimeout(after,120);});
     const no=document.getElementById('mNo');if(no)no.style.display='none';
     const yes=document.getElementById('mYes');if(yes)yes.textContent='开始干活';
   },600);
@@ -15271,11 +15293,18 @@ renderAll();
         try{
           if(_veil){_veil.style.opacity='0';setTimeout(()=>{try{_veil.remove();}catch(e){}},420);}
         }catch(e){}
-        try{if(typeof maybeOnboard==='function')maybeOnboard();}catch(e){}
+
       };
       /* 加载页至少停留 1 秒，再开始剧情，否则一闪而过像闪屏 */
       try{window.__loadAt=Date.now();}catch(e){}
-      setTimeout(()=>{try{playStoryForToday(_reveal);}catch(e){_reveal();}},1000);
+      /* 顺序改成：加载页 → 「开始干活」说明 → 点完才开始剧情 → 剧情完进引导 */
+      setTimeout(()=>{
+        const _run=()=>{try{playStoryForToday(_reveal);}catch(e){_reveal();}};
+        try{
+          if(typeof maybeOnboard==='function')maybeOnboard(_run);
+          else _run();
+        }catch(e){_run();}
+      },1000);
       /* 教练提示要排在剧情、新手说明后面，由 maybeOnboard 的关闭回调来触发 */
     }
   };
