@@ -3664,7 +3664,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00553</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00554</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3846,7 +3846,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00553</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00554</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6846,7 +6846,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00553';
+const APP_BUILD='00554';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -10149,11 +10149,8 @@ const SFX={
   /* 微信消息音：短促上扬的「咻」，只在微信剧情里用。
      连着来消息时加 150ms 最小间隔，避免「咻咻」叠成一片。 */
   msgOut(){
-    const now=(typeof performance!=='undefined'?performance.now():Date.now());
-    if(SFX._msgAt&&now-SFX._msgAt<150)return;
-    SFX._msgAt=now;
     aeResume();const t=AE.ctx?AE.ctx.currentTime:0;
-    aeTone(660,0.07,'triangle',0.16,880,t);
+    aeTone(660,0.07,'triangle',0.18,880,t);
   },
   /* 跑分：一段上扫 + 滴答，跑完来一个上扬和弦 */
   bench(){
@@ -16095,7 +16092,7 @@ function playChatScene(id,onDone){
     };
     const typeNar=(txt)=>{
       narBox.classList.add('show');
-      try{SFX.msgOut();}catch(e){}
+      /* 旁白不放音效，只有对话气泡才响 */
       narText.textContent='';typing=true;let n=0;
       const tick=()=>{
         if(closed||!typing)return;
@@ -16111,7 +16108,7 @@ function playChatScene(id,onDone){
       clearTimeout(autoT);
       const n=String(txt||'').length;
       /* 文字越长停得越久：基础 900ms + 每字 55ms（快速阅读也能跟上） */
-      const wait=900+Math.min(3800,n*55);
+      const wait=Math.max(1100,900+Math.min(3800,n*55));   /* 最短 1.1 秒，保证音效不重叠 */
       autoT=setTimeout(()=>{try{next();}catch(e){}},wait);
     };
     const next=()=>{
