@@ -3801,7 +3801,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01129</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.01132</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3984,7 +3984,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01129 · JS</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.01132 · JS</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7069,7 +7069,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01129';
+const APP_BUILD='01132';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -12004,7 +12004,6 @@ function tutGalShow(step){
        这样「引导压在剧情上」不可能靠某条路径绕过去。 */
     const m=document.getElementById('mask');
     if((m&&m.classList.contains('on'))||
-       (typeof Scene!=='undefined'&&Scene.busy&&Scene.busy())||
        document.getElementById('startLoad')||document.getElementById('chatPop')||
        document.getElementById('plotEvent')||document.getElementById('storyPop'))return;
     const g=document.getElementById('tutGal');if(!g)return;
@@ -12178,7 +12177,6 @@ function coachSay(key,text){
       try{
         const m=document.getElementById('mask');
         return !!((m&&m.classList.contains('on'))||
-          (typeof Scene!=='undefined'&&Scene.busy&&Scene.busy())||
           document.getElementById('startLoad')||document.getElementById('chatPop')||
           document.getElementById('plotEvent')||document.getElementById('storyPop'));
       }catch(e){return false;}
@@ -12243,6 +12241,9 @@ function drawCoach(el,step){
     document.getElementById('coachStep').textContent='旺财解说';
     document.getElementById('coachTitle').textContent=step.title;
     document.getElementById('coachText').textContent=step.text;
+    /* 手机端走 tutGal（不经过 drawCoach），这里必须同步 _coachKey，
+       否则新加的 240ms 节拍会一直以为「步骤没画过」，引导框永远出不来。 */
+    _coachKey=step.k;_coachDrawnKey=step.k;
     try{tutGalShow(step);}catch(e){}
     /* 线性时序：先出框 → 380ms 后念；这期间若换步，旧语音取消 */
     try{
@@ -12696,19 +12697,9 @@ function coachRefresh(){
   const step=coachStep();
   if(!step){coachHide();return;}
   if(_coachDismissed===step.k)return;
-  /* 线性节拍：步骤之间至少隔 240ms 再画下一个框，
-     避免「上一步的框还没收、下一步的字已经换掉」这种错位。 */
-  if(_coachKey!==step.k){
-    const _now=Date.now();
-    if(_now<(_coachSettleUntil||0)){
-      if(!_coachSettleT){
-        _coachSettleT=setTimeout(function(){_coachSettleT=0;try{coachRefresh();}catch(e){}},
-          Math.max(90,(_coachSettleUntil-_now))+20);
-      }
-      return;
-    }
-    _coachSettleUntil=_now+240;
-  }
+  /* （已移除 240ms 步间节拍：它要求 _coachKey 必须及时写入，
+       手机端走 tutGal 分支时写入滞后，会把引导框一直挡掉。
+       节奏改为「剧情之间 260ms + 语音 380ms」两处，够用且不挡绘制。） */
   /* 先切页、再画框：这一轮负责切，切完重新进 refresh 才画 */
   if(_coachSyncPage(step)){
     /* 切页时不收卡片（收了再画 = 肉眼看到两次弹出） */
@@ -15400,7 +15391,6 @@ renderAll();
     try{
       const m=document.getElementById('mask');
       _busy=!!((m&&m.classList.contains('on'))||
-        (typeof Scene!=='undefined'&&Scene.busy&&Scene.busy())||
         document.getElementById('startLoad')||document.getElementById('chatPop')||
         document.getElementById('plotEvent')||document.getElementById('storyPop'));
     }catch(e){}
