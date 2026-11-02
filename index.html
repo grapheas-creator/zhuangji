@@ -3676,7 +3676,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00555</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00556</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3858,7 +3858,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00555</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00556</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6858,7 +6858,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00555';
+const APP_BUILD='00556';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -15350,7 +15350,7 @@ function maybeOnboard(){
         不用记流程：清单会告诉你现在该做什么。<br>
         客户给的部件费是预算，花得越少赚得越多——但别省到跑不动客户的软件。
       </div>`,
-      ()=>{try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},240);});
+      ()=>{try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},600);});
     const no=document.getElementById('mNo');if(no)no.style.display='none';
     const yes=document.getElementById('mYes');if(yes)yes.textContent='开始干活';
   },600);
@@ -15660,6 +15660,20 @@ setInterval(function(){
 },700);
 </script>
 <script>
+/* 引导看门狗：任何原因导致引导没画出来（弹窗刚关、节流吞掉一次、切页被打断），
+   每 1.5 秒都会再试一次，直到引导真正出现或本步完成。 */
+try{
+  setInterval(function(){
+    try{
+      if(typeof coachRefresh!=='function')return;
+      if(!state)return;
+      if((state.day||1)!==1)return;
+      if(state.tut&&state.tut.guideOff)return;
+      if(document.getElementById('startLoad'))return;
+      coachRefresh();
+    }catch(e){}
+  },1500);
+}catch(e){}
 setTimeout(function(){
   try{
     var t=document.getElementById('tVer');
