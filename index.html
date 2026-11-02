@@ -3444,6 +3444,14 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 .story-pop .sp-acts{margin-top:14px!important}
 .story-pop .sp-card{position:relative!important}
 </style>
+<style id="galWxCover">
+/* 微信全屏层：盖住一切游戏 UI（底部交付条、页签、顶栏） */
+.chatPop.chatFull{position:fixed!important;inset:0!important;z-index:99990!important;
+  background:#e9e6e1!important;height:100vh!important;height:100dvh!important}
+body.wx-open #actionBar,body.wx-open #mNav,body.wx-open #mobileBar,
+body.wx-open header,body.wx-open #coach,body.wx-open .tutGal,
+body.wx-open #coachHole,body.wx-open .coachShield{visibility:hidden!important;opacity:0!important}
+</style>
 </head>
 <body>
 <div id="bootSplash" aria-hidden="true">
@@ -3537,7 +3545,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00532</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0.00533</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -3719,7 +3727,7 @@ header h1,#titleScr h1,.titleScr h1{font-family:'WCCute','PingFang SC',sans-seri
       <button class="tBtn" id="tLoad">读档</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00532</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0.00533</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -6719,7 +6727,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='00532';
+const APP_BUILD='00533';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
@@ -15857,7 +15865,7 @@ function playChatScene(id,onDone){
         '<div class="wxNarBox" id="wxNar"><div class="wxNarText" id="wxNarText"></div>'+
         '<div class="wxHint" id="wxHint">轻触继续 ▸</div></div>'+
       '</div>';
-    document.body.appendChild(ov);window.__sceneOpen=true;
+    document.body.appendChild(ov);window.__sceneOpen=true;try{document.body.classList.add('wx-open');}catch(e){}
     requestAnimationFrame(()=>{try{ov.classList.add('on');}catch(e){}});
     const body=ov.querySelector('#chatBody');
     const narBox=ov.querySelector('#chatFoot');
@@ -15868,6 +15876,7 @@ function playChatScene(id,onDone){
       if(closed)return;closed=true;clearTimeout(timer);
       try{state.story.seen=state.story.seen||{};state.story.seen['chat_'+id]=1;save();}catch(e){}
       window.__sceneOpen=false;
+      try{document.body.classList.remove('wx-open');}catch(e){}
       ov.classList.remove('on');
       setTimeout(()=>{try{ov.remove();}catch(e){}
         if(typeof onDone==='function')onDone();
