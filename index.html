@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01189</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01190</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01189</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01190</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,7 +7111,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01189';
+const APP_BUILD='01190';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8540,7 +8540,7 @@ M.forEach(m=>{
     /* 2026-10-28 淘宝抓价（16G 1538~1799、32G 2569）清洗后取：16G 6000=1700、32G=2700。
        明显被低价件污染的样本不用（威刚 16G ¥95、光威 32G ¥100、金士顿 32G 1434 倒挂）。 */
     const baseF=m.cap===16?1700:(m.cap===24?2180:(m.cap===32?2700:5400));
-    const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
+    const ff=m.mhz===4800?0.78:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
     const pr=Math.round(baseF*ff*(RAM_U_RATE[br]||0.86)/5)*5*(m.mult>1?m.mult:1);
     m.p=pr;m.u=Math.round(pr*0.62/5)*5;
   }
@@ -8961,13 +8961,20 @@ M.forEach(m=>{
   const br=m.n.split(' ')[0];
   const a=D5_ANCHOR[br]||Math.round(1700*(RAM_U_RATE[br]||0.86));
   const base=m.cap===16?a:(m.cap===24?Math.round(a*1.28):(m.cap===32?Math.round(a*1.65):Math.round(a*3.1)));
-  const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
+  const ff=m.mhz===4800?0.78:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
   const pr=Math.round(base*ff/5)*5*(m.mult>1?m.mult:1);
   m.p=pr;m.u=Math.round(pr*0.62/5)*5;
 });
 
 
 [G,C,B,M,P,H,ST,K].forEach(arr=>arr.forEach(x=>{if(x.p!=null&&x.u!=null&&x.p<x.u*1.15)x.p=Math.round(x.u*1.15);}));
+
+/* DDR5 16G 4800 全新实拍（2026-11-03 淘宝：英睿达 1060 / 威刚 D300 1170 / 光威天策 1279）
+   放在最后：前面还有整族系数和其它校准，写在这里才不会被盖掉 */
+(function(){
+  const R={'英睿达 DDR5 4800 16G 单条':1060,'威刚 DDR5 4800 16G 单条':1170,'光威 DDR5 4800 16G 单条':1279};
+  M.forEach(m=>{const v=R[m.n];if(v!=null){m.p=v;m.u=Math.round(v*0.62);m.flag=1;}});
+})();
 
 
 /* 2026-10-31 跑分按 topcpu.net 全量校准（Cinebench R23 多核） */
