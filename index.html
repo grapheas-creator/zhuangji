@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01191</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01192</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01191</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01192</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,7 +7111,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01191';
+const APP_BUILD='01192';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8968,12 +8968,20 @@ M.forEach(m=>{
 
 [G,C,B,M,P,H,ST,K].forEach(arr=>arr.forEach(x=>{if(x.p!=null&&x.u!=null&&x.p<x.u*1.15)x.p=Math.round(x.u*1.15);}));
 
-/* DDR5 16G 4800 全新实拍（2026-11-03 淘宝：英睿达 1060 / 威刚 D300 1170 / 光威天策 1279）
-   放在最后：前面还有整族系数和其它校准，写在这里才不会被盖掉 */
+/* ===== DDR5 4800 整类替换为实拍 =====
+   2026-11-03 用户淘宝截图（16G 4800 单条 ¥1060~1336，威刚 D50 16G×2 ¥2348）。
+   这个频率只留拍到实价的型号，其余（含套条）全删，不再用公式补。 */
 (function(){
-  const R={'英睿达 DDR5 4800 16G 单条':1060,'威刚 DDR5 4800 16G 单条':1170,'光威 DDR5 4800 16G 单条':1279};
-  M.forEach(m=>{const v=R[m.n];if(v!=null){m.p=v;m.u=Math.round(v*0.62);m.flag=1;}});
+  for(let i=M.length-1;i>=0;i--){const x=M[i];if(x.m==='DDR5'&&x.mhz===4800)M.splice(i,1);}
+  [['英睿达',1060,40],['威刚',1170,28],['铭瑄',1269,40],['光威',1279,40],
+   ['华硕',1290,40],['七彩虹',1336,28]].forEach(function(a){
+    M.push({n:a[0]+' DDR5 4800 16G 单条',m:'DDR5',cap:16,mhz:4800,st:1,cl:a[2],p:a[1],u:null,flag:1});
+  });
+  M.push({n:'威刚 D50 DDR5 4800 16G×2 套条',m:'DDR5',cap:16,mhz:4800,st:1,cl:40,
+    mult:2,kit:1,flag:1,p:2348,u:null});
 })();
+
+
 
 
 /* 2026-10-31 跑分按 topcpu.net 全量校准（Cinebench R23 多核） */
