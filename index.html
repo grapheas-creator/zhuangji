@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01186</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01187</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01186</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01187</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,7 +7111,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01186';
+const APP_BUILD='01187';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7560,11 +7560,11 @@ const RAM_BRANDS=['金士顿','威刚','海盗船','芝奇','光威','英睿达'
 '阿斯加特','朗科','玖合','金泰克','协德'];
 /* 内存：代际 × 容量 × 频率（频率按真实产品线，价格随频率上浮） */
 const RAM_TIERS=[
- ['DDR3',4,[1333,1600]],['DDR3',8,[1600]],['DDR3',16,[1600]],
+ ['DDR3',4,[1333,1600]],['DDR3',8,[1600]],   /* DDR3 不出 16G（用户 2026-11-03 定） */
  ['DDR4',8,[2666,3000,3200]],['DDR4',16,[3000,3200,3600]],['DDR4',32,[3200,3600]],
  ['DDR5',16,[4800,5600,6000]],['DDR5',32,[5600,6000,6400]],['DDR5',64,[6000]]
 ];
-const RAM_BASEU={'DDR3':{4:22,8:42,16:88},'DDR4':{8:240,16:460,32:900},'DDR5':{16:1300,32:2450,64:4700}};
+const RAM_BASEU={'DDR3':{4:22,8:42},'DDR4':{8:240,16:460,32:900},'DDR5':{16:1300,32:2450,64:4700}};
 const RAM_BASEP={'DDR4':{8:360,16:700,32:1400},'DDR5':{16:1700,32:3300,64:6400}};
 const RAM_REF={'DDR3':1600,'DDR4':3200,'DDR5':6000};
 /* 时序：同一代里 CL 越低越贵，用价格把「旗舰 / 中端 / 低端」拉开
@@ -8525,7 +8525,6 @@ M.forEach(m=>{
       if(m.cap===4&&m.mhz===1333)m.u=arr[0];
       else if(m.cap===4&&m.mhz===1600)m.u=arr[1];
       else if(m.cap===8&&m.mhz===1600)m.u=arr[2];
-      else if(m.cap===16&&m.mhz===1600)m.u=Math.round(arr[2]*2.05);
     }
     return;
   }
