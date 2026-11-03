@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01182</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01183</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01182</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01183</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,7 +7111,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01182';
+const APP_BUILD='01183';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -12218,7 +12218,7 @@ function tutGalHide(){
 let _tutHiddenAt=0,_tutHealAt=0;
 setInterval(function(){
   try{
-    if(!window.state||!state.tut||state.tut.guideOff||state.day>1)return;
+    if(typeof state==='undefined'||!state||!state.tut||state.tut.guideOff||state.day>1)return;
     if(window.__booting||window.__inGame===false)return;
     const g=document.getElementById('tutGal');
     if(!g||g.classList.contains('on'))return;
@@ -12509,7 +12509,11 @@ function drawCoach(el,step){
        只有语音没有框，就是这个原因。 */
     let _shown=false;
     try{_shown=tutGalShow(step);}catch(e){_shown=false;}
-    if(_shown){_coachKey=step.k;_coachDrawnKey=step.k;}
+    /* 卡片没出来（弹窗/剧情刚好压上来）就整步退出：不写 key、不画光圈、不亮提示卡。
+       以前这里照样往下走，末尾把 _coachKey 写成这一步，之后每轮 refresh
+       都在「步骤没变」处直接 return，卡片就再也回不来了。 */
+    if(!_shown)return;
+    _coachKey=step.k;_coachDrawnKey=step.k;
     /* 线性时序：先出框 → 380ms 后念；这期间若换步，旧语音取消 */
     try{
       clearTimeout(coachSay._stepT);
