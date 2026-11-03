@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01183</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01184</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01183</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01184</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,7 +7111,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01183';
+const APP_BUILD='01184';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7585,6 +7585,25 @@ RAM_BRANDS.forEach((br)=>RAM_TIERS.forEach(([mem,cap,freqs],ti)=>freqs.forEach((
     p:baseP?jitter(R2(baseP*fk*jf*ck,1),'r'+br+ki):null,
     u:jitter(R2(baseU*fk*jf*ck,1),'ru'+br+ki)});
 })));
+/* ===== 套条：两根一起卖（mult=2），占两个内存槽，工作台照片直接是插好两条的样子 =====
+   ① 结构性套条：DDR4/DDR5 每个规格都有一条「16G×2」的版本，价 = 两条单条的价，不另外估溢价。
+   ② RAM_FLAG：用户 2026-11-03 淘宝实拍价的旗舰条（大牌 + 海力士 A-die），只卖全新。 */
+const MK=[];
+M.slice().forEach(x=>{
+  if(x.m!=='DDR4'&&x.m!=='DDR5')return;
+  MK.push({n:x.n.replace(/ \d+G 单条$/,' '+x.cap+'G×2 套条'),m:x.m,mult:2,kit:1,cap:x.cap,mhz:x.mhz,st:1,cl:x.cl,
+    p:x.p==null?null:R2(x.p*2,1),u:x.u==null?null:R2(x.u*2,1)});
+});
+/* 实拍单条（¥1584 / ¥1665）—— 不进上面那轮，免得再凭空调出个两倍价的套条 */
+M.push({n:'十铨 引领者 DDR5 6000 16G 单条',m:'DDR5',cap:16,mhz:6000,st:1,cl:30,p:1584,u:null,flag:1});
+M.push({n:'玖合 玲珑 DDR5 6000 16G 单条',m:'DDR5',cap:16,mhz:6000,st:1,cl:28,p:1665,u:null,flag:1});
+[['威刚','XPG 威龙',28,4239],['阿斯加特','吹雪联名二代',0,3999],['光威','神武RGB',28,3899],
+ ['金百达','星刃',0,3878],['铭瑄','暗耀D5',28,3375],['科赋','BOLT V',28,3421],
+ ['光威','龙武RGB',0,1899]].forEach(function(f){
+  MK.push({n:f[0]+' '+f[1]+' DDR5 6000 16G×2 套条',m:'DDR5',cap:16,mhz:6000,st:1,cl:f[2],
+    mult:2,kit:1,flag:1,p:f[3],u:null});
+});
+MK.forEach(x=>M.push(x));
 
 /* 品牌系数按闲鱼实测（650W：海韵GX 400 / 振华 182 / 长城 115 / 酷冷 99 / 杂牌 87）重排 */
 const PSU_BRANDS=[['海韵','PRIME',1.5],['海韵','FOCUS GX',1.36],['鑫谷','昆仑',0.85],['全汉','MEGA',0.68],
@@ -7663,8 +7682,8 @@ try{(G||[]).forEach(function(x){if(x&&(x.ts||0)>=30445&&x.tier==='budget')x.tier
     /* 只收敛品牌，瓦数一档都不砍：200W 到 1600W 每个档位都要有货。 */
     cut(P,function(x){return PSU_BRAND.test(x.n);});
 
-    /* ---------- 内存：6 个品牌，每品牌只留 6 个主力规格 ---------- */
-    const RAM_BRAND=/^(金士顿|威刚|海盗船|光威|金百达|英睿达)/;
+    /* ---------- 内存：11 个品牌（含套条/旗舰条），每品牌只留 6 个主力规格 ---------- */
+    const RAM_BRAND=/^(金士顿|威刚|海盗船|光威|金百达|英睿达|铭瑄|科赋|十铨|阿斯加特|玖合)/;
     /* 同上：只收敛品牌。DDR3 1333 4G 到 DDR5 6000 64G 每一档都留着，
        频率/时序不同的条目继续保留，档位差异交给 assignTiers 比价。 */
     cut(M,function(x){return RAM_BRAND.test(x.n);});
@@ -8257,7 +8276,7 @@ const XY_CPU_FIX={'Intel Core i7-4790K':316,'Intel Core i5-10400F':549,'Intel Co
 'AMD Ryzen 5 3600':383,'AMD Ryzen 5 5600':621,'AMD Ryzen 5 7500F':520,'AMD Ryzen 7 5800X3D':2199};
 G.forEach(g=>{if(XY_GPU_FIX[g.n]!=null){g.u=XY_GPU_FIX[g.n];return;}if(g.u<15000)g.u=Math.round(g.u*1.4);});
 C.forEach(c=>{if(XY_CPU_FIX[c.n]!=null){c.u=XY_CPU_FIX[c.n];return;}c.u=Math.round(c.u*1.2);});
-M.forEach(m=>{m.u=Math.round(m.u*0.9);});
+M.forEach(m=>{if(m.u!=null)m.u=Math.round(m.u*0.9);});   /* 只卖全新的件 u 是 null，别被算成 0（0 会被当成「最便宜」） */
 ST.forEach(d=>{d.u=Math.round(d.u*(d.kind==='hdd'?0.85:(d.kind==='m2'?1.23:1)));});
 /* ===== topcpu.net 跑分校准（2026-10-27） ===== */
 const TC_CPU_FIX={"Intel Core i5-6400":3214,"Intel Core i5-6500":3420,"Intel Core i5-6600K":3963,"Intel Core i7-6700":4841,"Intel Core i7-6700K":5646,"Intel Core i7-7700":5443,"Intel Core i7-7700K":5881,"Intel Core i3-8100":3597,"Intel Core i3-9100F":3686,"Intel Core i5-8400":5798,"Intel Core i5-8600K":6612,"Intel Core i5-9400F":5579,"Intel Core i7-8700K":8734,"Intel Core i7-9700K":9416,"Intel Core i9-9900":12084,"Intel Core i3-10100":5565,"Intel Core i3-10105F":5689,"Intel Core i5-11400":9558,"Intel Core i5-11400F":10168,"Intel Core i7-10700":10429,"Intel Core i7-10700K":12983,"Intel Core i7-11700K":15011,"Intel Core i9-10900K":13761,"Intel Core i9-11900K":16211,"Intel Core i3-12100":7985,"Intel Core i3-12100F":8443,"Intel Core i5-12400F":12344,"Intel Core i5-12490F":11488,"Intel Core i5-13400":14311,"Intel Core i5-13400F":14311,"Intel Core i5-14600K":23983,"Intel Core i9-14900K":38497,"AMD Ryzen 3 1200":3010,"AMD Ryzen 3 3100":5627,"AMD Ryzen 5 1600":6233,"AMD Ryzen 5 2600":7101,"AMD Ryzen 5 5500":10550,"AMD Ryzen 7 1700":8046,"AMD Ryzen 7 2700X":10106,"AMD Ryzen 7 3700X":12173,"AMD Ryzen 7 5700X":14028,"AMD Ryzen 5 7500F":13809,"AMD Ryzen 5 8400F":13361,"AMD Ryzen 5 9600X":16284,"AMD Ryzen 7 9700X":19539};
@@ -8490,12 +8509,14 @@ const DDR3_OBS_U={'金士顿':[21,23,67],'威刚':[20,22,65],'芝奇':[23,23,63]
   '宇瞻':[21,23,67],'金泰克':[21,23,67],'十铨':[21,23,67],'阿斯加特':[21,23,67],
   '光威':[19,20,64],'影驰':[19,20,65],'金百达':[18,19,66],'朗科':[16,17,62],'玖合':[17,18,70],'宏想':[16,17,70],'协德':[16,17,60]};
 M.forEach(m=>{
+  if(m.flag)return;   /* 用户淘宝实拍价的旗舰条不要被这轮公式覆盖 */
   const br=m.n.split(' ')[0];
   if(m.m==='DDR4'){
     const key=m.m+' '+m.mhz+' '+m.cap+'G';
     const pbase=RAM_P_BASE[key], ubase=RAM_U_BASE[key];
     if(pbase!=null)m.p=pbase;
     if(ubase!=null)m.u=Math.round(ubase*(RAM_U_RATE[br]||0.86)/5)*5;
+    if(m.mult>1){if(m.p!=null)m.p*=m.mult;if(m.u!=null)m.u*=m.mult;}
     return;
   }
   if(m.m==='DDR3'){
@@ -8513,7 +8534,7 @@ M.forEach(m=>{
        明显被低价件污染的样本不用（威刚 16G ¥95、光威 32G ¥100、金士顿 32G 1434 倒挂）。 */
     const baseF=m.cap===16?1700:(m.cap===32?2700:5400);
     const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
-    const pr=Math.round(baseF*ff*(RAM_U_RATE[br]||0.86)/5)*5;
+    const pr=Math.round(baseF*ff*(RAM_U_RATE[br]||0.86)/5)*5*(m.mult>1?m.mult:1);
     m.p=pr;m.u=Math.round(pr*0.62/5)*5;
   }
 });
@@ -8929,12 +8950,12 @@ const D5_ANCHOR={'金士顿':1799,'海盗船':1538,'金百达':1690};
 G.forEach(g=>{const v=GPU_CRAWL_U[g.n];if(v!=null){g.u=v;if(g.p!=null&&g.p<g.u*1.15)g.p=Math.round(g.u*1.2);}});
 P.forEach(q=>{const v=PSU_CRAWL_P[q.n];if(v!=null){q.p=v;if(q.u!=null)q.u=Math.round(v*0.72);}});
 M.forEach(m=>{
-  if(m.m!=='DDR5')return;
+  if(m.m!=='DDR5'||m.flag)return;
   const br=m.n.split(' ')[0];
   const a=D5_ANCHOR[br]||Math.round(1700*(RAM_U_RATE[br]||0.86));
   const base=m.cap===16?a:(m.cap===32?Math.round(a*1.65):Math.round(a*3.1));
   const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
-  const pr=Math.round(base*ff/5)*5;
+  const pr=Math.round(base*ff/5)*5*(m.mult>1?m.mult:1);
   m.p=pr;m.u=Math.round(pr*0.62/5)*5;
 });
 
@@ -10576,7 +10597,19 @@ function m2Part(i){return build.m2[i]?build.m2[i].part:null;}
 function sataPart(i){return build.sata[i]?build.sata[i].part:null;}
 function totalCost(){let c=0;['case','psu','mb','cpu','cooler','gpu1','gpu2'].forEach(k=>c+=build[k]?build[k].paid:0);
   [...build.rams,...build.m2,...build.sata].forEach(s=>{if(s)c+=s.paid;});return c;}
-function ramTotal(){return build.rams.reduce((s,r)=>s+(r?r.part.cap:0),0);}
+function ramTotal(){
+  let t=0;const seen={};
+  build.rams.forEach(r=>{
+    if(!r)return;
+    const m=r.part.mult||1;
+    if(m>1){
+      if(r.kitId){if(seen[r.kitId])return;seen[r.kitId]=1;}
+      t+=r.part.cap*m;return;
+    }
+    t+=r.part.cap;
+  });
+  return t;
+}
 /* 功耗按「实际装了哪些件」加出来，不再拍一个 100W 的固定底数。
    以前是 100 + CPU 的 TDP + 显卡的 TBP，于是只有核显的办公机也报 195W（100+95），
    看着像装了两块卡。现在：主板/风扇/外设 30W 打底，内存按条、硬盘按类型、散热按风冷水冷各算一份。 */
@@ -10773,7 +10806,7 @@ function tbWeekKey(){
 function tbPool(){
   const cap=400+state.day*450,out=[];
   Object.entries(MAP).forEach(([cat,arr])=>{
-    const a=arr.filter(x=>tbVal(x)>0&&tbVal(x)<=cap);
+    const a=arr.filter(x=>!x.kit&&tbVal(x)>0&&tbVal(x)<=cap);
     if(a.length)out.push([cat,a]);
   });
   return out;
@@ -11224,6 +11257,13 @@ function benchPhoto(){
       }
       if(set.cpu)return {src:set.cpu,tag:'待涂硅脂'};
     }
+    /* 装了内存就出一张「插好内存」的工作台照片：
+       套条一次占两根槽，n=2 会自己落到 ram2 那张图（插好两条的样子）。
+       以前这个分支排在散热后面，装了散热就永远看不到内存照片。 */
+    if(b.cpu&&build.rams.filter(Boolean).length){
+      const src=n>=4?(set.ram4||set.ram2||set.ram1):(n>=2?(set.ram2||set.ram1||set.ram4):(set.ram1||set.ram2||set.ram4));
+      if(src)return {src,tag:'工作区'};
+    }
     if(b.cooler){
       const liq=(b.cooler.part.rad||0)>0;
       const src=liq?(set.aio||set.air||set.cool):(set.air||set.cool||set.aio);
@@ -11624,7 +11664,15 @@ function slotHas(k){
 }
 function backToInventory(cat,st){ if(!st)return; addInv({cat,part:st.part,paid:st.paid,shop:st.shop,owner:st.owner||null}); }
 function removeSlot(k){
-  if(k.startsWith('ram')){const i=+k.slice(3),s=build.rams[i];backToInventory('ram',s);build.rams[i]=null;return;}
+  if(k.startsWith('ram')){const i=+k.slice(3),s=build.rams[i];if(!s)return;
+    if(s.kitId){
+      let paid=0;
+      for(let j=0;j<build.rams.length;j++){const c=build.rams[j];
+        if(c&&c.kitId===s.kitId){paid+=c.paid||0;build.rams[j]=null;}}
+      build.rams[i]=null;
+      backToInventory('ram',{part:s.part,paid,shop:s.shop,owner:s.owner||null});return;
+    }
+    backToInventory('ram',s);build.rams[i]=null;return;}
   if(k.startsWith('m2')){const i=+k.slice(2),s=build.m2[i];backToInventory('disk',s);build.m2[i]=null;return;}
   if(k.startsWith('sata')){const i=+k.slice(4),s=build.sata[i];backToInventory('disk',s);build.sata[i]=null;return;}
   const cur=build[k];
@@ -13594,7 +13642,7 @@ function specOf(k,x){
   if(!x)return '';
   if(k==='cpu'){let s=`${x.s} · ${x.m} · ${x.t}W · 多核${x.cs}`;s+=x.ig?` · 核显TS ${igScore(x)}`:' · 无核显';return s;}
   if(k==='mb')return `${x.s} · ${x.m}×${x.dimm} · ${x.ff} · M.2 ${x.m2}（${x.m2spec}） · SATA ${x.sata}`;
-  if(k==='ram')return `${x.m}${x.mhz?'-'+x.mhz:''}${x.cl?' · CL'+x.cl:''} · 单条 ${x.cap}G`;
+  if(k==='ram')return `${x.m}${x.mhz?'-'+x.mhz:''}${x.cl?' · CL'+x.cl:''} · ${x.mult>1?('套条 '+x.cap+'G×2（共'+(x.cap*x.mult)+'G）'):('单条 '+x.cap+'G')}`;
   if(k==='gpu')return `${x.series} · ${x.len}mm · ${x.tbp}W · TS ${x.ts}`;
   if(k==='cooler')return `${x.cap}W · ${x.rad?'冷排'+x.rad:'高'+x.h}mm`;
   if(k==='psu')return `额定 ${x.w}W`;
@@ -13914,6 +13962,8 @@ function benchDemoAfterInstall(cat){
     const ph=benchPhoto();
     const el=document.getElementById('buildFlash');
     if(!el)return;
+    /* 没有照片就别掀这层：以前照样加 on，屏幕上就是一整块「破图」占位 */
+    if(!ph){el.classList.remove('on');_benchDemoOn=false;return;}
     if(ph){
       const img=document.getElementById('bfImg'),lb=document.getElementById('bfLabel');
       if(img)img.src=ph.src;
@@ -13992,8 +14042,17 @@ function placePart(cat,p,paid,shop,owner){
     if(build.case&&build.case.part.mg<p.len)return '显卡太长，机箱限长 '+build.case.part.mg+'mm';
     build.gpu1={part:p,paid,shop,owner:owner||null};return 'ok';}
   if(cat==='ram'){if(!mb)return '先装主板';if(p.m!==mb.m)return '内存代际不匹配：主板 '+mb.m+'，这条 '+p.m;
-    let idx=-1;for(let i=0;i<mb.dimm;i++)if(!build.rams[i]){idx=i;break;}
-    if(idx<0)return '内存槽已插满（'+mb.dimm+' 条）';build.rams[idx]={part:p,paid,shop,owner:owner||null};return 'ok';}
+    const mult=p.mult>1?p.mult:1;
+    let idx=-1;
+    for(let i=0;i+mult<=mb.dimm;i++){
+      let free=true;for(let k=0;k<mult;k++)if(build.rams[i+k]){free=false;break;}
+      if(free){idx=i;break;}
+    }
+    if(idx<0)return mult>1?('套条要连着插 '+mult+' 条，主板 '+mb.dimm+' 槽不够') : ('内存槽已插满（'+mb.dimm+' 条）');
+    /* 套条两根记同一个 kitId：拆的时候一起下台，仓库只回一件 */
+    const kid=mult>1?('k'+(uidSeq++)):null;
+    for(let k=0;k<mult;k++)build.rams[idx+k]={part:p,paid:(k===0?paid:0),shop,owner:owner||null,kitId:kid};
+    return 'ok';}
   if(cat==='disk'){
     if(!mb)return '先装主板';
     if(p.kind==='m2'){if(mb.m2<=0)return '这块主板没有 M.2 插槽';
