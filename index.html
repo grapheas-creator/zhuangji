@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01180</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01181</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01180</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01181</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,10 +7111,10 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01180';
+const APP_BUILD='01181';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
-/* 水印上统一的写法：v0.12.0 · 01180 */
+/* 水印上统一的写法：v0.12.0 · 01181 */
 const APP_VER_TXT=APP_VER+' · '+APP_BUILD;
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
 try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
@@ -7567,15 +7567,23 @@ const RAM_TIERS=[
 const RAM_BASEU={'DDR3':{4:22,8:42,16:88},'DDR4':{8:240,16:460,32:900},'DDR5':{16:1300,32:2450,64:4700}};
 const RAM_BASEP={'DDR4':{8:360,16:700,32:1400},'DDR5':{16:1700,32:3300,64:6400}};
 const RAM_REF={'DDR3':1600,'DDR4':3200,'DDR5':6000};
+/* 时序：同一代里 CL 越低越贵，用价格把「旗舰 / 中端 / 低端」拉开
+   （档位仍由 assignTiers 按同代同容量的价格比出来，不另外写死） */
+const RAM_CL={'DDR3':{1333:11,1600:11},'DDR4':{2666:19,3000:18,3200:16,3600:16},
+              'DDR5':{4800:40,5600:36,6000:30,6400:32}};
+const RAM_CL_REF={'DDR3':11,'DDR4':16,'DDR5':32};
 const RAM_SPECS=[];
 const M=[];
 RAM_BRANDS.forEach((br)=>RAM_TIERS.forEach(([mem,cap,freqs],ti)=>freqs.forEach((mhz,fi)=>{
   const ki=ti*7+fi, rj=rngFrom(hash(br+ki)),jf=0.92+rj()*0.22;
   const fk=1+(mhz-RAM_REF[mem])*0.00035;
   const baseU=RAM_BASEU[mem][cap]||100, baseP=(RAM_BASEP[mem]||{})[cap];
-  M.push({n:`${br} ${mem} ${mhz} ${cap}G 单条`,m:mem,cap,mhz,st:1,
-    p:baseP?jitter(R2(baseP*fk*jf,1),'r'+br+ki):null,
-    u:jitter(R2(baseU*fk*jf,1),'ru'+br+ki)});
+  const cl=(RAM_CL[mem]||{})[mhz]||0;
+  /* CL 比同代参考值低 → 更贵；高 → 更便宜（±20% 以内） */
+  const ck=cl?(1+((RAM_CL_REF[mem]||cl)-cl)*0.02):1;
+  M.push({n:`${br} ${mem} ${mhz} ${cap}G 单条`,m:mem,cap,mhz,st:1,cl,
+    p:baseP?jitter(R2(baseP*fk*jf*ck,1),'r'+br+ki):null,
+    u:jitter(R2(baseU*fk*jf*ck,1),'ru'+br+ki)});
 })));
 
 /* 品牌系数按闲鱼实测（650W：海韵GX 400 / 振华 182 / 长城 115 / 酷冷 99 / 杂牌 87）重排 */
@@ -7652,36 +7660,20 @@ try{(G||[]).forEach(function(x){if(x&&(x.ts||0)>=30445&&x.tier==='budget')x.tier
     /* 品牌收敛，但每个品牌的「旗舰/中端/低端」几条线都要保留 ——
        否则同一品牌内部就没有档位差异了。只砍瓦数档。 */
     const PSU_BRAND=/^(海韵|振华|长城|鑫谷|先马|航嘉|九州风神|大水牛)/;
-    const PSU_WATTS=new Set([350,450,550,650,750,850,1000,1200,1600]);
-    cut(P,function(x){
-      if(!PSU_BRAND.test(x.n))return false;
-      const m=/(\d+)W\b/.exec(x.n);
-      if(m&&!PSU_WATTS.has(parseInt(m[1],10)))return false;
-      return true;
-    });
+    /* 只收敛品牌，瓦数一档都不砍：200W 到 1600W 每个档位都要有货。 */
+    cut(P,function(x){return PSU_BRAND.test(x.n);});
 
     /* ---------- 内存：6 个品牌，每品牌只留 6 个主力规格 ---------- */
     const RAM_BRAND=/^(金士顿|威刚|海盗船|光威|金百达|英睿达)/;
-    const RAM_KEEP=[['DDR3',1600,8],['DDR4',3200,8],['DDR4',3200,16],['DDR4',3600,16],
-                    ['DDR5',6000,16],['DDR5',6000,32]];
-    cut(M,function(x){
-      if(!RAM_BRAND.test(x.n))return false;
-      const g=/(DDR[345])/.exec(x.n), hz=/(\d{4})/.exec(x.n), cap=/(\d+)G\b/.exec(x.n);
-      if(!g||!hz||!cap)return true;
-      const gen=g[1], mhz=parseInt(hz[1],10), c=parseInt(cap[1],10);
-      return RAM_KEEP.some(function(k){return k[0]===gen&&k[1]===mhz&&k[2]===c;});
-    });
+    /* 同上：只收敛品牌。DDR3 1333 4G 到 DDR5 6000 64G 每一档都留着，
+       频率/时序不同的条目继续保留，档位差异交给 assignTiers 比价。 */
+    cut(M,function(x){return RAM_BRAND.test(x.n);});
 
     /* ---------- 硬盘：6 个品牌，每品牌留 6 个主容量 ---------- */
     const DISK_BRAND=/^(三星|西部数据|希捷|铠侠|致态|金士顿)/;
-    /* 以前只留 480G 起，于是新手单「SATA 120G 起」那句话成了空话：
-       货架上最便宜的盘是 ¥87 的 480G，引导只能指它。120G/240G 二手在市场里
-       本来就常见（40~60 元），把这两档放回来，低价单才有便宜盘可用。 */
-    const DISK_KEEP=/SATA.*(120G|240G|480G|960G|2T|4T)|NVMe.*(512G|1T|2T|4T)|^(希捷|西部数据).*(2T|4T|8T)/;
-    cut(ST,function(x){
-      if(!DISK_BRAND.test(x.n))return false;
-      return DISK_KEEP.test(x.n);
-    });
+    /* 只收敛品牌，容量一档都不砍：
+       SATA 固态 60G–8T、M.2 128G–8T、机械 320G–20T 每档都要有货。 */
+    cut(ST,function(x){return DISK_BRAND.test(x.n);});
   }catch(e){}
   try{const keep2=new Set(["原装散热 Intel 下压", "AMD 原装幽灵散热", "九州风神 玄冰400", "酷冷至尊 T400i", "利民 AX120 R SE", "利民 AK120", "利民 PA120", "九州风神 大霜塔V5", "九州风神 AK620", "利民 FC140", "猫头鹰 NH-D15", "利民 水冷 240", "利民 水冷 360", "九州风神 冰堡垒360", "恩杰 Kraken 240", "服务器风冷 SP3", "服务器风冷 SP5", "LGA2011 专用风冷", "超频三 青鸟四", "九州风神 冰凌MINI", "乔思伯 CR-1000", "超频三 红海H4", "雅浚 B3", "ID-COOLING SE-224", "乔思伯 CR-2000", "超频三 巨浪360", "先马 XW240"]);for(let i=H.length-1;i>=0;i--){if(!keep2.has(H[i].n))H.splice(i,1);}}catch(e){}
 },0);
@@ -7697,14 +7689,14 @@ H.length=0;REAL_COOLS.forEach(x=>H.push(x));
 H.forEach(h=>{if(h.rad>0){['LGA2066','TR4','sTR5','TRX40','SP3','SP5'].forEach(_s=>{if(!h.s.includes(_s))h.s.push(_s);});}});REAL_COOLS_EXTRA.forEach(x=>H.push(x));
 const ST=[];
 ['三星','西部数据','金士顿','致态','铠侠','英睿达','光威','梵想','雷克沙','影驰','海康威视','联想','惠普','东芝','建兴','闪迪'].forEach((br)=>{
-  [[120,75],[240,120],[480,150],[960,300],[2000,620],[4000,1300]].forEach(([cap,base],ci)=>{
+  [[60,40],[120,75],[240,120],[480,150],[960,300],[2000,620],[4000,1300],[8000,2600]].forEach(([cap,base],ci)=>{
     const rj=rngFrom(hash(br+ci)),price=R2(base*(0.85+rj()*0.35),1);
     ST.push({n:`${br} SATA SSD ${cap>=1000?(cap/1000)+'T':cap+'G'}`,kind:'sata',cap,
       p:jitter(price,'s'+br+ci),u:jitter(R2(price*0.6,1),'su'+br+ci)});
   });
 });
 ['三星','西部数据','致态','铠侠','金士顿','英睿达','光威','雷克沙'].forEach((br)=>{
-  [[256,240],[512,430],[1000,680],[2000,1500],[4000,3000],[8000,6500]].forEach(([cap,base],ci)=>{
+  [[128,150],[256,240],[512,430],[1000,680],[2000,1500],[4000,3000],[8000,6500]].forEach(([cap,base],ci)=>{
     const rj=rngFrom(hash(br+'n'+ci)),price=R2(base*(0.85+rj()*0.4),1);
     ST.push({n:`${br} NVMe ${cap>=1000?(cap/1000)+'T':cap+'G'}`,kind:'m2',cap,
       p:jitter(price,'n'+br+ci),u:jitter(R2(price*0.65,1),'nu'+br+ci)});
@@ -13598,7 +13590,7 @@ function specOf(k,x){
   if(!x)return '';
   if(k==='cpu'){let s=`${x.s} · ${x.m} · ${x.t}W · 多核${x.cs}`;s+=x.ig?` · 核显TS ${igScore(x)}`:' · 无核显';return s;}
   if(k==='mb')return `${x.s} · ${x.m}×${x.dimm} · ${x.ff} · M.2 ${x.m2}（${x.m2spec}） · SATA ${x.sata}`;
-  if(k==='ram')return `${x.m}${x.mhz?'-'+x.mhz:''} · 单条 ${x.cap}G`;
+  if(k==='ram')return `${x.m}${x.mhz?'-'+x.mhz:''}${x.cl?' · CL'+x.cl:''} · 单条 ${x.cap}G`;
   if(k==='gpu')return `${x.series} · ${x.len}mm · ${x.tbp}W · TS ${x.ts}`;
   if(k==='cooler')return `${x.cap}W · ${x.rad?'冷排'+x.rad:'高'+x.h}mm`;
   if(k==='psu')return `额定 ${x.w}W`;
@@ -16200,7 +16192,7 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 #btnMotion.off{opacity:.6;border-color:rgba(196,150,120,.3)!important;color:#93796a!important}
 
 /* ===== 版本号水印：全站一种写法、一种样子 =====
-   v0.12.0 · 01180
+   v0.12.0 · 01181
    - 标题页用 #tVer（在 .tMeta 里），游戏内用 #verMark（固定右下角）
    - 深底浅字胶囊，压在任何画面（含剧情卡/微信层）上都读得清 */
 #tVer,#verMark{
