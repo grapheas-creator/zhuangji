@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01188</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01189</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01188</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01189</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,7 +7111,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01188';
+const APP_BUILD='01189';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7602,6 +7602,13 @@ M.push({n:'云彣 绫龙 DDR5 6000 24G 单条',m:'DDR5',cap:24,mhz:6000,st:1,cl:
  ['金百达','星刃',0,3878],['铭瑄','暗耀D5',28,3375],['科赋','BOLT V',28,3421],
  ['光威','龙武RGB',0,1899]].forEach(function(f){
   MK.push({n:f[0]+' '+f[1]+' DDR5 6000 16G×2 套条',m:'DDR5',cap:16,mhz:6000,st:1,cl:f[2],
+    mult:2,kit:1,flag:1,p:f[3],u:null});
+});
+/* 24G×2（48G）套条：2026-11-03 用户淘宝实拍价，只留能看清型号的 */
+[['威刚','XPG D300G 吹雪',28,3847],['威刚','XPG 龙耀',28,3689],
+ ['十铨','引领者',28,4380],['阿斯加特','女武神二代',28,4499],
+ ['海姆达尔','黑',36,4399]].forEach(f=>{
+  MK.push({n:f[0]+' '+f[1]+' DDR5 6000 24G×2 套条',m:'DDR5',cap:24,mhz:6000,st:1,cl:f[2],
     mult:2,kit:1,flag:1,p:f[3],u:null});
 });
 MK.forEach(x=>M.push(x));
