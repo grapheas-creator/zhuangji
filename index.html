@@ -3842,7 +3842,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
 </defs></svg>
 
 <header>
-  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01187</span></h1>
+  <h1>旺财装机店<span class="ver" id="verTag">v0.12.0 · 01188</span></h1>
   <div class="hstats">
     <div class="stat">日期<b id="dateTxt">—</b></div>
     <div class="stat">第<b id="dayTxt">1</b>天</div>
@@ -4026,7 +4026,7 @@ window.CPU_SOCK_IMG={"LGA1700": "data:image/webp;base64,UklGRuQJAABXRUJQVlA4INgJ
       <button class="tBtn tSetBtn" id="tSet">⚙ 设置</button>
     </div>
   </div>
-  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01187</span></div>
+  <div class="tMeta"><span id="tSaveHint">—</span><span class="tVer" id="tVer">v0.12.0 · 01188</span></div>
   <div class="tMark">一只白玉菇</div>
 </div>
 <div class="coach" id="coach" aria-hidden="true">
@@ -7111,7 +7111,7 @@ window.PART_PHOTO={"劲鲨 H61M-I":'data:image/webp;base64,UklGRq4xAABXRUJQVlA4I
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01187';
+const APP_BUILD='01188';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7562,9 +7562,9 @@ const RAM_BRANDS=['金士顿','威刚','海盗船','芝奇','光威','英睿达'
 const RAM_TIERS=[
  ['DDR3',4,[1333,1600]],['DDR3',8,[1600]],   /* DDR3 不出 16G（用户 2026-11-03 定） */
  ['DDR4',8,[2666,3000,3200]],['DDR4',16,[3000,3200,3600]],['DDR4',32,[3200,3600]],
- ['DDR5',16,[4800,5600,6000]],['DDR5',32,[5600,6000,6400]],['DDR5',64,[6000]]
+ ['DDR5',16,[4800,5600,6000]],['DDR5',24,[6000]],['DDR5',32,[5600,6000,6400]],['DDR5',64,[6000]]
 ];
-const RAM_BASEU={'DDR3':{4:22,8:42},'DDR4':{8:240,16:460,32:900},'DDR5':{16:1300,32:2450,64:4700}};
+const RAM_BASEU={'DDR3':{4:22,8:42},'DDR4':{8:240,16:460,32:900},'DDR5':{16:1300,24:1800,32:2450,64:4700}};
 const RAM_BASEP={'DDR4':{8:360,16:700,32:1400},'DDR5':{16:1700,32:3300,64:6400}};
 const RAM_REF={'DDR3':1600,'DDR4':3200,'DDR5':6000};
 /* 时序：同一代里 CL 越低越贵，用价格把「旗舰 / 中端 / 低端」拉开
@@ -7597,6 +7597,7 @@ M.slice().forEach(x=>{
 /* 实拍单条（¥1584 / ¥1665）—— 不进上面那轮，免得再凭空调出个两倍价的套条 */
 M.push({n:'十铨 引领者 DDR5 6000 16G 单条',m:'DDR5',cap:16,mhz:6000,st:1,cl:30,p:1584,u:null,flag:1});
 M.push({n:'玖合 玲珑 DDR5 6000 16G 单条',m:'DDR5',cap:16,mhz:6000,st:1,cl:28,p:1665,u:null,flag:1});
+M.push({n:'云彣 绫龙 DDR5 6000 24G 单条',m:'DDR5',cap:24,mhz:6000,st:1,cl:38,p:1949,u:null,flag:1});
 [['威刚','XPG 威龙',28,4239],['阿斯加特','吹雪联名二代',0,3999],['光威','神武RGB',28,3899],
  ['金百达','星刃',0,3878],['铭瑄','暗耀D5',28,3375],['科赋','BOLT V',28,3421],
  ['光威','龙武RGB',0,1899]].forEach(function(f){
@@ -8531,7 +8532,7 @@ M.forEach(m=>{
   if(m.m==='DDR5'){
     /* 2026-10-28 淘宝抓价（16G 1538~1799、32G 2569）清洗后取：16G 6000=1700、32G=2700。
        明显被低价件污染的样本不用（威刚 16G ¥95、光威 32G ¥100、金士顿 32G 1434 倒挂）。 */
-    const baseF=m.cap===16?1700:(m.cap===32?2700:5400);
+    const baseF=m.cap===16?1700:(m.cap===24?2180:(m.cap===32?2700:5400));
     const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
     const pr=Math.round(baseF*ff*(RAM_U_RATE[br]||0.86)/5)*5*(m.mult>1?m.mult:1);
     m.p=pr;m.u=Math.round(pr*0.62/5)*5;
@@ -8952,7 +8953,7 @@ M.forEach(m=>{
   if(m.m!=='DDR5'||m.flag)return;
   const br=m.n.split(' ')[0];
   const a=D5_ANCHOR[br]||Math.round(1700*(RAM_U_RATE[br]||0.86));
-  const base=m.cap===16?a:(m.cap===32?Math.round(a*1.65):Math.round(a*3.1));
+  const base=m.cap===16?a:(m.cap===24?Math.round(a*1.28):(m.cap===32?Math.round(a*1.65):Math.round(a*3.1)));
   const ff=m.mhz===4800?0.90:(m.mhz===5600?0.95:(m.mhz===6400?1.05:1.0));
   const pr=Math.round(base*ff/5)*5*(m.mult>1?m.mult:1);
   m.p=pr;m.u=Math.round(pr*0.62/5)*5;
