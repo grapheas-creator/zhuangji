@@ -1,7 +1,7 @@
 {
-  "code": 1211,
-  "name": "0.12.1-01211",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01211.apk",
+  "code": 1212,
+  "name": "0.12.2-01212",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01212.apk",
   "size": 31976051,
-  "note": "修复全屏分辨率适配（去掉强制宽视口/概览缩放）+ 刘海屏沉浸"
+  "note": "下载进度刷新提速到200ms，速度改为最近1.5秒滑动窗口"
 }
