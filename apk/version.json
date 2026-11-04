@@ -2,6 +2,6 @@
   "code": 1210,
   "name": "0.12.0-01210",
   "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01210.apk",
-  "size": 31808036,
-  "note": "图标改为加载页旺财图；更新只弹确认框；首次启动下载音乐包"
+  "size": 31971955,
+  "note": "加载页用游戏美术+自定义进度条，显示体积与速度"
 }
