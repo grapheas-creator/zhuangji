@@ -1,7 +1,7 @@
 {
-  "code": 1217,
-  "name": "0.12.7-01217",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01217.apk",
-  "size": 451747,
-  "note": "改成在线壳：游戏本体从网上加载，以后只推网页即可更新"
+  "code": 1218,
+  "name": "0.12.8-01218",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01218.apk",
+  "size": 32074598,
+  "note": "在线优先+内置兜底：平时只更新网页，APK 不用重装"
 }
