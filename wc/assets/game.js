@@ -8964,10 +8964,11 @@ renderAll();
       desc:'某菇说：到我家来买，好汀的管够。'}
   };
   function G(){
-    if(!state.gramo) state.gramo={own:{},intro:0,day3:0,boughtLegend:0,order5:0,shop7:0};
+    if(!state.gramo) state.gramo={own:{},intro:0,day3:0,boughtLegend:0,order5:0,shop7:0,phone:0,orderDay:0};
     var g=state.gramo;
     if(g.own==null)g.own={}; if(g.intro==null)g.intro=0; if(g.day3==null)g.day3=0;
     if(g.boughtLegend==null)g.boughtLegend=0; if(g.order5==null)g.order5=0; if(g.shop7==null)g.shop7=0;
+    if(g.phone==null)g.phone=0; if(g.orderDay==null)g.orderDay=0;
     return g;
   }
   function owned(){ var g=G(),a=[]; for(var k in g.own) if(g.own[k]&&DISCS[k]) a.push(k); return a; }
@@ -8981,7 +8982,7 @@ renderAll();
     var cash=state.cash||0;
     if(cash<d.price){ toast('钱不够，还差 ¥'+(d.price-cash)); return; }
     state.cash-=d.price; g.own[id]=1;
-    if(id==='legend')g.boughtLegend=1;
+    if(id==='legend'){ g.boughtLegend=1; g.orderDay=(state.day||1)+2; }
     try{renderAll();}catch(e){} try{save();}catch(e){} sync();
     toast('买下了「'+d.name+'」，右下角留声机可以听了');
   }
@@ -9011,22 +9012,68 @@ renderAll();
   }
 
   function offerLegend(){
-    var d=DISCS.legend;
     modal('神秘人',
       '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
       + '一个裹着围巾的人推门进来，没看货架，直接把一张碟拍在柜台上。<br>'
       + '「这张，你听一次就知道值。一千五，不还价。」<br><br>'
-      + d.tracks.length+' 首歌，听过的人都说忘不掉。</div>'
-      + discCard(d,false), null);
-    /* 把确认按钮改成「买下（¥1500）」 */
+      + '<span style="color:#9b8088;font-size:11.5px">碟面上一片空白，没有名字。</span></div>', null);
+    setTimeout(function(){
+      var yes=document.getElementById('mYes'), no=document.getElementById('mNo');
+      if(yes){
+        yes.textContent='买下 ¥1500';
+        yes.onclick=function(){
+          if((state.cash||0)<1500){ toast('钱不够，还差 ¥'+(1500-(state.cash||0))); return; }
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          buy('legend');
+          setTimeout(function(){
+            toast('碟听上了——那人临走说了句「过两天可能还得麻烦你」');
+          },900);
+        };
+      }
+      if(no){
+        no.textContent='先不买';
+        no.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          leavePhone();
+        };
+      }
+    },30);
+  }
+
+  /* 不买 → 留号码到「生活」 */
+  function leavePhone(){
+    var g=G();
+    if(g.phone||g.own.legend) return;
+    g.phone=1;
+    try{save();}catch(e){}
+    setTimeout(function(){
+      modal('柜台上的纸条',
+        '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+        + '那人把碟收回怀里，在柜台留了张纸条，上面写着一个号码。<br>'
+        + '「想通了就打这个号，我随时在。」<br><br>'
+        + '<span style="color:#b8546a;font-weight:700">号码收进了「生活」里，随时可以打过去。</span>'
+        + '</div>', null);
+    },600);
+  }
+
+  /* 打电话买碟 */
+  function callSeller(){
+    var g=G();
+    if(g.own.legend){ modal('神秘人','<div style="font-size:12.5px;line-height:1.8">「碟还好听吧？」他笑了一声，挂了。</div>',null); return; }
+    var cash=state.cash||0;
+    modal('拨打纸条上的号码',
+      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      + '响了两声就接了。<br>「我就知道你会打来。碟还在，一千五。」<br><br>'
+      + '<span style="color:#9b8088;font-size:11.5px">当前现金 ¥'+cash+'</span></div>', null);
     setTimeout(function(){
       var yes=document.getElementById('mYes');
       if(yes){
         yes.textContent='买下 ¥1500';
         yes.onclick=function(){
-          if((state.cash||0)<d.price){ toast('钱不够，还差 ¥'+(d.price-(state.cash||0))); return; }
+          if((state.cash||0)<1500){ toast('钱不够，还差 ¥'+(1500-(state.cash||0))); return; }
           try{closeMask(document.getElementById('mask'));}catch(e){}
           buy('legend');
+          toast('他说过两天还有事找你');
         };
       }
     },30);
@@ -9057,7 +9104,9 @@ renderAll();
   function onDay(day){
     var g=G();
     if(day===1&&!g.intro){ g.intro=1; setTimeout(introPopup,800); }
-    if(day===3&&!g.day3){ g.day3=1; setTimeout(offerLegend,1200); }
+    if(day===3&&!g.day3){
+      g.day3=1; setTimeout(offerLegend,1200);
+    }
     sync();
   }
 
@@ -9101,7 +9150,7 @@ renderAll();
     makeJobs=function(dateStr,day){
       var jobs=_makeJobs.apply(this,arguments)||[];
       var g=G();
-      if(day>=5&&!g.order5&&!jobs.some(function(x){return x&&x.id==='GR5';})){
+      if(g.orderDay&&day>=g.orderDay&&!g.order5&&!jobs.some(function(x){return x&&x.id==='GR5';})){
         try{ jobs.push(makeSevenJob(day)); }catch(e){}
       }
       setTimeout(function(){onDay(day);},600);
@@ -9139,8 +9188,11 @@ renderAll();
           if(body){
             var html='<div style="margin-top:14px;border-top:1px dashed #eccfd7;padding-top:12px">'
               + '<div style="font-weight:700;color:#b8546a;margin-bottom:6px">留声机 · 碟片</div>';
-            if(!g.boughtLegend&&!g.own.legend){
-              html+='<div style="font-size:11.5px;color:#b39aa2;margin-bottom:8px">传奇碟片还没到货（第 3 天有人会来卖）</div>';
+            if(g.phone&&!g.own.legend){
+              html+='<div style="margin:8px 0"><button class="mini" data-gramo="call">拨打陌生号码（买碟 ¥1500）</button></div>';
+            }
+            if(!g.boughtLegend&&!g.own.legend&&!g.phone){
+              html+='<div style="font-size:11.5px;color:#b39aa2;margin-bottom:8px">留声机还空着。第 3 天会有人上门卖碟。</div>';
             }
             if(g.own.legend) html+=discCard(DISCS.legend,true);
             else if(g.boughtLegend===0&&state.day>=3){
@@ -9158,6 +9210,7 @@ renderAll();
               btn.onclick=function(){
                 var id=btn.getAttribute('data-gramo');
                 try{closeMask(document.getElementById('mask'));}catch(e){}
+                if(id==='call'){ callSeller(); return; }
                 buy(id);
               };
             });
