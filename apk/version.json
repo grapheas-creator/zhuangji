@@ -1,7 +1,7 @@
 {
-  "code": 1213,
-  "name": "0.12.3-01213",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01213.apk",
+  "code": 1214,
+  "name": "0.12.4-01214",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01214.apk",
   "size": 31976051,
-  "note": "音乐播放器改成日式可爱风（奶油白卡片+樱花粉描边+粉色按钮）"
+  "note": "进入游戏后自动开始播放音乐（不再需要点一下）"
 }
