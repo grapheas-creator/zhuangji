@@ -23,7 +23,8 @@
  *      window.MUSIC_PLAYER_OPTIONS = {
  *        pack:  'music/manifest.js',  // 曲目清单
  *        dir:   'music/',             // 音频文件目录
- *        volume: 0.55,                // 默认音量 0~1
+ *        volume: 0.55,
+    allow: null,                 // 只放这些文件（null=全部）；留声机用                // 默认音量 0~1
  *        plotSelector: '#plotEvent,#storyPop', // 这些元素出现时视为「剧情中」
  *        resumeAfterPlot: true,       // 剧情结束后是否自动续播
  *        zIndex: 9400
@@ -44,6 +45,7 @@
     pack: 'music/manifest.js',
     dir: 'music/',
     volume: 0.55,
+    allow: null,                 // 只放这些文件（null=全部）；留声机用
     plotSelector: '#plotEvent,#storyPop',
     resumeAfterPlot: true,
     saveKey: 'wc_music_player',
@@ -470,6 +472,26 @@
     S.ui.dur.textContent = fmt(d);
   }
 
+  /* ---------- 白名单（留声机碟片） ---------- */
+  function applyAllow(list) {
+    CFG.allow = list;
+    if (!S.pack || !S.packOriginal) {
+      if (S.pack) S.packOriginal = S.pack.tracks.slice();
+      else return;
+    }
+    var keep = S.packOriginal.filter(function (t) { return (list || []).indexOf(t.f) >= 0; });
+    S.pack.tracks = keep;
+    if (S.i >= keep.length) S.i = keep.length ? 0 : -1;
+    if (!keep.length) {
+      if (S.el) { try { S.el.pause(); } catch (e) {} }
+      S.playing = false;
+      if (S.ui) { S.ui.fab.style.display = 'none'; S.ui.box.style.display = 'none'; }
+      return;
+    }
+    if (S.ui) S.ui.fab.style.display = '';
+    try { paintState(); paintMeta(); } catch (e) {}
+  }
+
   /* ---------- 启动 ---------- */
   function init() {
     loadSaved();
@@ -478,6 +500,9 @@
     // 清单没到之前按钮是灰的，点了给提示；加载失败就整个撤退，不影响游戏
     loadPack().then(function (pack) {
       if (!pack || !pack.tracks || !pack.tracks.length) throw new Error('空清单');
+      S.pack = pack;
+      S.packOriginal = pack.tracks.slice();
+      if (CFG.allow) applyAllow(CFG.allow);
       S.ready = true;
       if (S.i < 0 || S.i >= pack.tracks.length) S.i = 0;
       paintState();
@@ -496,6 +521,7 @@
 
   // 对外小接口，方便在控制台里调
   window.MusicPlayer = {
+    setAllow: function (list) { try { applyAllow(list || []); } catch (e) {} },
     play: function (i) { play(typeof i === 'number' ? i : undefined, true); },
     pause: pause,
     next: next,

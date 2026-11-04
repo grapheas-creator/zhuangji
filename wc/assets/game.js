@@ -8943,3 +8943,233 @@ renderAll();
     schedule(60);
   };
 })();
+
+
+/* ==================== 留声机系统（GRAMO） ====================
+   爸爸留下的留声机 + 三张碟：
+     · 传奇碟片「0_0000%」—— 第 3 天神秘人上门兜售，¥1500
+     · 7co 典藏集（28 首）—— 第 5 天替某菇修好资料机之后，生活里解锁购买
+   没有碟的时候右下角不出现留声机；有碟之后才能听，播放器只放已拥有的曲目。
+   ============================================================ */
+(function(){
+  var SEVEN=[];
+  for(var i=2;i<=29;i++){
+    var n=(i<10?'0':'')+i;
+    SEVEN.push('m'+n+((i===10||i===28)?'.ogg':'.mp3'));
+  }
+  var DISCS={
+    legend:{id:'legend',name:'传奇碟片「0_0000%」',price:1500,tracks:['m01.mp3'],
+      desc:'神秘人塞给你的一张碟，只有一首，但听一次就忘不掉。'},
+    seven:{id:'seven',name:'7co 典藏集（28 首）',price:2200,tracks:SEVEN,
+      desc:'某菇说：到我家来买，好汀的管够。'}
+  };
+  function G(){
+    if(!state.gramo) state.gramo={own:{},intro:0,day3:0,boughtLegend:0,order5:0,shop7:0};
+    var g=state.gramo;
+    if(g.own==null)g.own={}; if(g.intro==null)g.intro=0; if(g.day3==null)g.day3=0;
+    if(g.boughtLegend==null)g.boughtLegend=0; if(g.order5==null)g.order5=0; if(g.shop7==null)g.shop7=0;
+    return g;
+  }
+  function owned(){ var g=G(),a=[]; for(var k in g.own) if(g.own[k]&&DISCS[k]) a.push(k); return a; }
+  function allow(){ var a=[],o=owned(); for(var i=0;i<o.length;i++) a=a.concat(DISCS[o[i]].tracks); return a; }
+  function sync(){
+    try{ if(window.MusicPlayer&&MusicPlayer.setAllow) MusicPlayer.setAllow(allow()); }catch(e){}
+  }
+  function buy(id){
+    var d=DISCS[id]; if(!d) return;
+    var g=G(); if(g.own[id]){ toast('这张碟你已经有了'); return; }
+    var cash=state.cash||0;
+    if(cash<d.price){ toast('钱不够，还差 ¥'+(d.price-cash)); return; }
+    state.cash-=d.price; g.own[id]=1;
+    if(id==='legend')g.boughtLegend=1;
+    try{renderAll();}catch(e){} try{save();}catch(e){} sync();
+    toast('买下了「'+d.name+'」，右下角留声机可以听了');
+  }
+
+  /* ---- 弹窗：统一用游戏自带的 modal 风格 ---- */
+  function discCard(d,ownedFlag){
+    return '<div class="rowbox" style="margin:10px 0;padding:10px 12px;border:1px solid #f0cdd6;border-radius:12px;background:#fffdfb">'
+      + '<div style="font-weight:700;color:#b8546a">'+d.name+'</div>'
+      + '<div style="font-size:11.5px;color:#9b8088;margin:4px 0 6px;line-height:1.6">'+d.desc+'</div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center">'
+      +   '<b style="color:#d2768a">¥'+d.price+'</b>'
+      +   (ownedFlag?'<span style="font-size:11px;color:#8fb98f">已拥有</span>':'')
+      + '</div></div>';
+  }
+
+  function introPopup(){
+    /* 开头：爸爸寄来的留声机 */
+    modal('爸爸寄来的包裹',
+      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      + '门口放着一个纸箱，寄件人写着「爸」。<br>'
+      + '里面是一台旧留声机，还有一张字条：<br><br>'
+      + '<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
+      + '碟得自己攒，好的东西都藏得深。」</i><br><br>'
+      + '<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span>'
+      + '</div>', null);
+    try{closeMask(document.getElementById('mask'));}catch(e){}
+  }
+
+  function offerLegend(){
+    var d=DISCS.legend;
+    modal('神秘人',
+      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      + '一个裹着围巾的人推门进来，没看货架，直接把一张碟拍在柜台上。<br>'
+      + '「这张，你听一次就知道值。一千五，不还价。」<br><br>'
+      + d.tracks.length+' 首歌，听过的人都说忘不掉。</div>'
+      + discCard(d,false), null);
+    /* 把确认按钮改成「买下（¥1500）」 */
+    setTimeout(function(){
+      var yes=document.getElementById('mYes');
+      if(yes){
+        yes.textContent='买下 ¥1500';
+        yes.onclick=function(){
+          if((state.cash||0)<d.price){ toast('钱不够，还差 ¥'+(d.price-(state.cash||0))); return; }
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          buy('legend');
+        };
+      }
+    },30);
+  }
+
+  function offerSevenShop(){
+    toast('生活里多了一样东西：某菇的碟片');
+  }
+
+  /* ---- 第 5 天：某菇的救命单 ---- */
+  function makeSevenJob(day){
+    var s={day:day,id:'g5',who:'某菇',role:'7co 的粉丝',av:'菇',col:'#ff9ac7',
+      lines:[
+        '我是某菇。听说你这儿能把死机的机器救活？',
+        '里面有我追了七年的东西，比这台机器值钱多了。今天能修好吗？'
+      ],
+      job:{cat:'办公机',tier:0,name:'救命单 · 某菇的资料机',
+        sw:'资料救援（不重装也行）',level:'m',
+        target:{ts:0,cs:2000,ram:8},newOnly:false,tight:false,
+        partBudget:900,labor:600,
+        extra:['她说资料比机器重要，别乱重装系统']}};
+    var j=buildStoryJob(s);
+    j.id='GR5';j.storyId='g5';j.dueDay=day;   /* 当天必须交 */
+    return j;
+  }
+
+  /* ---- 每天开始 ---- */
+  function onDay(day){
+    var g=G();
+    if(day===1&&!g.intro){ g.intro=1; setTimeout(introPopup,800); }
+    if(day===3&&!g.day3){ g.day3=1; setTimeout(offerLegend,1200); }
+    sync();
+  }
+
+  /* ---- 交付时判断：修好某菇的机器 → 解锁 7co 碟 ---- */
+  function onDelivered(job){
+    if(!job) return;
+    if(job.id==='GR5'||job.storyId==='g5'){
+      var g=G();
+      if(!g.order5){
+        g.order5=1;g.shop7=1;
+        try{save();}catch(e){}
+        setTimeout(function(){
+          modal('某菇',
+            '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+            + '「修好了！我的宝贝资料全在！」<br>'
+            + '她抱着机箱笑，然后压低声音：<br><br>'
+            + '<i style="color:#b8546a">「我是某菇，你修好了我的电脑，真是我的救命恩人，'
+            + '以后你可以到我这里来买好汀的～我家还蛮大的，买完了可以直接睡，没问题的。」</i><br><br>'
+            + '<span style="color:#9b8088;font-size:11.5px">生活 里解锁了「7co 典藏集」的购买。</span>'
+            + '</div>', null);
+        },1200);
+      }
+    }
+  }
+
+  /* ================= 挂到游戏上 ================= */
+  /* 1) 开局：重置留声机状态 */
+  try{
+    var _newGame=newGame;
+    newGame=function(silent){
+      var r=_newGame.apply(this,arguments);
+      try{ state.gramo={own:{},intro:0,day3:0,boughtLegend:0,order5:0,shop7:0}; }catch(e){}
+      sync();
+      return r;
+    };
+  }catch(e){}
+
+  /* 2) 每天开始：注入第 5 天的单子 + 触发剧情 */
+  try{
+    var _makeJobs=makeJobs;
+    makeJobs=function(dateStr,day){
+      var jobs=_makeJobs.apply(this,arguments)||[];
+      var g=G();
+      if(day>=5&&!g.order5&&!jobs.some(function(x){return x&&x.id==='GR5';})){
+        try{ jobs.push(makeSevenJob(day)); }catch(e){}
+      }
+      setTimeout(function(){onDay(day);},600);
+      return jobs;
+    };
+  }catch(e){}
+
+  /* 3) 交付成功：解锁碟片 */
+  try{
+    var _deliver=deliver;
+    deliver=function(){
+      var before=state.activeId?job():null;
+      var dupBefore=(state.machines||[]).length;
+      var r=_deliver.apply(this,arguments);
+      setTimeout(function(){
+        try{
+          /* 只有真的交付成功（story.done 里记了 g5）才解锁，失败不算 */
+          var done=(state.story&&state.story.done)||{};
+          if(done['g5']) onDelivered({id:'GR5',storyId:'g5'});
+        }catch(e){}
+      },300);
+      return r;
+    };
+  }catch(e){}
+
+  /* 4) 生活商店：加碟片货架 */
+  try{
+    var _modal=modal;
+    modal=function(t,b,ok){
+      var r=_modal.apply(this,arguments);
+      try{
+        if(t&&t.indexOf('生活')===0){
+          var g=G();
+          var body=document.getElementById('mBody');
+          if(body){
+            var html='<div style="margin-top:14px;border-top:1px dashed #eccfd7;padding-top:12px">'
+              + '<div style="font-weight:700;color:#b8546a;margin-bottom:6px">留声机 · 碟片</div>';
+            if(!g.boughtLegend&&!g.own.legend){
+              html+='<div style="font-size:11.5px;color:#b39aa2;margin-bottom:8px">传奇碟片还没到货（第 3 天有人会来卖）</div>';
+            }
+            if(g.own.legend) html+=discCard(DISCS.legend,true);
+            else if(g.boughtLegend===0&&state.day>=3){
+              html+='<div style="margin:8px 0"><button class="mini" data-gramo="legend">买下传奇碟片 ¥1500</button></div>';
+            }
+            if(g.shop7){
+              if(g.own.seven) html+=discCard(DISCS.seven,true);
+              else html+='<div style="margin:8px 0"><button class="mini" data-gramo="seven">买下 7co 典藏集 ¥2200</button></div>';
+            }else{
+              html+='<div style="font-size:11.5px;color:#b39aa2;margin-top:8px">某菇说：帮她修好电脑，就能来买碟了。</div>';
+            }
+            html+='</div>';
+            body.innerHTML=body.innerHTML+html;
+            body.querySelectorAll('[data-gramo]').forEach(function(btn){
+              btn.onclick=function(){
+                var id=btn.getAttribute('data-gramo');
+                try{closeMask(document.getElementById('mask'));}catch(e){}
+                buy(id);
+              };
+            });
+          }
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+
+  /* 5) 启动时同步一次（读档后也要生效） */
+  setTimeout(function(){ try{ G(); sync(); }catch(e){} },1200);
+
+  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay};
+})();
