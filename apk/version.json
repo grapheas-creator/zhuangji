@@ -1,7 +1,7 @@
 {
-  "code": 1210,
-  "name": "0.12.0-01210",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01210.apk",
-  "size": 31971955,
-  "note": "加载页用游戏美术+自定义进度条，显示体积与速度"
+  "code": 1211,
+  "name": "0.12.1-01211",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01211.apk",
+  "size": 31976051,
+  "note": "修复全屏分辨率适配（去掉强制宽视口/概览缩放）+ 刘海屏沉浸"
 }
