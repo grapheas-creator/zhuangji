@@ -1,7 +1,7 @@
 {
-  "code": 1216,
-  "name": "0.12.6-01216",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01216.apk",
-  "size": 32074598,
-  "note": "更新弹窗/下载弹窗改成游戏画风（奶油白卡片+樱花+旺财头像）"
+  "code": 1217,
+  "name": "0.12.7-01217",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01217.apk",
+  "size": 451747,
+  "note": "改成在线壳：游戏本体从网上加载，以后只推网页即可更新"
 }
