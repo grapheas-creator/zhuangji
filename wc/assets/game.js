@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01274';
+const APP_BUILD='01275';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5312,27 +5312,11 @@ function tutGalHide(){
    这里每 1.5 秒查一次：只要有步骤在等着、又没有任何场景/弹窗挡着，
    而卡片已经收起超过 1.2 秒，就直接把它画回来。 */
 let _tutHiddenAt=0,_tutHealAt=0;
-setInterval(function(){
-  try{
-    if(typeof state==='undefined'||!state||!state.tut||state.tut.guideOff||state.day>1)return;
-    if(window.__booting||window.__inGame===false)return;
-    const g=document.getElementById('tutGal');
-    if(!g||g.classList.contains('on'))return;
-    const t=document.getElementById('titleScr');
-    if(t&&!t.classList.contains('hide'))return;
-    const m=document.getElementById('mask');
-    if((m&&m.classList.contains('on'))||document.getElementById('plotEvent')||
-       document.getElementById('storyPop')||document.getElementById('chatPop')||
-       document.getElementById('startLoad')||document.getElementById('dayOpen')||
-       document.getElementById('dayOverlay')||document.getElementById('buildFlash')&&document.getElementById('buildFlash').classList.contains('on'))return;
-    if(Date.now()-_tutHiddenAt<1200)return;
-    const step=(typeof coachStep==='function')?coachStep():null;
-    if(!step)return;
-    _tutHiddenAt=Date.now();
-    try{console.log('[HEAL] show', step.k);}catch(e){}
-    if(typeof tutGalShow==='function')tutGalShow(step);
-  }catch(e){}
-},1500);
+/* 原来的「引导卡自愈」定时器已删除：
+   它每 1.5 秒检查一次，只要卡片被收起超过 1.2 秒就重新画出来 ——
+   引导已经结束了它还会把框弹回来，看起来就是闪一下。
+   现在开局是线性 await，卡片只在该出现的那一步出现。 */
+
 /* 手机端引导卡上下停靠：目标在屏幕下半部时把卡翻到顶部。
    只处理卡片位置，不改变点击锁、目标高亮或语音。 */
 function tutDockBox(step){
@@ -9546,6 +9530,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01275':['删除引导卡「自愈」定时器（会凭空把框弹回来）'],
     '01274':['加载页只出现一次，不再二次闪现'],
     '01273':['修复留声机中间页一闪而过'],
     '01272':['剧情字号调小到 14.5px'],
