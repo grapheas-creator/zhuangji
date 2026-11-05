@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01226';
+const APP_BUILD='01227';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8744,8 +8744,10 @@ renderAll();
     };
     document.addEventListener('pointerdown',kick,{once:false});
     document.addEventListener('keydown',kick,{once:false});
-    /* 不靠点击：页面就绪后直接尝试一次 */
-    setTimeout(kick,600);
+    /* 不靠点击：等首屏渲染稳定后再起播，避免开头那一下卡顿 */
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ setTimeout(kick, 900); });
+    });
   })();
   const ts=document.getElementById('tSet');
   if(ts)ts.onclick=(e)=>{e.stopPropagation();try{if(typeof aeInit==='function')aeInit();}catch(err){}try{openSettings();}catch(err){}};
@@ -9265,6 +9267,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01227':['开局加载页换成旺财图','BGM 起播延后，开头不再卡一下'],
     '01226':['返回键改为游戏内确认框（再等等 / 退出）'],
     '01225':['更新提示和下载进度搬到游戏内，以后不用再装壳'],
     '01224':['设置页可以看内容版本和壳版本'],
