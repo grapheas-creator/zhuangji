@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01273';
+const APP_BUILD='01274';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8047,6 +8047,7 @@ function _seqWait(ms){return new Promise(function(r){setTimeout(r,ms);});}
 /* 点完「开始新游戏」立刻调用；runBootIntro 里再调用一次也只是复用同一张加载页。 */
 function showBootLoad(){
   try{
+    if(window.__bootLoadDone) return;        /* 加载页只允许出现一次：撤掉之后不再回来 */
     if(document.getElementById('startLoad'))return;
     const el=document.createElement('div');
     el.id='startLoad';
@@ -8059,6 +8060,7 @@ function showBootLoad(){
 }
 function hideBootLoad(){
   try{
+    window.__bootLoadDone=true;              /* 线性：撤掉就结束，不再创建第二次 */
     const el=document.getElementById('startLoad');if(!el)return;
     el.style.opacity='0';setTimeout(()=>{try{el.remove();}catch(e){}},420);
   }catch(e){}
@@ -9544,6 +9546,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01274':['加载页只出现一次，不再二次闪现'],
     '01273':['修复留声机中间页一闪而过'],
     '01272':['剧情字号调小到 14.5px'],
     '01271':['引导只保留一个立绘，去掉隐藏式补丁'],
