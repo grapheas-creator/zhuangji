@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01297';
+const APP_BUILD='01298';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3603,22 +3603,25 @@ let uidSeq=1;
 function addInv(item){state.inv.push({uid:'i'+(uidSeq++),cat:item.cat,part:item.part,paid:item.paid,shop:item.shop,owner:item.owner||null,broken:!!item.broken,faulty:!!item.faulty});}
 function invList(cat){return state.inv.filter(x=>x.cat===cat);}
 
-/* 开局仓库里的一批新货：各类别都有，能拼出一台能用的机器 */
+/* 开局仓库里的一批新货：每个分类各十来件（不是总共十件） */
 function giftStarterStock(){
   try{
-    const pick=(arr,f)=>arr.filter(f).sort((a,b)=>(a.p||0)-(b.p||0))[0];
-    const want=[];
-    const cpu=pick(C,x=>/i3-10100/.test(x.n));            if(cpu)want.push(['cpu',cpu]);
-    const mb=pick(B,x=>/H410|B460/i.test(x.n));           if(mb)want.push(['mb',mb]);
-    const cooler=pick(H,x=>(x.s||[]).includes('LGA1200')); if(cooler)want.push(['cooler',cooler]);
-    M.filter(x=>/DDR4/.test(x.n)&&/8G/.test(x.n)).slice(0,2).forEach(r=>want.push(['ram',r]));
-    const ssd=pick(ST,x=>x.kind==='m2'&&/512G/.test(x.n)); if(ssd)want.push(['disk',ssd]);
-    const gpu=pick(G,x=>/GTX 1650|RX 580/.test(x.n));      if(gpu)want.push(['gpu',gpu]);
-    const psu=pick(P,x=>/500W/.test(x.n));                 if(psu)want.push(['psu',psu]);
-    const kase=pick(K,x=>/MATX|ITX/.test((x.ff||[]).join(','))); if(kase)want.push(['case',kase]);
-    want.push(['cooler',pick(H,x=>true)||cooler]);
-    const fan=pick(K,x=>/风扇|机箱/.test(x.n));
-    want.forEach(([cat,part])=>{ if(part) addInv({cat,part,paid:0,shop:'own'}); });
+    const plan=[['cpu',C,10],['mb',B,10],['cooler',H,10],['ram',M,12],
+                ['disk',ST,12],['gpu',G,10],['psu',P,10],['case',K,10]];
+    plan.forEach(function(it){
+      const cat=it[0], arr=it[1]||[], n=it[2];
+      /* 去掉同名的重复项，按价格从低到高取，尽量覆盖不同型号 */
+      const seen={}, list=[];
+      arr.slice().sort((a,b)=>(a.p||0)-(b.p||0)).forEach(function(x){
+        if(!x||!x.n) return;
+        if(seen[x.n]) return;
+        seen[x.n]=1;
+        list.push(x);
+      });
+      list.slice(0,n).forEach(function(part){
+        try{ addInv({cat:cat,part:part,paid:0,shop:'own'}); }catch(e){}
+      });
+    });
   }catch(e){}
 }
 
@@ -9672,6 +9675,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01298':['开局库存改为每类十来件（共 80 余件）'],
     '01297':['零元购 CG 换成自家店门口实景夜戏'],
     '01296':['开局仓库送一批新货；新增零元购→报警→刘警官→半月重开张剧情'],
     '01295':['剧情卡只认按钮，防止手滑闪页'],
