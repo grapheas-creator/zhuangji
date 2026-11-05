@@ -1,3 +1,6 @@
+
+
+
 /* ══════════════════════════════════════════════════════════════
    game.js 目录 — 自动生成，按行号或章节名搜索即可跳转
    ══════════════════════════════════════════════════════════════
@@ -31,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01236';
+const APP_BUILD='01237';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9311,6 +9314,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01237':['启动自动校验内容版本，旧缓存会被强制刷新'],
     '01236':['设置里加了「检查更新」按钮，能看内容/壳是否最新'],
     '01235':['游戏底色换成店门口那张（原来是工具桌）'],
     '01234':['恢复「已涂硅脂 / 工作区」标签，只去掉档位标签'],
@@ -9524,4 +9528,31 @@ renderAll();
     },600);
     return 'asking';
   };
+})();
+
+/* ==================== 内容自愈：HTML 缓存也能绕过 ====================
+   GitHub Pages 对 index.html 有 10 分钟缓存，光给脚本加 ?v= 不够（HTML 本身还是旧的）。
+   这里在启动时问一次线上版本：内容版本对不上就带上新参数重载自己一次。
+   只重载一次（sessionStorage 里记着），避免死循环。 */
+(function(){
+  try{
+    if(!/^https?:/.test(location.protocol)) return;        /* file:// 不折腾 */
+    var local=(typeof APP_BUILD!=='undefined')?APP_BUILD:'';
+    if(!local) return;
+    var KEY='wc_heal_'+local;
+    if(sessionStorage.getItem(KEY)) return;                 /* 这一版已经重载过了 */
+    sessionStorage.setItem(KEY,'1');
+    fetch('../apk/version.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(o){
+        var remote=o&&o.content;
+        if(!remote||remote===local) return;
+        try{ console.info('[内容自愈] 本地 '+local+' → 线上 '+remote+'，重载中'); }catch(e){}
+        var u=new URL(location.href);
+        u.searchParams.set('v',remote);
+        u.searchParams.set('t',String(Date.now()));
+        location.replace(u.toString());
+      })
+      .catch(function(){});
+  }catch(e){}
 })();
