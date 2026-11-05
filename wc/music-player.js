@@ -545,4 +545,35 @@
   } else {
     init();
   }
+
+
+  /* ===== 切到后台就静音，回前台接着放 =====
+     不换曲、不改播放列表，只是暂停/继续。 */
+  var _bgWasPlaying = false;
+  function _onHide(){
+    try{
+      _bgWasPlaying = !!S.playing;
+      if (S.el && !S.el.paused) S.el.pause();
+      S.playing = false;
+      paintState();
+    }catch(e){}
+  }
+  function _onShow(){
+    try{
+      if (_bgWasPlaying && S.pack && S.pack.tracks && S.pack.tracks.length) {
+        var a = audio();
+        var p = a.play();
+        if (p && p.catch) p.catch(function(){});
+        S.playing = true;
+        paintState();
+      }
+    }catch(e){}
+    _bgWasPlaying = false;
+  }
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) _onHide(); else _onShow();
+  });
+  window.addEventListener('pagehide', _onHide);
+  window.addEventListener('pageshow', _onShow);
+
 })();
