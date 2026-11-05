@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01282';
+const APP_BUILD='01283';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8810,6 +8810,7 @@ function maybeOnboard(after){
 function hideTitle(){const t=document.getElementById('titleScr');if(t)t.classList.add('hide');try{document.body.classList.remove('title-open');}catch(e){}}
 function showTitle(){
   const t=document.getElementById('titleScr');if(!t)return;
+  try{ document.documentElement.classList.add('ready'); }catch(e){}
   try{document.body.classList.add('title-open');}catch(e){}
   const ver=document.getElementById('tVer');if(ver)ver.textContent=APP_VER_TXT;
   const hint=document.getElementById('tSaveHint');
@@ -9515,6 +9516,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01283':['启动阶段不显示页面底图，避免同一张图闪两次'],
     '01282':['剧情卡期间屏蔽引导与点击锁；字体统一'],
     '01281':['留声机三页改用独立剧情卡（不再被上一幕顶掉）'],
     '01280':['剧情框内边距留够，文字不再压花边'],
