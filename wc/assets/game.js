@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01305';
+const APP_BUILD='01306';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3787,13 +3787,23 @@ function giftStarterStock(){
         y.onclick=function(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
           setTimeout(function(){
+            var gotoChat=function(){
+              try{
+                if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
+                  playChatScene('chat_chenmo_gpu',function(){
+                    setTimeout(function(){ A.gpuGuide(); },420);
+                  });
+                }else{ A.gpuGuide(); }
+              }catch(e){ A.gpuGuide(); }
+            };
+            /* 重开张之后：爸爸寄来的包裹（留声机 + 旧整机）先来 */
             try{
-              if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
-                playChatScene('chat_chenmo_gpu',function(){
-                  setTimeout(function(){ A.gpuGuide(); },420);
-                });
-              }else{ A.gpuGuide(); }
-            }catch(e){ A.gpuGuide(); }
+              if(window.__GRAMO&&window.__GRAMO.introForce){
+                window.__GRAMO.introForce().then(function(){ setTimeout(gotoChat,420); });
+                return;
+              }
+            }catch(e){}
+            gotoChat();
           },380);
         };
       }
@@ -8314,11 +8324,6 @@ async function runBootIntro(){
   /* 2 剧情结束（加载页继续盖着，下面的留声机卡直接接上） */
   await wait(60);
 
-  /* 2.5 爸爸寄来的包裹（留声机 + 旧整机）——必须在陈默微信之前 */
-  if(window.__GRAMO&&window.__GRAMO.introOnce){
-    try{ await window.__GRAMO.introOnce(); }catch(e){}
-    try{ await wait(200); }catch(e){}
-  }
   /* 3 陈默微信 */
   if(state.day===1&&!S['chat_chat_chenmo_d1']&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
     const ok=await _playScene(cb=>playChatScene('chat_chenmo_d1',cb));
@@ -9801,10 +9806,16 @@ renderAll();
     return introDone;
   }
 
-  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce};
+  function introForce(){
+    var g=G(); g.intro=0; g.introV=0;
+    introDone=null;
+    return introOnce();
+  }
+  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce,introForce:introForce};
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01306':['爸爸寄留声机挪到重开张之后'],
     '01305':['神秘人卖碟挪到第 20 天后；加刘警官第一单（占位）'],
     '01304':['第 1 天不许卖货，旺财会拦着（这批是给顾客装机的）'],
     '01303':['零元购恢复为第 1 天夜里（设计如此：开局赚不到钱）'],
@@ -9918,7 +9929,12 @@ renderAll();
     }catch(e){}
   })();
 
-  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce};
+  function introForce(){
+    var g=G(); g.intro=0; g.introV=0;
+    introDone=null;
+    return introOnce();
+  }
+  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce,introForce:introForce};
 
   /* ---- 内容更新提示：换了版本，标题页角上闪一条，不打断 ---- */
   (function(){
