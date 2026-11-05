@@ -8998,24 +8998,6 @@ renderAll();
       + '</div></div>';
   }
 
-  /* 加载页/剧情/过场还开着时别弹，否则会被覆盖掉、看起来像闪一下 */
-  function busyUI(){
-    try{
-      if(document.getElementById('startLoad')) return true;
-      if(document.getElementById('plotEvent')) return true;
-      if(document.getElementById('storyPop')) return true;
-      if(document.querySelector('.gal-box')) return true;
-      var ts=document.getElementById('titleScr');
-      if(ts && !ts.classList.contains('hide')) return true;
-    }catch(e){}
-    return false;
-  }
-  function readyThen(fn,tries){
-    tries=tries||0;
-    if(busyUI() && tries<60){ setTimeout(function(){ readyThen(fn,tries+1); },400); return; }
-    fn();
-  }
-
   function introPopup(){
     /* 开头：爸爸寄来的留声机 */
     modal('爸爸寄来的包裹',
@@ -9026,7 +9008,6 @@ renderAll();
       + '碟得自己攒，好的东西都藏得深。」</i><br><br>'
       + '<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span>'
       + '</div>', null);
-    try{closeMask(document.getElementById('mask'));}catch(e){}
   }
 
   function offerLegend(){
@@ -9121,9 +9102,9 @@ renderAll();
   /* ---- 每天开始 ---- */
   function onDay(day){
     var g=G();
-    if(day===1&&!g.intro){ g.intro=1; readyThen(introPopup); }
+    /* 开场的留声机包褒不在按天触发，改成加载页撤掉那一刻（见 hideBootLoad 挂钩） */
     if(day===3&&!g.day3){
-      g.day3=1; setTimeout(function(){ readyThen(offerLegend); },1200);
+      g.day3=1; setTimeout(offerLegend,1200);
     }
     sync();
   }
@@ -9242,5 +9223,22 @@ renderAll();
   /* 5) 启动时同步一次（读档后也要生效） */
   setTimeout(function(){ try{ G(); sync(); }catch(e){} },1200);
 
-  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay};
+  /* 加载页撤掉之后再弹开场：不看心情、不轮询，就等这一刻 */
+  function introOnce(){
+    var g=G();
+    if(g.intro) return;
+    g.intro=1;
+    try{save();}catch(e){}
+    introPopup();
+  }
+
+  try{
+    var _hideBootLoad=hideBootLoad;
+    hideBootLoad=function(){
+      _hideBootLoad.apply(this,arguments);
+      setTimeout(function(){ try{ introOnce(); }catch(e){} }, 520);
+    };
+  }catch(e){}
+
+  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce};
 })();
