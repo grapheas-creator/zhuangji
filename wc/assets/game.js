@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01225';
+const APP_BUILD='01226';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9265,6 +9265,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01226':['返回键改为游戏内确认框（再等等 / 退出）'],
     '01225':['更新提示和下载进度搬到游戏内，以后不用再装壳'],
     '01224':['设置页可以看内容版本和壳版本'],
     '01223':['右下角不再显示版本号','内容更新改为游戏风弹窗提示'],
@@ -9426,4 +9427,44 @@ renderAll();
   setTimeout(checkOnce,2500);
 
   window.__WC_UPDATE={check:checkOnce,shellVer:shellVer};
+})();
+
+
+/* ==================== 返回键：游戏风退出确认 ==================== */
+(function(){
+  var asking=false;
+  function closeTopLayer(){
+    try{
+      var m=document.getElementById('mask');
+      if(m&&m.classList.contains('on')){ closeMask(m); return true; }
+      var ss=document.getElementById('setSheet');
+      if(ss){ ss.classList.remove('on'); setTimeout(function(){try{ss.remove();}catch(e){}},220); return true; }
+    }catch(e){}
+    return false;
+  }
+  window.__WC_BACK=function(){
+    /* 有弹窗/面板开着：先收掉，不退出 */
+    if(closeTopLayer()) return 'closed';
+    if(asking) return 'asking';
+    asking=true;
+    modal('退出游戏',
+      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      + '要关掉旺财装机店吗？<br>'
+      + '<span style="color:#9b8088;font-size:11.5px">进度是自动存的，下次进来接着干。</span>'
+      + '</div>', null);
+    setTimeout(function(){
+      var y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){ y.textContent='退出'; y.onclick=function(){ try{ WCBridge.exitApp(); }catch(e){} }; }
+      if(n){
+        n.textContent='再等等';
+        n.onclick=function(){ asking=false; try{closeMask(document.getElementById('mask'));}catch(e){} };
+      }
+    },30);
+    /* 用户点了空白处关掉时也要复位 */
+    var t=setInterval(function(){
+      var m=document.getElementById('mask');
+      if(!m||!m.classList.contains('on')){ asking=false; clearInterval(t); }
+    },600);
+    return 'asking';
+  };
 })();
