@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01291';
+const APP_BUILD='01292';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8088,13 +8088,10 @@ async function runBootIntro(){
   if(state.day===1&&!S['plot_opening']){
     /* 先把 CG 创建出来（它自己带奶油底、铺满屏幕），
        等它画上屏之后再撤底图 —— 中间不留空隙 */
-    const sceneP=_playScene(cb=>playPlotEvent('opening',cb));
-    setTimeout(function(){ try{hideBootLoad();}catch(e){} },140);
-    const ok=await sceneP;
+    const ok=await _playScene(cb=>playPlotEvent('opening',cb));
     if(ok){S['plot_opening']=1;state.story.flags.opening=true;try{save();}catch(e){}}
   }
-  /* 2 剧情结束 */
-  try{ if(!document.getElementById('plotEvent')) hideBootLoad(); }catch(e){}
+  /* 2 剧情结束（加载页继续盖着，下面的留声机卡直接接上） */
   await wait(60);
 
   /* 2.5 爸爸寄来的包裹（留声机 + 旧整机）——必须在陈默微信之前 */
@@ -9277,6 +9274,7 @@ renderAll();
       function step(){
         if(i>=PAGES.length){ resolve(true); return; }
         var pg=PAGES[i];
+        if(i===0){ try{ hideBootLoad(); }catch(e){} }   /* 留声机第一页出现，加载页让位 */
         introCard(pg.t, pg.html, pg.ok, function(){
           if(i===PAGES.length-1){
             try{ giftDadPC(); }catch(e){}
@@ -9532,7 +9530,7 @@ renderAll();
   var INTRO_V=4;                       /* 剧情改版号：变了就让所有人再看一次 */
   function introOnce(){
     var g=G();
-    if(g.intro&&g.introV===INTRO_V) return Promise.resolve(false);
+    if(g.intro&&g.introV===INTRO_V){ try{hideBootLoad();}catch(e){} return Promise.resolve(false); }
     if(introDone) return introDone;
     var waitFree=function(tries){
       return new Promise(function(res){
@@ -9557,6 +9555,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01292':['加载页盖到留声机第一页出现，不留空隙'],
     '01291':['加载页只在切场时出现；剧情画面底图统一用店门口那张'],
     '01290':['加载页盖到整段开场结束；剧情卡背景改用店门口图'],
     '01289':['开始新游戏改回加载页（图+标题+进度条）再接剧情'],
