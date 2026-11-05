@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01306';
+const APP_BUILD='01307';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4987,6 +4987,12 @@ function renderHeader(){
     const lb=document.getElementById('btnLife');
     if(lb){
       const L=state.life||{};const c=LIFE_CARS.find(x=>x.id===L.car),h=LIFE_HOUSES.find(x=>x.id===L.house);
+      try{
+        if(L.pc){
+          var _lb=document.getElementById('lifeBtn')||document.querySelector('[data-panel="life"]');
+          if(_lb){ _lb.title='爸爸的旧电脑：用来上网接单、跟客户聊'; }
+        }
+      }catch(e){}
       lb.textContent=(c&&c.id!=='bike')||(h&&h.id!=='rent')?'生活 ●':'生活';
     }
   }catch(e){}
@@ -9510,7 +9516,13 @@ renderAll();
 
         introCard(pg.t, pg.html, pg.ok, function(){
           if(i===PAGES.length-1){
-            try{ giftDadPC(); }catch(e){}
+            try{
+              /* 爸爸那台机器是拿来上网接单、跟客户聊天的，不进仓库当货卖 */
+              state.life=state.life||{car:null,house:null};
+              state.life.pc={id:'dad_pc',name:'爸爸的旧电脑',
+                note:'放在柜台后面，用来上网下单、跟客户聊天。'};
+              save();
+            }catch(e){}
             phonePing(function(){ resolve(true); });
             return;
           }
@@ -9815,6 +9827,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01307':['爸爸那台机器改为工作电脑（上网接单），不进仓库'],
     '01306':['爸爸寄留声机挪到重开张之后'],
     '01305':['神秘人卖碟挪到第 20 天后；加刘警官第一单（占位）'],
     '01304':['第 1 天不许卖货，旺财会拦着（这批是给顾客装机的）'],
