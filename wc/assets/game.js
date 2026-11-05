@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01266';
+const APP_BUILD='01267';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9228,11 +9228,13 @@ renderAll();
       function show(){
         var pg=PAGES[page];
         modal(pg.t, pg.html, null);
+        var born=Date.now();
         setTimeout(function(){
           var y=document.getElementById('mYes'), n=document.getElementById('mNo');
           if(y){
             y.textContent=pg.ok;
             y.onclick=function(){
+              if(Date.now()-born<650) return;   /* 刚弹出来的手滑点击不算 */
               if(page<PAGES.length-1){ page++; show(); return; }
               try{closeMask(document.getElementById('mask'));}catch(e){}
               /* 把旧整机放进仓库（用游戏里真实存在的零件拼） */
@@ -9486,12 +9488,23 @@ renderAll();
 
   /* 开场留声机：由剧情序列在「招牌剧情」之后调用，返回 Promise */
   var introDone=null;
-  var INTRO_V=2;                       /* 剧情改版号：变了就让所有人再看一次 */
+  var INTRO_V=3;                       /* 剧情改版号：变了就让所有人再看一次 */
   function introOnce(){
     var g=G();
     if(g.intro&&g.introV===INTRO_V) return Promise.resolve(false);
     if(introDone) return introDone;
-    introDone=introPopup().then(function(){
+    var waitFree=function(tries){
+      return new Promise(function(res){
+        var t=tries||0;
+        var busy=(document.getElementById('plotEvent')||document.getElementById('chatPop')
+                  ||(document.getElementById('mask')&&document.getElementById('mask').classList.contains('on')));
+        if(!busy||t>12) return res();
+        setTimeout(function(){ waitFree(t+1).then(res); },250);
+      });
+    };
+    introDone=waitFree(0).then(function(){ return new Promise(function(r){ setTimeout(r,420); }); })
+      .then(function(){ return introPopup(); })
+      .then(function(){
       g.intro=1; g.introV=INTRO_V;
       try{save();}catch(e){}
       return true;
@@ -9503,6 +9516,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01267':['修复留声机剧情没出现（等上一幕关掉再弹，防误触）'],
     '01266':['爸爸的旧整机改用真实零件（i3-10100/B460/8G×2/512G NVMe/750Ti/500W）'],
     '01265':['留声机剧情回归并加长（爸爸送的旧整机）；仓库新增整机栏；微信点一次一句'],
     '01264':['留声机挪到陈默剧情前+手机消息提示；微信剧情改点击推进；顶栏贴顶'],
