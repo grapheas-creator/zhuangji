@@ -1,8 +1,8 @@
 {
-  "code": 1229,
-  "name": "0.12.19-01229",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01229.apk",
-  "size": 36764892,
-  "content": "01258",
-  "note": "允许无声自动播放；启动动画修正"
+  "code": 1230,
+  "name": "0.12.20-01230",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01230.apk",
+  "size": 38460701,
+  "content": "01259",
+  "note": "开场 CG 改原生播放器（VideoView），不依赖 WebView 自动播放"
 }

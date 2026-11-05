@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01258';
+const APP_BUILD='01259';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9322,6 +9322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01259':['APK 内开场 CG 改由原生播放器播放'],
     '01258':['修复启动动画不播放（改用 DOM 设 src，无播放键）'],
     '01257':['App 一打开就播动画（只播这一次，点一下可跳过）'],
     '01256':['开机页换成动画：旺财挥手、开箱、拿螺丝刀、指主机'],
@@ -9619,6 +9620,7 @@ renderAll();
 (function(){
   try{
     if(document.getElementById('bootCinema')) return;
+    if(window.WCBridge) return;              /* 在 APK 壳里：开场 CG 由原生播放器负责 */
     var el=document.createElement('div');
     el.id='bootCinema';
 
