@@ -1,8 +1,8 @@
 {
-  "code": 1225,
-  "name": "0.12.15-01225",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01225.apk",
-  "size": 32553980,
+  "code": 1226,
+  "name": "0.12.16-01226",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01226.apk",
+  "size": 32758780,
   "content": "01251",
-  "note": "内置离线副本刷新到最新；右下角标注在线/离线"
+  "note": "去掉开机原生启动图（只在首次安装时出现），换掉发白的旧图"
 }
