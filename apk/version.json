@@ -1,7 +1,7 @@
 {
-  "code": 1219,
-  "name": "0.12.9-01219",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01219.apk",
+  "code": 1220,
+  "name": "0.12.10-01220",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01220.apk",
   "size": 32074598,
-  "note": "加载地址带时间戳：以后内容更新重开 App 即最新，不用等缓存"
+  "note": "壳版本号同步到网页：设置页可看内容版本与壳版本"
 }
