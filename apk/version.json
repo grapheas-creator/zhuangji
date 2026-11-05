@@ -1,8 +1,8 @@
 {
-  "code": 1232,
-  "name": "0.12.22-01232",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01232.apk",
-  "size": 38460701,
+  "code": 1233,
+  "name": "0.12.23-01233",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01233.apk",
+  "size": 38468893,
   "content": "01286",
-  "note": "修正开场CG缩放（不再过度放大）"
+  "note": "顺序：CG → 底图 → 开始界面；网页先加载，CG 盖在上面"
 }
