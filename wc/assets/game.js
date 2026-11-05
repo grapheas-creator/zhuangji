@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01265';
+const APP_BUILD='01266';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6243,27 +6243,79 @@ function renderLeft(){
 /* ================= 仓库 · 整机 =================
    一整台机器单独占一行，不拆成散件。目前只有爸爸给的那台开机机。
    后续「整机上台 / 拆成散件 / 标价出售」再逐步接上。 */
+/* 爸爸的旧整机：从真实零件库里挑 i3-10100 / B460 / 8G×2 / 512G NVMe / 750Ti / 500W */
+function giftDadPC(){
+  try{
+    state.machines=state.machines||[];
+    if(state.machines.some(m=>m.dadGift)) return;
+    const pick=(arr,f)=>arr.find(f);
+    const cpu=pick(C,x=>x.n==='Intel Core i3-10100');
+    const mb=pick(B,x=>/B460/i.test(x.n))||pick(B,x=>/H410/i.test(x.n));
+    const cooler=pick(H,x=>(x.s||[]).includes('LGA1200'));
+    const rams=M.filter(x=>/DDR4/.test(x.n)&&/8G/.test(x.n)&&/3200/.test(x.n)).slice(0,2);
+    const ssd=pick(ST,x=>x.kind==='m2'&&/512G/.test(x.n));
+    const gpu=pick(G,x=>x.n==='NVIDIA GeForce GTX 750 Ti');
+    const psu=pick(P,x=>/500W/.test(x.n));
+    const kase=K[0];
+    const parts=[{cat:'cpu',part:cpu},{cat:'mb',part:mb},{cat:'cooler',part:cooler},
+                 {cat:'ram',part:rams[0]},{cat:'ram',part:rams[1]},
+                 {cat:'disk',part:ssd},{cat:'gpu',part:gpu},{cat:'psu',part:psu},{cat:'case',part:kase}]
+                .filter(x=>x.part);
+    const b=partsToBuild(parts);
+    if(b.cpu&&b.mb) b.paste=true;      /* 爸爸早装过了，硅脂不用再涂 */
+    const md=addMachine(null,null,b,{name:'爸爸的旧整机',
+      note:'箱盖内侧写着：拆坏了不心疼，装好了就是你的第一台。'});
+    md.dadGift=true;
+    save();
+    return md;
+  }catch(e){ return null; }
+}
 function pcBoxHTML(){
-  const list=state.pcBox||[];
+  const list=(typeof machinesInInv==='function')?machinesInInv():(state.machines||[]).filter(m=>!m.onBench);
   if(!list.length) return '';
   return '<div class="pcBoxWrap"><div class="pcBoxHd">整机 <span class="pcBoxCnt">'+list.length+'</span></div>'
-    + list.map((p,i)=>'<div class="pcCard" data-pc="'+i+'">'
-        +'<div class="pcIcon">▣</div>'
-        +'<div class="pcMain"><b>'+p.name+'</b>'
-        +'<div class="pcSpec">'+(p.spec||'')+'</div>'
-        +(p.note?'<div class="pcNote">'+p.note+'</div>':'')
-        +'</div><div class="pcOps"><button type="button" class="mini" data-pcinfo="'+i+'">查看</button></div>'
-      +'</div>').join('')
+    + list.map((m,i)=>{
+        const b=m.build||{};
+        const detail=[];
+        if(b.cpu)detail.push('CPU '+b.cpu.part.n);
+        if(b.mb)detail.push('主板 '+b.mb.part.n);
+        const rn=(b.rams||[]).filter(Boolean);
+        if(rn.length)detail.push('内存 '+(rn[0].part.cap||0)+'G×'+rn.length);
+        const dk=(b.m2||[]).concat(b.sata||[]).filter(Boolean)[0];
+        if(dk)detail.push('硬盘 '+dk.part.n);
+        if(b.gpu1)detail.push('显卡 '+b.gpu1.part.n);
+        if(b.psu)detail.push('电源 '+b.psu.part.n);
+        return '<div class="pcCard" data-mid="'+m.mid+'">'
+          +'<div class="pcIcon">▣</div>'
+          +'<div class="pcMain"><b>'+m.name+'</b>'
+          +'<div class="pcSpec">'+(machineSpec(m)||'空机箱')+'</div>'
+          +(m.note?'<div class="pcNote">'+m.note+'</div>':'')
+          +'</div><div class="pcOps"><button type="button" class="mini" data-pcinfo="'+m.mid+'">查看</button></div>'
+        +'</div>';
+      }).join('')
     +'</div>';
 }
 function bindPcBox(){
   document.querySelectorAll('[data-pcinfo]').forEach(b=>{
     b.onclick=()=>{
-      const p=(state.pcBox||[])[+b.dataset.pcinfo]; if(!p) return;
-      modal(p.name,
-        '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
-        +'<b style="color:#b8546a">配置</b><br>'+p.spec.replace(/ · /g,'<br>')
-        +'<br><br><span style="color:#9b8088;font-size:11.5px">'+(p.note||'')+'</span></div>',null);
+      const m=(state.machines||[]).find(x=>x.mid===b.dataset.pcinfo); if(!m) return;
+      const bd=m.build||{},rows=[];
+      const add=(k,v)=>{ if(v)rows.push(k+'　'+v); };
+      add('CPU',bd.cpu&&bd.cpu.part.n);
+      add('主板',bd.mb&&bd.mb.part.n);
+      add('散热',bd.cooler&&bd.cooler.part.n);
+      const rr=(bd.rams||[]).filter(Boolean);
+      add('内存',rr.length?rr.map(r=>r.part.n).join(' + '):'');
+      const dk=(bd.m2||[]).filter(Boolean).concat((bd.sata||[]).filter(Boolean));
+      add('硬盘',dk.length?dk.map(d=>d.part.n).join(' + '):'');
+      add('显卡',bd.gpu1&&bd.gpu1.part.n);
+      add('电源',bd.psu&&bd.psu.part.n);
+      add('机箱',bd.case&&bd.case.part.n);
+      modal(m.name,
+        '<div style="font-size:12.5px;line-height:1.95;color:#6b5b60">'
+        +rows.join('<br>')
+        +(m.note?'<br><br><span style="color:#9b8088;font-size:11.5px">'+m.note+'</span>':'')
+        +'</div>',null);
     };
   });
 }
@@ -9183,16 +9235,8 @@ renderAll();
             y.onclick=function(){
               if(page<PAGES.length-1){ page++; show(); return; }
               try{closeMask(document.getElementById('mask'));}catch(e){}
-              /* 把旧整机放进仓库 */
-              try{
-                state.pcBox=state.pcBox||[];
-                if(!state.pcBox.some(function(x){return x.id==='dad_pc';})){
-                  state.pcBox.push({id:'dad_pc',name:'爸爸的旧整机',
-                    spec:'CPU i3-10100 · 内存 8G×2 · 硬盘 512G M.2 · 显卡 GTX 750Ti · 电源 500W',
-                    note:'箱盖内侧写着：拆坏了不心疼，装好了就是你的第一台。'});
-                  save();
-                }
-              }catch(e){}
+              /* 把旧整机放进仓库（用游戏里真实存在的零件拼） */
+              try{ giftDadPC(); }catch(e){}
               setTimeout(function(){ phonePing(resolve); }, 420);
             };
           }
@@ -9459,6 +9503,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01266':['爸爸的旧整机改用真实零件（i3-10100/B460/8G×2/512G NVMe/750Ti/500W）'],
     '01265':['留声机剧情回归并加长（爸爸送的旧整机）；仓库新增整机栏；微信点一次一句'],
     '01264':['留声机挪到陈默剧情前+手机消息提示；微信剧情改点击推进；顶栏贴顶'],
     '01263':['剧情 CG 绝对定位铺满，彻底消除黑边'],
