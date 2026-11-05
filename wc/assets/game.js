@@ -31,14 +31,14 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01222';
+const APP_BUILD='01223';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
-const APP_VER_TXT=APP_VER+' · 内容 '+APP_BUILD;   /* 这是游戏内容的版本；APK 壳版本另算 */
+const APP_VER_TXT=APP_VER+' · 内容 '+APP_BUILD;   /* 不再显示在角落，仅供更新通知/设置页使用 */
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
-try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
-var _t=document.getElementById('verTag');if(_t)_t.textContent=APP_VER_TXT;})();}catch(e){}
+try{(function(){var _v=document.getElementById('tVer');if(_v){_v.textContent=APP_VER_TXT;_v.style.display='none';}
+var _t=document.getElementById('verTag');if(_t){_t.textContent=APP_VER_TXT;_t.style.display='none';}})();}catch(e){}
 /* 任何上层弹窗出现时，把下层锁住：不能滚、不能点 */
 const MODAL_SEL='.mask.on,.ho-overlay,.story-pop,.dayopen,.titleScr:not(.hide)';
 function syncModalLock(){
@@ -8561,7 +8561,7 @@ document.addEventListener('visibilitychange',()=>{
 });
 document.getElementById('tbMask').onclick=e=>{if(e.target.id==='tbMask'){const o=state.tb;if(o){o.closed=true;save();}tbRender();}};
 document.getElementById('tbMini').onclick=()=>{const o=state.tb;if(o){o.closed=false;save();tbRender();}};
-try{const vm=document.getElementById('verMark');if(vm)vm.textContent=APP_VER_TXT;}catch(e){}
+try{const vm=document.getElementById('verMark');if(vm){vm.textContent=APP_VER_TXT;vm.style.display='none';}}catch(e){}
 /* 标题页花瓣：26 片，随机位置/速度/大小 */
 try{
   (function(){
@@ -9248,6 +9248,41 @@ renderAll();
       setTimeout(function(){ try{ introOnce(); }catch(e){} }, 520);
     };
   }catch(e){}
+
+  window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce};
+
+  /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
+  var BUILD_NOTES={
+    '01223':['右下角不再显示版本号','内容更新改为游戏风弹窗提示'],
+    '01222':['留声机开场改成加载结束后弹出','没有碟时角落不再出现音符','标题页 BGM 自动播放'],
+    '01221':['留声机系统上线（碟片解锁）','神秘人上门卖碟、可留号码改天再买','某菇的救命单与 7co 典藏集'],
+    '01219':['全屏适配修复','更新下载显示体积与速度']
+  };
+  (function(){
+    try{
+      var KEY='wc_seen_build', cur=(typeof APP_BUILD!=='undefined')?APP_BUILD:'';
+      if(!cur) return;
+      var last=localStorage.getItem(KEY);
+      localStorage.setItem(KEY,cur);
+      if(!last||last===cur) return;          /* 第一次玩 / 没换版本：不提示 */
+      var notes=BUILD_NOTES[cur]||[];
+      setTimeout(function(){
+        modal('内容更新',
+          '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+          + '<div style="color:#b8546a;font-weight:700;margin-bottom:6px">这次更新了什么</div>'
+          + (notes.length
+              ? notes.map(function(t){return '<div style="margin:3px 0">· '+t+'</div>';}).join('')
+              : '<div style="margin:3px 0">· 内容已更新到 '+cur+'</div>')
+          + '<div style="margin-top:10px;color:#9b8088;font-size:11.5px">更新说明会存在这里，旧版本可以直接跳过。</div>'
+          + '</div>', null);
+        setTimeout(function(){
+          var y=document.getElementById('mYes'), n=document.getElementById('mNo');
+          if(y) y.textContent='知道了';
+          if(n) n.style.display='none';
+        },30);
+      },1500);
+    }catch(e){}
+  })();
 
   window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce};
 
