@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01286';
+const APP_BUILD='01287';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8080,18 +8080,20 @@ async function runBootIntro(){
   state.story=state.story||{};state.story.seen=state.story.seen||{};
   const S=state.story.seen;
 
-  /* 0 底图（CG 已经播完，这里是唯一一张静态过渡） */
-  showBootStill();
-  await wait(420);
+  /* 0 底图：开始新游戏后盖住游戏页面，直到剧情 CG 上场 */
+  try{ window.__bootStillDone=false; showBootStill(); }catch(e){}
+  await wait(320);
 
   /* 1 开头剧情 */
   if(state.day===1&&!S['plot_opening']){
+    /* CG 即将创建，这时才收底图与标题，避免先露出游戏页面 */
+    hideBootStill();
     const ok=await _playScene(cb=>playPlotEvent('opening',cb));
     if(ok){S['plot_opening']=1;state.story.flags.opening=true;try{save();}catch(e){}}
   }
   /* 2 剧情结束：底图可以让位给剧情画面 */
   hideBootStill();
-  await wait(120);
+  await wait(60);
 
   /* 2.5 爸爸寄来的包裹（留声机 + 旧整机）——必须在陈默微信之前 */
   if(window.__GRAMO&&window.__GRAMO.introOnce){
@@ -8872,7 +8874,7 @@ renderAll();
   const st=document.getElementById('tStart'),ld=document.getElementById('tLoad');
   const startNew=(mode)=>{
     /* 先盖加载页，再动标题/底页；否则会闪出一帧没有 UI 的游戏页面。 */
-    try{showBootStill();}catch(e){}
+    try{ window.__bootStillDone=false; showBootStill(); }catch(e){}
     try{
       /* 先把自动存档清掉再开新局，避免任何残留被下一次 load 读回来 */
       try{localStorage.removeItem(SAVE);}catch(e){}
@@ -9549,6 +9551,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01287':['开始新游戏后底图盖到剧情 CG 上场，不再先露游戏页面'],
     '01286':['底图停留 1.3 秒再进标题页，顺序：CG→底图→开始界面'],
     '01285':['底图改为静态元素，第一帧就有图；修复底图背景失效'],
     '01284':['启动重排：CG → 底图 → 开始界面，去掉加载页与页面锁'],
