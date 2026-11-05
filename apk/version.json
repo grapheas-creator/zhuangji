@@ -1,8 +1,8 @@
 {
-  "code": 1223,
-  "name": "0.12.13-01223",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01223.apk",
-  "size": 32074598,
-  "note": "返回键改为游戏内确认框（再等等 / 退出），壳只提供 exitApp 桥",
-  "content": "01237"
+  "code": 1224,
+  "name": "0.12.14-01224",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01224.apk",
+  "size": 32058288,
+  "content": "01237",
+  "note": "内置离线版刷新到最新；走离线时会有提示"
 }
