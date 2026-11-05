@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01230';
+const APP_BUILD='01231';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2788,7 +2788,7 @@ function playPlotEvent(evId,onDone){
   };
   const ov=document.createElement('div');
   ov.className='plotCg';ov.id='plotEvent';
-  ov.innerHTML='<div class="gal">'+
+  ov.innerHTML='<div class="gal" style="--cg:url(\''+artFor(0)+'\')">'+
     '<img class="gal-cg" id="galCg" alt="" src="'+artFor(0)+'">'+
     '<div class="gal-shade"></div>'+
     '<img class="gal-sprite" id="galSprite" alt="" style="display:none">'+
@@ -2876,7 +2876,10 @@ function playPlotEvent(evId,onDone){
     try{
       const cg=ov.querySelector('#galCg');
       if(cg){const want=artFor(idx-1);
-        if(want&&cg.getAttribute('src')!==want){cg.setAttribute('src',want);}}
+        if(want&&cg.getAttribute('src')!==want){
+          cg.setAttribute('src',want);
+          try{const gal=ov.querySelector('.gal');if(gal)gal.style.setProperty('--cg','url("'+want+'")');}catch(e){}
+        }}
     }catch(e){}
     setSpeaker(p.who);
     full=p.txt;textEl.textContent='';typing=true;
@@ -9276,6 +9279,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01231':['剧情 CG 改成完整显示＋模糊垫底，竖屏不再硬裁'],
     '01230':['开场留声机剧情加了特写插图'],
     '01229':['「清空工作台」按钮改成浅色樱花风'],
     '01228':['开场留声机剧情改为单按钮，确认后接着走陈默的单'],
