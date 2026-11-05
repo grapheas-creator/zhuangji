@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01228';
+const APP_BUILD='01229';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7388,7 +7388,7 @@ function renderChecks(){
       预计利润 <b style="color:${spare+labor>=0?'#7ee0a1':'#f08a8a'}">${money(spare+labor)}</b></div>
       <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
       <button class="primary" id="btnDeliver">开机测试并交付</button>
-      ${j.story?`<button id="btnClearBench">清空工作台</button>`:`<button class="bad" id="btnAbandon">放弃本单</button>`}</div>`;
+      ${j.story?`<button class="btn-soft" id="btnClearBench">清空工作台</button>`:`<button class="bad" id="btnAbandon">放弃本单</button>`}</div>`;
     document.getElementById('btnDeliver').onclick=confirmDeliver;
     try{if(_readyUntil&&Date.now()<_readyUntil)document.getElementById('btnDeliver').classList.add('readyPulse');}catch(e){}
     try{
@@ -9273,6 +9273,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01229':['「清空工作台」按钮改成浅色樱花风'],
     '01228':['开场留声机剧情改为单按钮，确认后接着走陈默的单'],
     '01227':['开局加载页换成旺财图','BGM 起播延后，开头不再卡一下'],
     '01226':['返回键改为游戏内确认框（再等等 / 退出）'],
