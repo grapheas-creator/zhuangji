@@ -2319,7 +2319,7 @@ input[type=range]{accent-color:#f286a6}
   background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,214,170,.14)!important;
   overflow:hidden}
 .ic .pico,.ic .pico.photo{width:100%!important;height:100%!important;border-radius:11px!important;
-  object-fit:contain!important}
+  object-fit:cover!important}
 .ic .pico.photo{background:#f7f3ec!important;box-shadow:none!important}
 .item .n{font-size:13px!important}
 .item .s{font-size:10.5px!important}
@@ -2333,7 +2333,7 @@ input[type=range]{accent-color:#f286a6}
 .item{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
   gap:12px!important;padding:11px 12px!important}
 .item .ic{flex:0 0 84px!important;height:84px!important;border-radius:13px!important;overflow:hidden}
-.ic .pico,.ic .pico.photo{width:100%!important;height:100%!important;object-fit:contain!important;border-radius:12px!important}
+.ic .pico,.ic .pico.photo{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:12px!important}
 .ic .pico.photo{background:#f7f3ec!important}
 .item .mid{flex:1 1 auto!important;min-width:0!important}
 .item .n{font-size:13px!important;line-height:1.35!important;white-space:normal!important}
@@ -3530,7 +3530,7 @@ body.scene-mode #mobileBar,body.scene-mode #actionBar,body.scene-mode #leftBody{
 .chatPop .wxBody .chatRow .cav{
   display:block!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
   max-width:40px!important;max-height:40px!important;flex:0 0 40px!important;
-  aspect-ratio:1/1!important;object-fit:contain!important;object-position:center center!important;
+  aspect-ratio:1/1!important;object-fit:cover!important;object-position:center center!important;
   border-radius:6px!important}
 .story-pop .sp-av{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;
   flex:0 0 52px!important;aspect-ratio:1/1!important;overflow:hidden!important;border-radius:12px!important}
@@ -3676,10 +3676,10 @@ body .modal .warnMain{color:#9a4a10!important}
 .chatPop .chatRow .cav{
   width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
   max-width:34px!important;max-height:34px!important;flex:0 0 34px!important;
-  aspect-ratio:1/1!important;object-fit:contain!important;object-position:center center!important;
+  aspect-ratio:1/1!important;object-fit:cover!important;object-position:center center!important;
   background:#f1e6da!important;border-radius:6px!important;display:block!important}
-.story-pop .sp-av img{object-fit:contain!important;background:#f1e6da!important}
-#plotEvent .gal-av{object-fit:contain!important;background:#f1e6da!important}
+.story-pop .sp-av img{object-fit:cover!important;background:#f1e6da!important}
+#plotEvent .gal-av{object-fit:cover!important;background:#f1e6da!important}
 </style>
 <style id="galCreamKillBrown">
 /* ===== 彻底清掉棕色/金橙：用比原规则更高的特异性 + !important ===== */
@@ -3789,7 +3789,7 @@ button.btn-soft:active{transform:scale(.97)}
   background-image:var(--cg);background-size:cover;background-position:50% 45%;
   filter:blur(26px) brightness(.52) saturate(1.05);transform:scale(1.18)}
 #plotEvent .gal-cg,.plotCg .gal-cg{position:relative!important;z-index:1;width:100%!important;height:100%!important;
-  object-fit:contain!important;object-position:50% 45%!important;filter:none!important;inset:auto!important}
+  object-fit:cover!important;object-position:50% 45%!important;filter:none!important;inset:auto!important}
 .plotCg .gal-shade{z-index:2}
 .plotCg .gal-box{z-index:3}
 @media (orientation:portrait){
@@ -3867,7 +3867,7 @@ body::before{display:none!important}
 <style id="solidBoot">
 /* 开机加载屏：不用图片，纯色底 + 文字 + 进度条，杜绝任何发白/透明问题 */
 #startLoad{background:linear-gradient(180deg,#fdf7f0,#f9ecdf 60%,#f6e3d3)!important}
-#startLoad .sl-bg{display:none!important}
+#startLoad .sl-bg{display:block!important}
 #startLoad .sl-inner{top:50%!important;bottom:auto!important;transform:translateY(-50%)}
 #startLoad .sl-logo{color:#b8546a!important;text-shadow:none!important}
 #startLoad .sl-sub{color:#c39aa2!important}
@@ -3928,11 +3928,11 @@ body::before{display:none!important}
 <body>
 <!-- 网页启动页已删除（只保留开局加载页） -->
 </div>
-<script src="assets/art-portrait-video.js?v=01260"></script>
-<script src="assets/art-coach-full.js?v=01260"></script>
-<script src="assets/art-coach-voice.js?v=01260"></script>
-<script src="assets/art-extra-1.js?v=01260"></script>
-<script src="assets/art-bench.js?v=01260"></script>
+<script src="assets/art-portrait-video.js?v=01261"></script>
+<script src="assets/art-coach-full.js?v=01261"></script>
+<script src="assets/art-coach-voice.js?v=01261"></script>
+<script src="assets/art-extra-1.js?v=01261"></script>
+<script src="assets/art-bench.js?v=01261"></script>
 
 
 <!-- QQ 内置浏览器（X5）兼容性太差：不尝试渲染游戏，直接引导去系统浏览器 -->
@@ -3946,7 +3946,7 @@ body::before{display:none!important}
     <button class="qqBtn" id="qqCopy" type="button">复制网址</button>
   </div>
 </div>
-<script src="assets/misc-ua-guard.js?v=01260"></script>
+<script src="assets/misc-ua-guard.js?v=01261"></script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
@@ -4189,14 +4189,14 @@ body::before{display:none!important}
   <div class="acts"><button id="smaskNo">关闭</button></div>
 </div></div>
 
-<script src="assets/lib-three.min.js?v=01260"></script>
-<script src="assets/lib-case3d.js?v=01260"></script>
-<script src="assets/art-extra-2.js?v=01260"></script>
-<script src="assets/art-core.js?v=01260"></script>
-<script src="assets/game.js?v=01260"></script>
-<script src="assets/misc-stats.js?v=01260"></script>
+<script src="assets/lib-three.min.js?v=01261"></script>
+<script src="assets/lib-case3d.js?v=01261"></script>
+<script src="assets/art-extra-2.js?v=01261"></script>
+<script src="assets/art-core.js?v=01261"></script>
+<script src="assets/game.js?v=01261"></script>
+<script src="assets/misc-stats.js?v=01261"></script>
 
-<script src="assets/lib-live2d.js?v=01260"></script>
+<script src="assets/lib-live2d.js?v=01261"></script>
 <div class="buildFlash" id="buildFlash">
   <div class="bfInner">
     <div class="bfTop"><span class="bfDot"></span>装机台 · 实时</div>
@@ -4218,8 +4218,8 @@ body::before{display:none!important}
     <div class="tutActs"><button id="tutVoice" class="tutBtn ghost">🔊 语音</button><button id="tutSkip" class="tutBtn ghost">跳过引导</button><button id="tutNext" class="tutBtn main">知道了</button></div>
   </div>
 </div>
-<script src="assets/misc-tut-next.js?v=01260"></script>
-<script src="assets/misc-fx-prefs.js?v=01260"></script>
+<script src="assets/misc-tut-next.js?v=01261"></script>
+<script src="assets/misc-fx-prefs.js?v=01261"></script>
 <style id="a11yMotion">
 /* 立绘「非当前说话者」：降亮度/饱和，不做半透明 */
 #tutVid.is-idle{filter:brightness(.82) saturate(.88) drop-shadow(0 18px 30px rgba(0,0,0,.5))}
@@ -4269,13 +4269,13 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 /* 标题页右下角已经有 #tVer 了，别叠两层 */
 body.title-open #verMark{display:none!important}
 </style>
-<script src="assets/misc-mobile-dialog.js?v=01260"></script>
-<script src="assets/art-sprites.js?v=01260"></script>
-<script src="assets/misc-version-check.js?v=01260"></script>
-<script src="assets/misc-debug-panel.js?v=01260"></script>
+<script src="assets/misc-mobile-dialog.js?v=01261"></script>
+<script src="assets/art-sprites.js?v=01261"></script>
+<script src="assets/misc-version-check.js?v=01261"></script>
+<script src="assets/misc-debug-panel.js?v=01261"></script>
 
-<script src="assets/misc-context-menu.js?v=01260"></script>
+<script src="assets/misc-context-menu.js?v=01261"></script>
 <!-- 音乐播放器：独立文件，资源包在 music/。删掉这一行就整体去掉，不影响游戏 -->
-<script src="music-player.js?v=01260" defer></script>
+<script src="music-player.js?v=01261" defer></script>
 </body>
 </html>

@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01260';
+const APP_BUILD='01261';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8294,7 +8294,10 @@ function openSettings(){
       '<span id="setUpdMsg" style="margin-left:8px;color:#b8546a"></span></div>'+
     '</div>'+
     '<div class="setActs"><button class="mini" id="setTest">试听</button>'+
-    '<button class="primary" id="setOk">完成</button></div></div>';
+    '<button class="primary" id="setOk">完成</button></div>'+
+    '<div class="setActs" style="margin-top:8px">'+
+      '<button class="mini" id="setToTitle">返回主菜单</button>'+
+      '<button class="mini bad" id="setQuit">退出游戏</button></div></div>';
   document.body.appendChild(ov);
   requestAnimationFrame(()=>ov.classList.add('on'));
   ov.querySelectorAll('input[data-vol]').forEach(inp=>{
@@ -8342,6 +8345,33 @@ function openSettings(){
   };
   const ok=document.getElementById('setOk');
   if(ok)ok.onclick=()=>{ov.classList.remove('on');setTimeout(()=>ov.remove(),220);};
+  const toTitle=document.getElementById('setToTitle');
+  if(toTitle)toTitle.onclick=()=>{
+    try{ ov.classList.remove('on'); }catch(e){}
+    setTimeout(()=>{ try{ov.remove();}catch(e){} },200);
+    modal('返回主菜单',
+      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      +'要回到标题画面吗？<br><span style="color:#9b8088;font-size:11.5px">进度是自动存的，随时能继续。</span></div>',null);
+    setTimeout(()=>{
+      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){ y.textContent='回标题'; y.onclick=()=>{ try{saveGame&&saveGame();}catch(e){} setTimeout(()=>{ location.reload(); },120); }; }
+      if(n){ n.textContent='再想想'; n.onclick=()=>{ try{closeMask(document.getElementById('mask'));}catch(e){} }; }
+    },30);
+  };
+  const quit=document.getElementById('setQuit');
+  if(quit)quit.onclick=()=>{
+    try{ ov.classList.remove('on'); }catch(e){}
+    setTimeout(()=>{ try{ov.remove();}catch(e){} },200);
+    modal('退出游戏',
+      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      +'要关掉旺财装机店吗？<br><span style="color:#9b8088;font-size:11.5px">进度是自动存的，下次进来接着干。</span></div>',null);
+    setTimeout(()=>{
+      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){ y.textContent='退出'; y.onclick=()=>{ try{saveGame&&saveGame();}catch(e){}
+        try{ WCBridge.exitApp(); }catch(e){} setTimeout(()=>{ try{window.close();}catch(e){} },300); }; }
+      if(n){ n.textContent='再等等'; n.onclick=()=>{ try{closeMask(document.getElementById('mask'));}catch(e){} }; }
+    },30);
+  };
   ov.onclick=(e)=>{if(e.target===ov){ov.classList.remove('on');setTimeout(()=>ov.remove(),220);}};
 }
 volLoad();
@@ -9322,6 +9352,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01261':['CG恢复铺满；加载页恢复背景；设置里加退出游戏/返回主菜单；返回键只在标题页生效'],
     '01260':['更新直接一步到最新版本；同一版本不再重复弹窗'],
     '01259':['APK 内开场 CG 改由原生播放器播放'],
     '01258':['修复启动动画不播放（改用 DOM 设 src，无播放键）'],
@@ -9551,6 +9582,10 @@ renderAll();
   window.__WC_BACK=function(){
     /* 有弹窗/面板开着：先收掉，不退出 */
     if(closeTopLayer()) return 'closed';
+    /* 只有在标题（开始）页面才弹退出确认；游戏内返回键不退出 */
+    var t=document.getElementById('titleScr');
+    var onTitle=!!t && !t.classList.contains('hide');
+    if(!onTitle) return 'ignored';
     if(asking) return 'asking';
     asking=true;
     modal('退出游戏',
