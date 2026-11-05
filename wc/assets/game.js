@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01284';
+const APP_BUILD='01285';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8036,7 +8036,8 @@ function _seqWait(ms){return new Promise(function(r){setTimeout(r,ms);});}
 function showBootStill(){
   try{
     if(window.__bootStillDone) return;
-    if(document.getElementById('bootStill')) return;
+    var exists=document.getElementById('bootStill');
+    if(exists){ try{exists.classList.add('on');}catch(e){} return; }
     var el=document.createElement('div');
     el.id='bootStill';
     document.body.appendChild(el);
@@ -8053,6 +8054,7 @@ function hideBootStill(){
     setTimeout(function(){ try{el.remove();}catch(e){} },420);
   }catch(e){}
 }
+try{ if(document.body) showBootStill(); else document.addEventListener('DOMContentLoaded',showBootStill,{once:true}); }catch(e){}
 function showBootLoad(){
   try{
     if(window.__bootLoadDone) return;        /* 加载页只允许出现一次：撤掉之后不再回来 */
@@ -9538,6 +9540,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01285':['底图改为静态元素，第一帧就有图；修复底图背景失效'],
     '01284':['启动重排：CG → 底图 → 开始界面，去掉加载页与页面锁'],
     '01283':['启动阶段不显示页面底图，避免同一张图闪两次'],
     '01282':['剧情卡期间屏蔽引导与点击锁；字体统一'],
