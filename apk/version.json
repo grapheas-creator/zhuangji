@@ -1,8 +1,8 @@
 {
-  "code": 1235,
-  "name": "0.12.25-01235",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01235.apk",
+  "code": 1236,
+  "name": "0.12.26-01236",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01236.apk",
   "size": 38530333,
   "content": "01286",
-  "note": "原生底图换成 9:20 原图，CG 结束不再缩放跳变"
+  "note": "去掉多余的原生底图，启动只剩 网页+CG 两层"
 }
