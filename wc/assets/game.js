@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01300';
+const APP_BUILD='01301';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3640,6 +3640,28 @@ function giftStarterStock(){
       try{ addInv({cat:'ram',part:r,paid:Math.round(r.p||0),shop:'own'}); }catch(e){}
       try{ addInv({cat:'ram',part:r,paid:Math.round(r.p||0),shop:'own'}); }catch(e){}
     });
+
+    /* ---- 再进一点 DDR5 平台的货（新平台，值钱，也难卖） ---- */
+    try{
+      const d5cpu=(C||[]).filter(function(x){return /i3-12100|i5-12400|i5-13400|i5-11400/.test(x.n);});
+      d5cpu.slice(0,3).forEach(function(part){ addInv({cat:'cpu',part:part,paid:Math.round(part.p||0),shop:'own'}); });
+
+      const d5mb=(B||[]).filter(function(x){return /B760|B660|Z690/.test(x.n);});
+      d5mb.slice(0,3).forEach(function(part){ addInv({cat:'mb',part:part,paid:Math.round(part.p||0),shop:'own'}); });
+
+      const d5ram=(M||[]).filter(function(x){return /DDR5/.test(x.n);})
+                        .sort(function(a,b){return (a.p||0)-(b.p||0);});
+      const d5seen={};
+      let d5n=0;
+      d5ram.forEach(function(r){
+        if(d5n>=2) return;
+        if(d5seen[r.n]) return;
+        d5seen[r.n]=1; d5n++;
+        addInv({cat:'ram',part:r,paid:Math.round(r.p||0),shop:'own'});
+        addInv({cat:'ram',part:r,paid:Math.round(r.p||0),shop:'own'});   /* 也是一套两条 */
+      });
+    }catch(e){}
+
   }catch(e){}
 }
 
@@ -3715,6 +3737,39 @@ function giftStarterStock(){
     setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='收下名片'; },30);
   };
 
+  A.gpuGuide=function(){
+    modal('加显卡：二手还是全新',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'陈默要加一张卡。摆在面前两条路：<br><br>'
+      +'<b style="color:#b8546a">① 闲鱼淘二手</b><br>'
+      +'便宜，一千以内能拿到不错的型号；但矿卡、拆机卡、改过 BIOS 的混在一起，跑分不一定过。<br><br>'
+      +'<b style="color:#b8546a">② 商店买全新</b><br>'
+      +'贵一截，但保修、跑分、稳定性都稳，客户的单子不容易返工。<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">这单是客户机器，返工的成本比省下的钱高。</span></div>',null);
+    setTimeout(function(){
+      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){
+        y.textContent='去商店买全新';
+        y.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          try{
+            state.panel='shop'; if(typeof curCat!=='undefined') curCat='gpu';
+            if(typeof isMobile==='function'&&isMobile()) mViewSet('docs',true);
+            renderAll();
+          }catch(e){}
+          try{ toast('去「商店 · 显卡」挑一张全新的'); }catch(e){}
+        };
+      }
+      if(n){
+        n.textContent='先淘二手看看';
+        n.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          try{ toast('闲鱼那边风险自负，跑分不过就得自己填'); }catch(e){}
+        };
+      }
+    },30);
+  };
+
   A.playReopen=function(){
     const f=g(); f.reopen=1; try{save();}catch(e){}
     state.cash=Math.max(state.cash||0,0);
@@ -3724,7 +3779,22 @@ function giftStarterStock(){
       +'门口重新挂上红布的时候，微信响了。<br><br>'
       +'<span style="color:#9b8088;font-size:12.5px">陈默：「你那台剪辑机……能不能再给我加张显卡？」</span></div>',null);
     setTimeout(function(){
-      const y=document.getElementById('mYes'); if(y)y.textContent='重新开张';
+      const y=document.getElementById('mYes');
+      if(y){
+        y.textContent='重新开张';
+        y.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          setTimeout(function(){
+            try{
+              if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
+                playChatScene('chat_chenmo_gpu',function(){
+                  setTimeout(function(){ A.gpuGuide(); },420);
+                });
+              }else{ A.gpuGuide(); }
+            }catch(e){ A.gpuGuide(); }
+          },380);
+        };
+      }
     },30);
   };
 
@@ -9693,6 +9763,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01301':['开局补 DDR5 平台；重开张接陈默加显卡剧情与二手/全新引导'],
     '01300':['开局库存走中段价位，内存按套条进货'],
     '01299':['开局这批货算旺财自己进的（按进价记成本）'],
     '01298':['开局库存改为每类十来件（共 80 余件）'],
