@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01223';
+const APP_BUILD='01224';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8267,8 +8267,20 @@ function openSettings(){
   const row=(id,label,val)=>'<div class="setRow"><span>'+label+'</span>'+
     '<input type="range" min="0" max="100" value="'+Math.round(val*100)+'" data-vol="'+id+'">'+
     '<b id="setVal_'+id+'">'+Math.round(val*100)+'</b></div>';
+  const shell=(function(){
+    try{
+      var m=/WCShell\/(\d+)/.exec(navigator.userAgent||'');
+      if(m) return m[1];
+      if(window.__SHELL_BUILD) return String(window.__SHELL_BUILD);
+    }catch(e){}
+    return '—';
+  })();
   ov.innerHTML='<div class="setCard"><div class="setHd">设置</div>'+
     row('music','音乐',VOL.music)+row('sfx','音效',VOL.sfx)+row('voice','语音',VOL.voice)+
+    '<div style="margin:10px 2px 2px;font-size:11px;color:#9b8088;line-height:1.9">'+
+      '<div>内容版本　'+(typeof APP_BUILD!=='undefined'?APP_BUILD:'—')+'</div>'+
+      '<div>壳版本　　'+shell+'</div>'+
+    '</div>'+
     '<div class="setActs"><button class="mini" id="setTest">试听</button>'+
     '<button class="primary" id="setOk">完成</button></div></div>';
   document.body.appendChild(ov);
@@ -9253,6 +9265,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01224':['设置页可以看内容版本和壳版本'],
     '01223':['右下角不再显示版本号','内容更新改为游戏风弹窗提示'],
     '01222':['留声机开场改成加载结束后弹出','没有碟时角落不再出现音符','标题页 BGM 自动播放'],
     '01221':['留声机系统上线（碟片解锁）','神秘人上门卖碟、可留号码改天再买','某菇的救命单与 7co 典藏集'],
