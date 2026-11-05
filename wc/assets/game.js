@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01231';
+const APP_BUILD='01232';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4283,7 +4283,7 @@ function benchPhoto(){
       const tier=(liq||price>=700)?'high':(price<=250?'cheap':'mid');
       const _itx=!!(cs&&cs.ff&&cs.ff.indexOf('ITX')>=0);
       const src=(_itx&&window.CASE_ITX)?window.CASE_ITX:((window.CASE_FRONT||{})[tier]||set.front);
-      return src?{src,tag:'已装机 · '+tier.toUpperCase()}:null;
+      return src?{src,tag:''}:null;   /* 不再打档位标签 */
     }
     /* CPU 装好、散热还没压：涂之前显示干净 CPU，涂完显示带硅脂的实拍图。
        以前这里是反的：没涂时显示带硅脂的图，涂完反而跳回普通主板图。 */
@@ -4329,7 +4329,7 @@ function renderBenchPhoto(host){
   }
   if(_case3d){try{_case3d.destroy();}catch(e){}_case3d=null;}
   host.classList.remove('flat');host.classList.add('photo');
-  host.innerHTML=`<div class="benchPhotoBox"><img src="${ph.src}" alt=""><span class="bpTag">${ph.tag}</span></div>`;
+  host.innerHTML=`<div class="benchPhotoBox"><img src="${ph.src}" alt="">`+(ph.tag?`<span class="bpTag">${ph.tag}</span>`:'')+`</div>`;
   host.dataset.bpSig=ph.src;
   try{
     const im=host.querySelector('.benchPhotoBox img');
@@ -9279,6 +9279,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01232':['去掉装机照片上的档位标签','便宜机箱换成写实内部照片'],
     '01231':['剧情 CG 改成完整显示＋模糊垫底，竖屏不再硬裁'],
     '01230':['开场留声机剧情加了特写插图'],
     '01229':['「清空工作台」按钮改成浅色樱花风'],
