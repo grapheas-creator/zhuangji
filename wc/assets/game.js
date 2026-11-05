@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01310';
+const APP_BUILD='01311';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -684,6 +684,31 @@ function repBadCount(){
 /* 被发现的概率：10 单里已经有过 2 次，这次就更容易被抓 */
 function repCatchChance(){
   return Math.min(0.92,0.55+0.07*repBadCount());
+}
+/* 客户评价：交付时显示一句，跟口碑档位对应 */
+const REVIEW_TEXT={
+  perfect:[
+    '比我想的还好，跑分贴我看看？行，这钱花得值。',
+    '一点杂音都没有，剪片子顺得跟流水一样。下次还找你。',
+    '你把线都理了？……有点东西啊老板。',
+    '我朋友问我在哪装的，我就把你店名发过去了。'
+  ],
+  basic:[
+    '能用，该跑的都跑起来了。就这样吧。',
+    '行，比原来那台强。有问题再找你。',
+    '嗯，开机能亮，剪片子也不卡了。',
+    '价格实在，别的没啥说的。'
+  ],
+  fail:[
+    '这不对吧？我拿回来一跑，风扇跟拖拉机一样。',
+    '你是不是拿旧的糊弄我？我朋友一看就看出来了。',
+    '说好的配置呢？这跑分你解释解释。',
+    '算了，这单我不结了。以后也别联系了。'
+  ]
+};
+function reviewFor(tier){
+  const list=REVIEW_TEXT[tier]||REVIEW_TEXT.basic;
+  return list[Math.floor(Math.random()*list.length)];
 }
 function repApply(ok,tier){
   const r=state.rep||(state.rep={score:3,log:[],bad:0});
@@ -8182,7 +8207,23 @@ function deliver(){
       `<br><br>实测 Time Spy ${sc.ts.toLocaleString()}　Cinebench ${sc.cs.toLocaleString()}　内存 ${sc.ram}G`,
       '没达标：'+fails[0]);return;}
   /* 验机：不达标就有概率被发现；10 单内问题越多越容易被抓 */
-  let _caught=false,_repNote='';
+  let _caught=false,_repNote='',_tier='';
+  /* 维修单：修好就是完美单；但如果换上去的件档次比原来低，就算不合格 */
+  if(j.repair&&j.repair.level){
+    try{
+      const lv=j.repair.level;
+      const all=[build.case,build.psu,build.mb,build.cpu,build.cooler,build.gpu1,build.gpu2,
+        ...build.rams,...build.m2,...build.sata].filter(Boolean);
+      const rank={budget:0,mid:1,flag:2,high:3,ultra:4};
+      const downgrade=all.some(function(c){
+        const t0=rank[c.part&&c.part.tier];
+        const t1=rank[lv];
+        return t0!=null&&t1!=null&&t0<t1;
+      });
+      _tier=downgrade?'fail':'perfect';
+      if(downgrade) _caught=true;
+    }catch(e){}
+  }
   if(repUnlocked()){
     if(_missed){
       const p=repCatchChance();
@@ -8191,10 +8232,21 @@ function deliver(){
         const before=repScore();
         repApply(false);
         const after=repScore();
-        _repNote='客户验机发现问题（'+_missList[0]+'），口碑 '+before.toFixed(1)+' → '+after.toFixed(1);
+        _repNote='客户评价：「'+reviewFor('fail')+'」'
+          +'（不合格单：'+_missList[0]+'，口碑 '+before.toFixed(1)+' → '+after.toFixed(1)+'）';
       }else{
         _repNote='客户没看出来，这次糊弄过去了（但 10 单里问题越多越容易被抓）';
       }
+    }else if(_tier==='fail'&&j.repair){
+      const before=repScore();
+      repApply(false,'fail');
+      _repNote='客户评价：「'+reviewFor('fail')+'」（换了比原来档次低的件，口碑 '
+        +before.toFixed(1)+' → '+repScore().toFixed(1)+'）';
+    }else if(j.repair){
+      const before=repScore();
+      repApply(true,'perfect');
+      _repNote='客户评价：「'+reviewFor('perfect')+'」（维修单修好，口碑 '
+        +before.toFixed(1)+' → '+repScore().toFixed(1)+'）';
     }else{
       const before=repScore();
       /* 判定：超出要求 20% 以上算完美单，否则算基本单 */
@@ -8206,8 +8258,8 @@ function deliver(){
         perfect=tsOK&&csOK;
       }catch(e){}
       repApply(true, perfect?'perfect':'basic');
-      _repNote='客户验机满意（'+(perfect?'完美单':'基本单')+'），口碑 '
-        +before.toFixed(1)+' → '+repScore().toFixed(1);
+      _repNote='客户评价：「'+reviewFor(perfect?'perfect':'basic')+'」'
+        +'（'+(perfect?'完美单':'基本单')+'，口碑 '+before.toFixed(1)+' → '+repScore().toFixed(1)+'）';
     }
   }
   try{SFX.success();}catch(e){}
@@ -10000,6 +10052,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01311':['交付时显示客户评价；维修单修好=完美，换低档件=不合格'],
     '01310':['单量增长放慢；超出5单只记数字；口碑分完美/基本/不合格三档'],
     '01309':['单量随口碑/粉丝增长（前期少）；每天最多自己做 5 台；B站拍视频涨粉；贷款改年化5%'],
     '01308':['开始新游戏先选难度：旺财/墨桀/某菇/486'],
