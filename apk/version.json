@@ -1,8 +1,8 @@
 {
-  "code": 1227,
-  "name": "0.12.17-01227",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01227.apk",
+  "code": 1228,
+  "name": "0.12.18-01228",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01228.apk",
   "size": 36625549,
   "content": "01257",
-  "note": "离线副本刷新到 01256（含开机动画）"
+  "note": "离线副本刷新到 01257（启动动画只播一次）"
 }
