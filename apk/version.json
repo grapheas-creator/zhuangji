@@ -1,7 +1,7 @@
 {
-  "code": 1220,
-  "name": "0.12.10-01220",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01220.apk",
+  "code": 1221,
+  "name": "0.12.11-01221",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01221.apk",
   "size": 32074598,
-  "note": "壳版本号同步到网页：设置页可看内容版本与壳版本"
+  "note": "修复更新弹窗布局（文字/按钮被压扁）"
 }
