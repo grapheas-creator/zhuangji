@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01285';
+const APP_BUILD='01286';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8833,10 +8833,19 @@ function maybeOnboard(after){
   },600);
 }
 function hideTitle(){const t=document.getElementById('titleScr');if(t)t.classList.add('hide');try{document.body.classList.remove('title-open');}catch(e){}}
+let _titleFirst=true;
 function showTitle(){
   const t=document.getElementById('titleScr');if(!t)return;
   try{ document.documentElement.classList.add('ready'); }catch(e){}
-  try{ hideBootStill(); }catch(e){}
+  /* 顺序：CG → 底图露出（停留一会儿）→ 开始界面，底图再撤 */
+  if(_titleFirst){
+    _titleFirst=false;
+    setTimeout(function(){
+      try{ hideBootStill(); }catch(e){}
+      try{ showTitle(); }catch(e){}
+    },1300);
+    return;
+  }
   try{document.body.classList.add('title-open');}catch(e){}
   const ver=document.getElementById('tVer');if(ver)ver.textContent=APP_VER_TXT;
   const hint=document.getElementById('tSaveHint');
@@ -9540,6 +9549,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01286':['底图停留 1.3 秒再进标题页，顺序：CG→底图→开始界面'],
     '01285':['底图改为静态元素，第一帧就有图；修复底图背景失效'],
     '01284':['启动重排：CG → 底图 → 开始界面，去掉加载页与页面锁'],
     '01283':['启动阶段不显示页面底图，避免同一张图闪两次'],
