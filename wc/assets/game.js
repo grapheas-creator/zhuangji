@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01283';
+const APP_BUILD='01284';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8030,6 +8030,29 @@ function _seqWait(ms){return new Promise(function(r){setTimeout(r,ms);});}
    6 点开始干活 → 引导框 + Live2D
 */
 /* 点完「开始新游戏」立刻调用；runBootIntro 里再调用一次也只是复用同一张加载页。 */
+/* ===== 启动唯一的中间层：底图 =====
+   顺序只有三段：CG → 底图 → 开始界面（标题页）。
+   底图就是那张 9:20 店门口，撤掉之后不再回来。 */
+function showBootStill(){
+  try{
+    if(window.__bootStillDone) return;
+    if(document.getElementById('bootStill')) return;
+    var el=document.createElement('div');
+    el.id='bootStill';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ try{el.classList.add('on');}catch(e){} });
+  }catch(e){}
+}
+function hideBootStill(){
+  try{
+    if(window.__bootStillDone) return;
+    window.__bootStillDone=true;
+    var el=document.getElementById('bootStill');
+    if(!el) return;
+    el.classList.remove('on');
+    setTimeout(function(){ try{el.remove();}catch(e){} },420);
+  }catch(e){}
+}
 function showBootLoad(){
   try{
     if(window.__bootLoadDone) return;        /* 加载页只允许出现一次：撤掉之后不再回来 */
@@ -8055,18 +8078,18 @@ async function runBootIntro(){
   state.story=state.story||{};state.story.seen=state.story.seen||{};
   const S=state.story.seen;
 
-  /* 0 立刻显示唯一的加载页（旺财站在店门口那张） */
-  showBootLoad();
-  await wait(600);
+  /* 0 底图（CG 已经播完，这里是唯一一张静态过渡） */
+  showBootStill();
+  await wait(420);
 
   /* 1 开头剧情 */
   if(state.day===1&&!S['plot_opening']){
     const ok=await _playScene(cb=>playPlotEvent('opening',cb));
     if(ok){S['plot_opening']=1;state.story.flags.opening=true;try{save();}catch(e){}}
   }
-  /* 2 剧情结束：撤加载页 */
-  hideBootLoad();
-  await wait(160);
+  /* 2 剧情结束：底图可以让位给剧情画面 */
+  hideBootStill();
+  await wait(120);
 
   /* 2.5 爸爸寄来的包裹（留声机 + 旧整机）——必须在陈默微信之前 */
   if(window.__GRAMO&&window.__GRAMO.introOnce){
@@ -8085,7 +8108,7 @@ async function runBootIntro(){
   }catch(e){}
   /* 5 撤加载页 → 底页 + 开工说明（页面锁生效） */
   await wait(420);
-  try{document.body.classList.remove('boot-mode');}catch(e){}   /* 这时才让底页出现 */
+
   try{Scene.end();}catch(e){}
   /* 新手说明前不要把引导画出来：maybeOnboard 会先等 600ms 再弹窗，
      这一下足够引导卡先露一帧，看起来就像「说明卡在引导后面」。 */
@@ -8811,6 +8834,7 @@ function hideTitle(){const t=document.getElementById('titleScr');if(t)t.classLis
 function showTitle(){
   const t=document.getElementById('titleScr');if(!t)return;
   try{ document.documentElement.classList.add('ready'); }catch(e){}
+  try{ hideBootStill(); }catch(e){}
   try{document.body.classList.add('title-open');}catch(e){}
   const ver=document.getElementById('tVer');if(ver)ver.textContent=APP_VER_TXT;
   const hint=document.getElementById('tSaveHint');
@@ -8837,14 +8861,12 @@ renderAll();
   const st=document.getElementById('tStart'),ld=document.getElementById('tLoad');
   const startNew=(mode)=>{
     /* 先盖加载页，再动标题/底页；否则会闪出一帧没有 UI 的游戏页面。 */
-    try{showBootLoad();}catch(e){}
-    try{bootFadeIn();}catch(e){}
+    try{showBootStill();}catch(e){}
     try{
       /* 先把自动存档清掉再开新局，避免任何残留被下一次 load 读回来 */
       try{localStorage.removeItem(SAVE);}catch(e){}
       _openingSeq=true;try{_openingUntil=Date.now()+6000;}catch(e){}
       window.__booting=true;
-      try{document.body.classList.add('boot-mode');}catch(e){}
       /* 12 秒保险：说明卡还开着就等它关；关了就立刻解锁开场锁。
          以前这里还要求 state.tut.onboarded 已置位，可说明卡只要不是从
          「开始干活」按钮关掉的（点空白、被剧情顶掉、旧存档没这个字段），
@@ -9516,6 +9538,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01284':['启动重排：CG → 底图 → 开始界面，去掉加载页与页面锁'],
     '01283':['启动阶段不显示页面底图，避免同一张图闪两次'],
     '01282':['剧情卡期间屏蔽引导与点击锁；字体统一'],
     '01281':['留声机三页改用独立剧情卡（不再被上一幕顶掉）'],
