@@ -3883,16 +3883,32 @@ body::before{display:none!important}
 .titleScr .tMark{opacity:.9}
 @media (min-height:820px){.titleScr .tInner{margin-top:16vh!important}}
 </style>
+<style id="bootVideoCss">
+/* 开机页视频背景：铺满、裁切、无控件；下面的图只做兜底 */
+#startLoad .sl-vid{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center 40%;background:#fdf1e6;z-index:0}
+#startLoad .sl-bg{z-index:0}
+#startLoad .sl-inner{z-index:3}
+#startLoad .sl-veil{display:none!important}
+#startLoad .sl-inner{top:6.5%!important;bottom:auto!important;transform:none!important}
+#startLoad .sl-inner::before{content:'';position:absolute;left:-20px;right:-20px;top:-14px;bottom:-10px;
+  background:linear-gradient(180deg,rgba(30,18,10,.34),rgba(30,18,10,0));filter:blur(10px);z-index:-1}
+#startLoad .sl-logo{font-size:26px!important;letter-spacing:5px!important;color:#fffdf8!important;text-shadow:0 2px 12px rgba(90,60,45,.55)!important}
+#startLoad .sl-sub{font-size:10.5px!important;margin-top:4px!important;color:rgba(255,253,248,.94)!important;text-shadow:0 1px 8px rgba(90,60,45,.5)!important}
+#startLoad .sl-bar{margin:14px auto 6px!important;width:150px!important;height:4px!important}
+#startLoad .sl-sub{color:rgba(255,253,248,.94)!important;text-shadow:0 1px 8px rgba(90,60,45,.45)!important}
+#startLoad .sl-tip{color:rgba(255,253,248,.9)!important;text-shadow:0 1px 8px rgba(90,60,45,.45)!important}
+</style>
 </head>
 </head>
 <body>
 <!-- 网页启动页已删除（只保留开局加载页） -->
 </div>
-<script src="assets/art-portrait-video.js?v=01255"></script>
-<script src="assets/art-coach-full.js?v=01255"></script>
-<script src="assets/art-coach-voice.js?v=01255"></script>
-<script src="assets/art-extra-1.js?v=01255"></script>
-<script src="assets/art-bench.js?v=01255"></script>
+<script src="assets/art-portrait-video.js?v=01256"></script>
+<script src="assets/art-coach-full.js?v=01256"></script>
+<script src="assets/art-coach-voice.js?v=01256"></script>
+<script src="assets/art-extra-1.js?v=01256"></script>
+<script src="assets/art-bench.js?v=01256"></script>
 
 
 <!-- QQ 内置浏览器（X5）兼容性太差：不尝试渲染游戏，直接引导去系统浏览器 -->
@@ -3906,7 +3922,7 @@ body::before{display:none!important}
     <button class="qqBtn" id="qqCopy" type="button">复制网址</button>
   </div>
 </div>
-<script src="assets/misc-ua-guard.js?v=01255"></script>
+<script src="assets/misc-ua-guard.js?v=01256"></script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
@@ -4149,14 +4165,14 @@ body::before{display:none!important}
   <div class="acts"><button id="smaskNo">关闭</button></div>
 </div></div>
 
-<script src="assets/lib-three.min.js?v=01255"></script>
-<script src="assets/lib-case3d.js?v=01255"></script>
-<script src="assets/art-extra-2.js?v=01255"></script>
-<script src="assets/art-core.js?v=01255"></script>
-<script src="assets/game.js?v=01255"></script>
-<script src="assets/misc-stats.js?v=01255"></script>
+<script src="assets/lib-three.min.js?v=01256"></script>
+<script src="assets/lib-case3d.js?v=01256"></script>
+<script src="assets/art-extra-2.js?v=01256"></script>
+<script src="assets/art-core.js?v=01256"></script>
+<script src="assets/game.js?v=01256"></script>
+<script src="assets/misc-stats.js?v=01256"></script>
 
-<script src="assets/lib-live2d.js?v=01255"></script>
+<script src="assets/lib-live2d.js?v=01256"></script>
 <div class="buildFlash" id="buildFlash">
   <div class="bfInner">
     <div class="bfTop"><span class="bfDot"></span>装机台 · 实时</div>
@@ -4178,8 +4194,8 @@ body::before{display:none!important}
     <div class="tutActs"><button id="tutVoice" class="tutBtn ghost">🔊 语音</button><button id="tutSkip" class="tutBtn ghost">跳过引导</button><button id="tutNext" class="tutBtn main">知道了</button></div>
   </div>
 </div>
-<script src="assets/misc-tut-next.js?v=01255"></script>
-<script src="assets/misc-fx-prefs.js?v=01255"></script>
+<script src="assets/misc-tut-next.js?v=01256"></script>
+<script src="assets/misc-fx-prefs.js?v=01256"></script>
 <style id="a11yMotion">
 /* 立绘「非当前说话者」：降亮度/饱和，不做半透明 */
 #tutVid.is-idle{filter:brightness(.82) saturate(.88) drop-shadow(0 18px 30px rgba(0,0,0,.5))}
@@ -4229,13 +4245,13 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 /* 标题页右下角已经有 #tVer 了，别叠两层 */
 body.title-open #verMark{display:none!important}
 </style>
-<script src="assets/misc-mobile-dialog.js?v=01255"></script>
-<script src="assets/art-sprites.js?v=01255"></script>
-<script src="assets/misc-version-check.js?v=01255"></script>
-<script src="assets/misc-debug-panel.js?v=01255"></script>
+<script src="assets/misc-mobile-dialog.js?v=01256"></script>
+<script src="assets/art-sprites.js?v=01256"></script>
+<script src="assets/misc-version-check.js?v=01256"></script>
+<script src="assets/misc-debug-panel.js?v=01256"></script>
 
-<script src="assets/misc-context-menu.js?v=01255"></script>
+<script src="assets/misc-context-menu.js?v=01256"></script>
 <!-- 音乐播放器：独立文件，资源包在 music/。删掉这一行就整体去掉，不影响游戏 -->
-<script src="music-player.js?v=01255" defer></script>
+<script src="music-player.js?v=01256" defer></script>
 </body>
 </html>

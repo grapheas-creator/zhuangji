@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01255';
+const APP_BUILD='01256';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7961,7 +7961,11 @@ function showBootLoad(){
     if(document.getElementById('startLoad'))return;
     const el=document.createElement('div');
     el.id='startLoad';
-    el.innerHTML='<div class="sl-bg"></div><div class="sl-veil"></div>'+
+    el.innerHTML='<video class="sl-vid" autoplay muted playsinline loop preload="auto" '+
+      'poster="assets/shop_bg.webp">'+
+        '<source src="assets/boot.webm" type="video/webm">'+
+        '<source src="assets/boot.mp4" type="video/mp4">'+
+      '</video><div class="sl-bg"></div><div class="sl-veil"></div>'+
       '<div class="sl-inner"><div class="sl-logo">旺财装机店</div>'+
       '<div class="sl-sub">一间小店 · 一台台机器 · 一单单生意</div>'+
       '<div class="sl-bar"><i></i></div><div class="sl-tip">正在生火开张…</div></div>';
@@ -9322,6 +9326,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01256':['开机页换成动画：旺财挥手、开箱、拿螺丝刀、指主机'],
     '01255':['标题页排版下移，标题/按钮间距更舒展'],
     '01254':['页面底色奶油覆盖彻底去掉，原图显示'],
     '01253':['页面底色的奶白覆盖降到 12%，图基本原色显示'],
