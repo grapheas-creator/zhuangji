@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01267';
+const APP_BUILD='01268';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8073,9 +8073,15 @@ async function runBootIntro(){
     const ok=await _playScene(cb=>playPlotEvent('opening',cb));
     if(ok){S['plot_opening']=1;state.story.flags.opening=true;try{save();}catch(e){}}
   }
-  /* 2 剧情结束：撤加载页，立刻接微信（避免它第二次露脸） */
+  /* 2 剧情结束：撤加载页 */
   hideBootLoad();
-  await wait(0);
+  await wait(160);
+
+  /* 2.5 爸爸寄来的包裹（留声机 + 旧整机）——必须在陈默微信之前 */
+  if(window.__GRAMO&&window.__GRAMO.introOnce){
+    try{ await window.__GRAMO.introOnce(); }catch(e){}
+    try{ await wait(200); }catch(e){}
+  }
   /* 3 陈默微信 */
   if(state.day===1&&!S['chat_chat_chenmo_d1']&&typeof CHAT_SCENES!=='undefined'&&CHAT_SCENES.chat_chenmo_d1){
     const ok=await _playScene(cb=>playChatScene('chat_chenmo_d1',cb));
@@ -9488,7 +9494,7 @@ renderAll();
 
   /* 开场留声机：由剧情序列在「招牌剧情」之后调用，返回 Promise */
   var introDone=null;
-  var INTRO_V=3;                       /* 剧情改版号：变了就让所有人再看一次 */
+  var INTRO_V=4;                       /* 剧情改版号：变了就让所有人再看一次 */
   function introOnce(){
     var g=G();
     if(g.intro&&g.introV===INTRO_V) return Promise.resolve(false);
@@ -9516,6 +9522,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01268':['留声机剧情插进真正的开局流程 runBootIntro'],
     '01267':['修复留声机剧情没出现（等上一幕关掉再弹，防误触）'],
     '01266':['爸爸的旧整机改用真实零件（i3-10100/B460/8G×2/512G NVMe/750Ti/500W）'],
     '01265':['留声机剧情回归并加长（爸爸送的旧整机）；仓库新增整机栏；微信点一次一句'],
