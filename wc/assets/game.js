@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01229';
+const APP_BUILD='01230';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9017,9 +9017,12 @@ renderAll();
   }
 
   function introPopup(){
-    /* 开头：爸爸寄来的留声机 */
+    /* 开头：爸爸寄来的留声机（带特写） */
     modal('爸爸寄来的包裹',
-      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      '<img src="assets/gramo.webp?v=01230" alt="" '
+      + 'style="width:100%;display:block;border-radius:12px;margin-bottom:12px;'
+      + 'border:1px solid #f3cdd5;box-shadow:0 6px 18px -10px rgba(180,90,110,.5)">'
+      + '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
       + '门口放着一个纸箱，寄件人写着「爸」。<br>'
       + '里面是一台旧留声机，还有一张字条：<br><br>'
       + '<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
@@ -9273,6 +9276,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01230':['开场留声机剧情加了特写插图'],
     '01229':['「清空工作台」按钮改成浅色樱花风'],
     '01228':['开场留声机剧情改为单按钮，确认后接着走陈默的单'],
     '01227':['开局加载页换成旺财图','BGM 起播延后，开头不再卡一下'],
