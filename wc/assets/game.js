@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01295';
+const APP_BUILD='01296';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3594,6 +3594,7 @@ function newGame(silent){const d=today();
     rep:{score:3,log:[],bad:0},life:{car:null,house:null},extraIncome:0,done:[],
     tut:{done:{},hidden:false},seed:(Math.random()*1e9)|0};
   state.jobs=makeJobs(d,1);state.dayTotal=state.jobs.length;build=newBuild();
+  giftStarterStock();
   const r=document.getElementById('result');if(r){r.className='';r.innerHTML='';}
   /* silent：初始化时只要内存里有一局可渲染，不写盘——不然还没开局就多出一条「第1天」的自动存档 */
   if(!silent)save();}
@@ -3601,6 +3602,114 @@ function newGame(silent){const d=today();
 let uidSeq=1;
 function addInv(item){state.inv.push({uid:'i'+(uidSeq++),cat:item.cat,part:item.part,paid:item.paid,shop:item.shop,owner:item.owner||null,broken:!!item.broken,faulty:!!item.faulty});}
 function invList(cat){return state.inv.filter(x=>x.cat===cat);}
+
+/* 开局仓库里的一批新货：各类别都有，能拼出一台能用的机器 */
+function giftStarterStock(){
+  try{
+    const pick=(arr,f)=>arr.filter(f).sort((a,b)=>(a.p||0)-(b.p||0))[0];
+    const want=[];
+    const cpu=pick(C,x=>/i3-10100/.test(x.n));            if(cpu)want.push(['cpu',cpu]);
+    const mb=pick(B,x=>/H410|B460/i.test(x.n));           if(mb)want.push(['mb',mb]);
+    const cooler=pick(H,x=>(x.s||[]).includes('LGA1200')); if(cooler)want.push(['cooler',cooler]);
+    M.filter(x=>/DDR4/.test(x.n)&&/8G/.test(x.n)).slice(0,2).forEach(r=>want.push(['ram',r]));
+    const ssd=pick(ST,x=>x.kind==='m2'&&/512G/.test(x.n)); if(ssd)want.push(['disk',ssd]);
+    const gpu=pick(G,x=>/GTX 1650|RX 580/.test(x.n));      if(gpu)want.push(['gpu',gpu]);
+    const psu=pick(P,x=>/500W/.test(x.n));                 if(psu)want.push(['psu',psu]);
+    const kase=pick(K,x=>/MATX|ITX/.test((x.ff||[]).join(','))); if(kase)want.push(['case',kase]);
+    want.push(['cooler',pick(H,x=>true)||cooler]);
+    const fan=pick(K,x=>/风扇|机箱/.test(x.n));
+    want.forEach(([cat,part])=>{ if(part) addInv({cat,part,paid:0,shop:'own'}); });
+  }catch(e){}
+}
+
+/* ================= 开局剧情线：零元购 → 报警 → 重开张 ================= */
+(function(){
+  const A={};
+  function g(){ try{ return state.story.flags||(state.story.flags={}); }catch(e){ return {}; } }
+  A.stolen=function(){ return !!g().robbery; };
+
+  /* 被打劫：清空仓库与整机 */
+  A.doRobbery=function(){
+    try{
+      state.inv=[]; state.machines=[];
+      state.benchMachines={};
+      build=newBuild();
+      g().robbery=1; g().robberyDay=state.day;
+      g().policeDay=state.day;
+      g().reopenDay=state.day+15;
+      save();
+    }catch(e){}
+  };
+
+  A.onNewDay=function(){
+    const f=g();
+    /* Day1 夜里：零元购 */
+    if(!f.robbery && state.day===2){ setTimeout(function(){ A.playRobbery(); },700); return; }
+    /* 3 天后：刘警官破案 */
+    if(f.robbery && !f.policeDone && state.day>=(f.policeDay||1)+3){ setTimeout(function(){ A.playPolice(); },700); return; }
+    /* 半月后：重开张 */
+    if(f.robbery && !f.reopen && state.day>=(f.reopenDay||16)){ setTimeout(function(){ A.playReopen(); },700); }
+  };
+
+  A.playRobbery=function(){
+    if(typeof modal!=='function') return;
+    modal('半夜，卷帘门被撬了',
+      '<img src="assets/robbery.webp" style="width:100%;display:block;border-radius:12px;margin-bottom:12px">'
+      +'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'夜里两点多，卷帘门被人从底下撬开一条缝。<br>'
+      +'三个戴帽子的人进来，把货架上能拿的全塞进纸箱，连工作台上拆到一半的机器都抱走了。<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">第二天早上你推开门，货架是空的，只剩地上一层灰。</span></div>',null);
+    setTimeout(function(){
+      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){
+        y.textContent='报警';
+        y.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          A.doRobbery();
+          setTimeout(function(){
+            modal('刘警官',
+              '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+              +'「昨儿夜里的事吧？」她翻了翻本子，「这条街今年第三起了。<br>'
+              +'监控我调了，跑不掉。三天，我给你把人找着。」<br><br>'
+              +'<span style="color:#9b8088;font-size:12.5px">货追不追得回来，她没敢打包票。</span></div>',null);
+            setTimeout(function(){
+              const y2=document.getElementById('mYes'), n2=document.getElementById('mNo');
+              if(y2){ y2.textContent='等消息'; }
+              if(n2) n2.style.display='none';
+            },30);
+          },420);
+        };
+      }
+      if(n) n.style.display='none';
+    },30);
+  };
+
+  A.playPolice=function(){
+    const f=g(); f.policeDone=1; try{save();}catch(e){}
+    modal('人抓到了',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'刘警官把三个人押回来了，货已经被转手，只追回一点零碎。<br>'
+      +'「对不住，」她说，「以后这条街我看着点。」<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">她留了张名片：以后店里有活儿，可以找她。</span></div>',null);
+    setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='收下名片'; },30);
+  };
+
+  A.playReopen=function(){
+    const f=g(); f.reopen=1; try{save();}catch(e){}
+    state.cash=Math.max(state.cash||0,0);
+    modal('半个月后',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'半个月，把卷帘门修好，货架重新钉了一遍。<br>'
+      +'门口重新挂上红布的时候，微信响了。<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">陈默：「你那台剪辑机……能不能再给我加张显卡？」</span></div>',null);
+    setTimeout(function(){
+      const y=document.getElementById('mYes'); if(y)y.textContent='重新开张';
+    },30);
+  };
+
+  window.__ARC=A;
+  window.addEventListener('load',function(){ setTimeout(function(){ try{A.onNewDay();}catch(e){} },1200); });
+})();
 function part(k){return build[k]?build[k].part:null;}
 function ramPart(i){return build.rams[i]?build.rams[i].part:null;}
 function m2Part(i){return build.m2[i]?build.m2[i].part:null;}
@@ -8544,6 +8653,7 @@ document.getElementById('btnClose').onclick=()=>{
   const d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+1);
   const next=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   state.date=next;state.day+=1;
+  try{ if(window.__ARC) setTimeout(function(){ try{window.__ARC.onNewDay();}catch(e){} },700); }catch(e){}
   /* 跨天保留：没做完且没到交期的单继续挂着；过了交期的算退单并扣口碑 */
   const _nextDay=state.day;
   const _carry=[];let _expired=0;
@@ -9562,6 +9672,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01296':['开局仓库送一批新货；新增零元购→报警→刘警官→半月重开张剧情'],
     '01295':['剧情卡只认按钮，防止手滑闪页'],
     '01294':['切到后台自动暂停音乐，回来继续'],
     '01293':['开场全程用加载页当背景；游戏页面延后到接单后再显示'],
