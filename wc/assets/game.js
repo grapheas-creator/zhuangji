@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01280';
+const APP_BUILD='01281';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9183,83 +9183,67 @@ renderAll();
       + '</div></div>';
   }
 
+  /* 剧情卡：自己创建、自己销毁，不借用通用弹窗（共用弹窗会被上一幕的关闭动画顶掉） */
+  function introCard(title, html, btnText, onNext){
+    var ov=document.createElement('div');
+    ov.id='introCard';
+    ov.innerHTML='<div class="ic-box"><div class="ic-hd">'+title+'</div>'
+      +'<div class="ic-body">'+html+'</div>'
+      +'<div class="ic-acts"><button class="ic-btn" id="icNext">'+btnText+'</button></div></div>';
+    document.body.appendChild(ov);
+    requestAnimationFrame(function(){ ov.classList.add('on'); });
+    var born=Date.now();
+    var btn=ov.querySelector('#icNext');
+    btn.onclick=function(){
+      if(Date.now()-born<420) return;         /* 手滑不生效 */
+      ov.classList.remove('on');
+      setTimeout(function(){ try{ov.remove();}catch(e){} onNext&&onNext(); },240);
+    };
+  }
+
   function introPopup(){
-    /* 开头：爸爸寄来的两个箱子 —— 留声机 + 一台旧电脑。
-       关掉之后接一条「手机消息」，再交给陈默的微信剧情。 */
+    /* 开头：爸爸寄来的两个箱子 —— 留声机 + 一台旧电脑。 */
     return new Promise(function(resolve){
-      var page=0;
       var PAGES=[
         {t:'门口的两个纸箱',
-         html:'<div style="font-size:15.5px;line-height:1.95;color:#6b5b60">'
-           +'早上一拉卷帘门，门口摞着两个纸箱，边上还有一截胶带没撕干净。<br>'
+         html:'<div class="ic-text">'
+           +'早上一拉开卷帘门，门口摞着两个纸箱，边上还有一截胶带没撕干净。<br>'
            +'寄件人一栏是同一个名字，写着「爸」。<br><br>'
-           +'<span style="color:#9b8088;font-size:13px">他这人从来不打电话——寄到了就是寄到了。</span></div>',
+           +'<span class="ic-note">他这人从来不打电话——寄到了就是寄到了。</span></div>',
          ok:'拆第一个'},
         {t:'爸爸寄来的留声机',
-         html:'<img src="assets/gramo.webp?v=01230" alt="" '
-           +'style="width:100%;display:block;border-radius:12px;margin-bottom:12px;'
-           +'border:1px solid #f3cdd5;box-shadow:0 6px 18px -10px rgba(180,90,110,.5)">'
-           +'<div style="font-size:15.5px;line-height:1.95;color:#6b5b60">'
+         html:'<img src="assets/gramo.webp?v=01230" alt="" class="ic-img">'
+           +'<div class="ic-text">'
            +'第一个箱子里是一台旧留声机，铜喇叭擦得能照出人影。<br>'
            +'底下压着一张字条，字迹还是他那手歪歪扭扭的字：<br><br>'
-           +'<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
-           +'碟得自己攒，好的东西都藏得深。」</i><br><br>'
-           +'<span style="color:#9b8088;font-size:13px">留声机放在了柜台右下角。没有碟的时候它不会响。</span></div>',
+           +'<i class="ic-quote">「店里要是太安静了，就放点歌。<br>碟得自己攒，好的东西都藏得深。」</i><br><br>'
+           +'<span class="ic-note">留声机放在了柜台右下角。没有碟的时候它不会响。</span></div>',
          ok:'再拆第二个'},
         {t:'第二个箱子里是台电脑',
-         html:'<div style="font-size:15.5px;line-height:1.95;color:#6b5b60">'
+         html:'<div class="ic-text">'
            +'第二个箱子沉得多。掀开纸壳，是一台被拆得差不多的老机器，配件用气泡膜一件件裹好：<br><br>'
-           +'<div style="background:#fff7f4;border:1px solid #f3cdd5;border-radius:12px;padding:10px 12px;line-height:1.95">'
-           +'<b style="color:#b8546a">爸爸的旧整机</b><br>'
-           +'CPU　i3-10100<br>'
-           +'内存　8G × 2<br>'
-           +'硬盘　512G M.2 固态<br>'
-           +'显卡　GTX 750Ti<br>'
-           +'电源　500W</div><br>'
+           +'<div class="ic-spec"><b>爸爸的旧整机</b><br>'
+           +'CPU　i3-10100<br>内存　8G × 2<br>硬盘　512G M.2 固态<br>'
+           +'显卡　GTX 750 Ti<br>电源　500W</div><br>'
            +'箱盖内侧用油性笔写了一句：<br>'
-           +'<i style="color:#b8546a">「这台你留着练手。拆坏了不心疼，装好了就是你的第一台。」</i><br><br>'
-           +'<span style="color:#9b8088;font-size:13px">整机已经收进「仓库 · 整机」里了。</span></div>',
+           +'<i class="ic-quote">「这台你留着练手。拆坏了不心疼，装好了就是你的第一台。」</i><br><br>'
+           +'<span class="ic-note">整机已经收进「仓库 · 整机」里了。</span></div>',
          ok:'收下'}
       ];
-      /* 返回键 / 点空白把弹窗关掉时，也算结束，绝不能让流程卡死。
-         但切页那一瞬间弹窗会短暂关闭 —— 那时候不能算「结束」，否则中间那页一闪而过。 */
-      var finished=false, switching=false;
-      var watch=setInterval(function(){
-        if(switching) return;
-        var m=document.getElementById('mask');
-        if(!m||!m.classList.contains('on')){
-          clearInterval(watch);
-          if(!finished){ finished=true; resolve(false); }
-        }
-      },400);
-      function show(){
-        var pg=PAGES[page];
-        modal(pg.t, pg.html, null);
-        var born=Date.now();
-        setTimeout(function(){
-          var y=document.getElementById('mYes'), n=document.getElementById('mNo');
-          if(y){
-            y.textContent=pg.ok;
-            y.onclick=function(){
-              if(Date.now()-born<650) return;   /* 刚弹出来的手滑点击不算 */
-              if(page<PAGES.length-1){
-                /* 翻下一页：这段时间里弹窗会短暂消失，先别当成「关掉了」 */
-                switching=true;
-                page++; show();
-                setTimeout(function(){ switching=false; },900);
-                return;
-              }
-              finished=true; clearInterval(watch);
-              try{closeMask(document.getElementById('mask'));}catch(e){}
-              /* 把旧整机放进仓库（用游戏里真实存在的零件拼） */
-              try{ giftDadPC(); }catch(e){}
-              setTimeout(function(){ phonePing(resolve); }, 420);
-            };
+      var i=0;
+      function step(){
+        if(i>=PAGES.length){ resolve(true); return; }
+        var pg=PAGES[i];
+        introCard(pg.t, pg.html, pg.ok, function(){
+          if(i===PAGES.length-1){
+            try{ giftDadPC(); }catch(e){}
+            phonePing(function(){ resolve(true); });
+            return;
           }
-          if(n) n.style.display='none';
-        },30);
+          i++; step();
+        });
       }
-      show();
+      step();
     });
   }
 
@@ -9530,6 +9514,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01281':['留声机三页改用独立剧情卡（不再被上一幕顶掉）'],
     '01280':['剧情框内边距留够，文字不再压花边'],
     '01279':['剧情框高度砍掉三分之一（212→142）'],
     '01278':['旁白与台词统一字号（之前旁白小一号）'],
