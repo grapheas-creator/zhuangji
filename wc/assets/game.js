@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01257';
+const APP_BUILD='01258';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9322,6 +9322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01258':['修复启动动画不播放（改用 DOM 设 src，无播放键）'],
     '01257':['App 一打开就播动画（只播这一次，点一下可跳过）'],
     '01256':['开机页换成动画：旺财挥手、开箱、拿螺丝刀、指主机'],
     '01255':['标题页排版下移，标题/按钮间距更舒展'],
@@ -9614,33 +9615,55 @@ renderAll();
 
 
 /* ==================== 开机动画（App 一打开就播） ====================
-   和「开始新游戏」后的加载页共用同一个视频；这里只负责启动那一下，
-   播完（或页面就绪）淡出，交给标题页。 */
+   注意：<source> 用 innerHTML 插进去不会触发加载，必须用 DOM 创建 + 直接设 src。 */
 (function(){
   try{
     if(document.getElementById('bootCinema')) return;
     var el=document.createElement('div');
     el.id='bootCinema';
-    el.innerHTML='<video class="bc-video" autoplay muted playsinline preload="auto">'
-        +'<source src="assets/boot.webm" type="video/webm">'
-        +'<source src="assets/boot.mp4" type="video/mp4">'
-      +'</video>'
-      +'<div class="bc-wrap"><div class="bc-title">旺财装机店</div>'
+
+    var v=document.createElement('video');
+    v.className='bc-video';
+    v.muted=true; v.defaultMuted=true; v.autoplay=true; v.loop=false;
+    v.playsInline=true; v.setAttribute('playsinline','');
+    v.setAttribute('webkit-playsinline','');
+    v.preload='auto';
+    v.controls=false;
+    v.poster='assets/boot_poster.jpg';
+    var srcs=['assets/boot.mp4','assets/boot.webm'];
+    /* 先用 mp4（WebView 兼容性最好），失败再退回 webm */
+    v.src=srcs[0];
+    v.addEventListener('error', function(){
+      if(v.src.indexOf('webm')<0){ v.src=srcs[1]; v.load(); try{v.play().catch(function(){});}catch(e){} }
+    });
+
+    var wrap=document.createElement('div');
+    wrap.className='bc-wrap';
+    wrap.innerHTML='<div class="bc-title">旺财装机店</div>'
       +'<div class="bc-sub">一间小店 · 一台台机器 · 一单单生意</div>'
-      +'<div class="bc-bar"><i></i></div></div>';
+      +'<div class="bc-bar"><i></i></div>';
+    el.appendChild(v); el.appendChild(wrap);
+
     function mount(){
       document.body.appendChild(el);
-      var v=el.querySelector('video');
-      try{ v.play().catch(function(){}); }catch(e){}
+      v.load();
+      function kick(){ try{ var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){}); }catch(e){} }
+      kick();
+      v.addEventListener('loadeddata', kick, {once:true});
+      v.addEventListener('canplay', kick, {once:true});
+      /* 首帧真正上屏后再显形，避免看到灰底 */
+      v.addEventListener('playing', function(){ el.classList.add('on'); }, {once:true});
+
       var done=false;
-      v.addEventListener('ended', bye, {once:true});
-      el.addEventListener('click', bye, {once:true});
       function bye(){
         if(done) return; done=true;
-        el.style.opacity='0';
-        setTimeout(function(){ try{ v.pause(); el.remove(); }catch(e){} }, 460);
+        try{ v.pause(); }catch(e){}
+        el.classList.add('bye');
+        setTimeout(function(){ try{ el.remove(); }catch(e){} }, 520);
       }
-      setTimeout(bye, 12000);                      /* 兜底：最多 12 秒 */
+      v.addEventListener('ended', bye, {once:true});
+      el.addEventListener('click', bye, {once:true});
+      setTimeout(bye, 13000);
     }
     if(document.body) mount(); else document.addEventListener('DOMContentLoaded', mount, {once:true});
   }catch(e){}
