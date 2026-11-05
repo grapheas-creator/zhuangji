@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01233';
+const APP_BUILD='01234';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4293,27 +4293,27 @@ function benchPhoto(){
       const _pi=(window.PASTE_IMG||{})[fam]||(window.PASTE_IMG||{})[String(fam).replace(/_\d+$/,'')];
       if(b.paste){
         const src=_pi||set.cpu;
-        return src?{src,tag:''}:null;
+        return src?{src,tag:'已涂硅脂'}:null;
       }
-      if(set.cpu)return {src:set.cpu,tag:''};
+      if(set.cpu)return {src:set.cpu,tag:'待涂硅脂'};
     }
     /* 装了内存就出一张「插好内存」的工作台照片：
        套条一次占两根槽，n=2 会自己落到 ram2 那张图（插好两条的样子）。
        以前这个分支排在散热后面，装了散热就永远看不到内存照片。 */
     if(b.cpu&&build.rams.filter(Boolean).length){
       const src=n>=4?(set.ram4||set.ram2||set.ram1):(n>=2?(set.ram2||set.ram1||set.ram4):(set.ram1||set.ram2||set.ram4));
-      if(src)return {src,tag:''};
+      if(src)return {src,tag:'工作区'};
     }
     if(b.cooler){
       const liq=(b.cooler.part.rad||0)>0;
       const src=liq?(set.aio||set.air||set.cool):(set.air||set.cool||set.aio);
-      return src?{src,tag:''}:null;
+      return src?{src,tag:'工作区'}:null;
     }
     if(b.cpu){
       const src=n>=4?(set.ram4||set.ram2||set.ram1):(n>=2?(set.ram2||set.ram1||set.ram4):(n>=1?(set.ram1||set.ram2||set.ram4):(set.cpu||set.empty)));
-      return src?{src,tag:''}:null;
+      return src?{src,tag:'工作区'}:null;
     }
-    return set.empty?{src:set.empty,tag:''}:null;
+    return set.empty?{src:set.empty,tag:'工作区'}:null;
   }catch(e){return null;}
 }
 function renderBenchPhoto(host){
@@ -9283,7 +9283,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
-    '01233':['引导卡片：立绘不再上下跳','去掉实时模糊，滚动更丝滑','工作台照片标签全部去掉','便宜机箱提亮'],
+    '01234':['恢复「已涂硅脂 / 工作区」标签，只去掉档位标签'],
+    '01233':['引导卡片：立绘不再上下跳','去掉实时模糊，滚动更丝滑','便宜机箱提亮'],
     '01232':['去掉装机照片上的档位标签','便宜机箱换成写实内部照片'],
     '01231':['剧情 CG 改成完整显示＋模糊垫底，竖屏不再硬裁'],
     '01230':['开场留声机剧情加了特写插图'],
