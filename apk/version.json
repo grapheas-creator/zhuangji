@@ -1,8 +1,8 @@
 {
-  "code": 1233,
-  "name": "0.12.23-01233",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01233.apk",
+  "code": 1234,
+  "name": "0.12.24-01234",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01234.apk",
   "size": 38468893,
   "content": "01286",
-  "note": "顺序：CG → 底图 → 开始界面；网页先加载，CG 盖在上面"
+  "note": "底图内置进壳（原生垫层），断网也秒显"
 }
