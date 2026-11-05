@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01294';
+const APP_BUILD='01295';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9236,8 +9236,13 @@ renderAll();
     requestAnimationFrame(function(){ ov.classList.add('on'); });
     var born=Date.now();
     var btn=ov.querySelector('#icNext');
-    btn.onclick=function(){
-      if(Date.now()-born<420) return;         /* 手滑不生效 */
+    /* 点背景不推进：只有按按钮才算。按钮出现后 700ms 内的点击也算手滑 */
+    ov.addEventListener('click',function(e){
+      if(e.target===ov){ e.stopPropagation(); }
+    },true);
+    btn.onclick=function(e){
+      if(e){ e.stopPropagation(); }
+      if(Date.now()-born<700) return;
       ov.classList.remove('on');
       setTimeout(function(){ try{ov.remove();}catch(e){} onNext&&onNext(); },240);
     };
@@ -9557,6 +9562,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01295':['剧情卡只认按钮，防止手滑闪页'],
     '01294':['切到后台自动暂停音乐，回来继续'],
     '01293':['开场全程用加载页当背景；游戏页面延后到接单后再显示'],
     '01292':['加载页盖到留声机第一页出现，不留空隙'],
