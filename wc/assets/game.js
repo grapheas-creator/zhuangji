@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01298';
+const APP_BUILD='01299';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3603,7 +3603,8 @@ let uidSeq=1;
 function addInv(item){state.inv.push({uid:'i'+(uidSeq++),cat:item.cat,part:item.part,paid:item.paid,shop:item.shop,owner:item.owner||null,broken:!!item.broken,faulty:!!item.faulty});}
 function invList(cat){return state.inv.filter(x=>x.cat===cat);}
 
-/* 开局仓库里的一批新货：每个分类各十来件（不是总共十件） */
+/* 开局仓库里的一批新货：旺财自己拿存款进的第一批货，每个分类各十来件。
+   这些件按进货价记成本（paid=进价），不是白捡的 —— 卖了才算回本。 */
 function giftStarterStock(){
   try{
     const plan=[['cpu',C,10],['mb',B,10],['cooler',H,10],['ram',M,12],
@@ -3619,7 +3620,7 @@ function giftStarterStock(){
         list.push(x);
       });
       list.slice(0,n).forEach(function(part){
-        try{ addInv({cat:cat,part:part,paid:0,shop:'own'}); }catch(e){}
+        try{ addInv({cat:cat,part:part,paid:Math.round(part.p||0),shop:'own'}); }catch(e){}
       });
     });
   }catch(e){}
@@ -9675,6 +9676,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01299':['开局这批货算旺财自己进的（按进价记成本）'],
     '01298':['开局库存改为每类十来件（共 80 余件）'],
     '01297':['零元购 CG 换成自家店门口实景夜戏'],
     '01296':['开局仓库送一批新货；新增零元购→报警→刘警官→半月重开张剧情'],
