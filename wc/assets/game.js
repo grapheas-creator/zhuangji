@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01301';
+const APP_BUILD='01302';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3686,8 +3686,14 @@ function giftStarterStock(){
 
   A.onNewDay=function(){
     const f=g();
-    /* Day1 夜里：零元购 */
-    if(!f.robbery && state.day===2){ setTimeout(function(){ A.playRobbery(); },700); return; }
+    /* 前三天先把开局那批货用出去，第 4 天夜里才被零元购 */
+    if(!f.robbery && state.day>=4){
+      const firstDone=(()=>{ try{
+        return state.jobs.some(j=>j.story&&(j.status==='done'||j.status==='accepted'||j.status==='delivered'))
+            || (state.tut&&state.tut.done&&(state.tut.done.deliver||state.tut.done.accept));
+      }catch(e){ return false; } })();
+      if(firstDone){ setTimeout(function(){ A.playRobbery(); },700); return; }
+    }
     /* 3 天后：刘警官破案 */
     if(f.robbery && !f.policeDone && state.day>=(f.policeDay||1)+3){ setTimeout(function(){ A.playPolice(); },700); return; }
     /* 半月后：重开张 */
@@ -9763,6 +9769,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01302':['零元购推迟到第 4 天（首单做完之后），开局货能用上'],
     '01301':['开局补 DDR5 平台；重开张接陈默加显卡剧情与二手/全新引导'],
     '01300':['开局库存走中段价位，内存按套条进货'],
     '01299':['开局这批货算旺财自己进的（按进价记成本）'],
