@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01238';
+const APP_BUILD='01239';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8324,7 +8324,15 @@ function openSettings(){
           return;
         }
         if(remoteC&&remoteC!==contentNow){
-          text='内容不是最新（本地 '+contentNow+' → 线上 '+remoteC+'）';
+          /* 不是最新就自己更新，不给按钮 */
+          if(msg)msg.textContent='正在更新到 '+remoteC+'…';
+          setTimeout(function(){
+            const u=new URL(location.href);
+            u.searchParams.set('v',remoteC);
+            u.searchParams.set('t',String(Date.now()));
+            location.replace(u.toString());
+          },400);
+          return;
         }else{
           text='已是最新'+(remoteC?'（'+remoteC+'）':'');
         }
@@ -9314,6 +9322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01239':['检查到内容不是最新时自动更新，不用手动点'],
     '01238':['页面底色彻底换成店门口那张（去掉工具桌）'],
     '01237':['启动自动校验内容版本，旧缓存会被强制刷新'],
     '01236':['设置里加了「检查更新」按钮，能看内容/壳是否最新'],
@@ -9543,17 +9552,28 @@ renderAll();
     var KEY='wc_heal_'+local;
     if(sessionStorage.getItem(KEY)) return;                 /* 这一版已经重载过了 */
     sessionStorage.setItem(KEY,'1');
-    fetch('../apk/version.json?t='+Date.now(),{cache:'no-store'})
-      .then(function(r){ return r.json(); })
-      .then(function(o){
-        var remote=o&&o.content;
-        if(!remote||remote===local) return;
-        try{ console.info('[内容自愈] 本地 '+local+' → 线上 '+remote+'，重载中'); }catch(e){}
-        var u=new URL(location.href);
-        u.searchParams.set('v',remote);
-        u.searchParams.set('t',String(Date.now()));
-        location.replace(u.toString());
-      })
-      .catch(function(){});
+    /* 启动时网络可能还没通：最多试 4 次，间隔 2.5 秒；联网事件也会再触发一次 */
+    var tries=0, done=false;
+    function tryHeal(){
+      if(done) return;
+      tries++;
+      fetch('../apk/version.json?t='+Date.now(),{cache:'no-store',mode:'cors'})
+        .then(function(r){ return r.json(); })
+        .then(function(o){
+          var remote=o&&o.content;
+          if(!remote||remote===local){ done=true; return; }
+          done=true;
+          try{ console.info('[内容自愈] 本地 '+local+' → 线上 '+remote+'，重载中'); }catch(e){}
+          var u=new URL(location.href);
+          u.searchParams.set('v',remote);
+          u.searchParams.set('t',String(Date.now()));
+          location.replace(u.toString());
+        })
+        .catch(function(){
+          if(tries<4 && !done) setTimeout(tryHeal, 2500);
+        });
+    }
+    tryHeal();
+    window.addEventListener('online',function(){ if(!done){ tries=0; tryHeal(); } },{once:true});
   }catch(e){}
 })();
