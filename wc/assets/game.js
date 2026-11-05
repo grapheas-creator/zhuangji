@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01303';
+const APP_BUILD='01304';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7102,6 +7102,24 @@ function bindShopList(){
     const i=state.inv.findIndex(x=>x.uid===el.dataset.sell);if(i<0)return;
     const it=state.inv[i];
     if(it.owner){toast('客户自带的件不能卖');return;}
+    /* 第 1 天：这批货是给顾客装机用的，不许卖 */
+    try{
+      if(state.day===1&&!(state.story&&state.story.flags&&state.story.flags.robbery)){
+        if(!window.__nagSell){
+          window.__nagSell=1;
+          modal('旺财',
+            '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+            +'「别卖呀。」<br>'
+            +'「这些是我一件件挑回来给顾客装机的，卖了拿什么接单？」<br><br>'
+            +'<span style="color:#9b8088;font-size:12.5px">她挡在货架前面，一副不打算让开的样子。</span></div>',null);
+          setTimeout(function(){ const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+            if(y) y.textContent='那我先去接单'; if(n) n.style.display='none'; },30);
+        }else{
+          toast('「这些是我买来给顾客装机的，不卖。」');
+        }
+        return;
+      }
+    }catch(e){}
     const sell=resaleValue(it);
     modal('确认卖出',`<b>${it.part.n}</b><br>买入 ${money(it.paid)}　回收 <b>${money(sell)}</b>`,()=>{
       state.cash+=sell;state.todayIn=(state.todayIn||0)+sell;state.inv.splice(i,1);save();renderAll();toast('已卖出');});
@@ -9765,6 +9783,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01304':['第 1 天不许卖货，旺财会拦着（这批是给顾客装机的）'],
     '01303':['零元购恢复为第 1 天夜里（设计如此：开局赚不到钱）'],
     '01302':['零元购推迟到第 4 天（首单做完之后），开局货能用上'],
     '01301':['开局补 DDR5 平台；重开张接陈默加显卡剧情与二手/全新引导'],
