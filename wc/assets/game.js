@@ -8998,6 +8998,24 @@ renderAll();
       + '</div></div>';
   }
 
+  /* 加载页/剧情/过场还开着时别弹，否则会被覆盖掉、看起来像闪一下 */
+  function busyUI(){
+    try{
+      if(document.getElementById('startLoad')) return true;
+      if(document.getElementById('plotEvent')) return true;
+      if(document.getElementById('storyPop')) return true;
+      if(document.querySelector('.gal-box')) return true;
+      var ts=document.getElementById('titleScr');
+      if(ts && !ts.classList.contains('hide')) return true;
+    }catch(e){}
+    return false;
+  }
+  function readyThen(fn,tries){
+    tries=tries||0;
+    if(busyUI() && tries<60){ setTimeout(function(){ readyThen(fn,tries+1); },400); return; }
+    fn();
+  }
+
   function introPopup(){
     /* 开头：爸爸寄来的留声机 */
     modal('爸爸寄来的包裹',
@@ -9103,9 +9121,9 @@ renderAll();
   /* ---- 每天开始 ---- */
   function onDay(day){
     var g=G();
-    if(day===1&&!g.intro){ g.intro=1; setTimeout(introPopup,800); }
+    if(day===1&&!g.intro){ g.intro=1; readyThen(introPopup); }
     if(day===3&&!g.day3){
-      g.day3=1; setTimeout(offerLegend,1200);
+      g.day3=1; setTimeout(function(){ readyThen(offerLegend); },1200);
     }
     sync();
   }
