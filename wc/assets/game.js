@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01227';
+const APP_BUILD='01228';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9026,6 +9026,12 @@ renderAll();
       + '碟得自己攒，好的东西都藏得深。」</i><br><br>'
       + '<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span>'
       + '</div>', null);
+    /* 只留一个按钮：收下留声机，接着就是陈默上门那单 */
+    setTimeout(function(){
+      var y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y) y.textContent='收下留声机';
+      if(n) n.style.display='none';
+    },30);
   }
 
   function offerLegend(){
@@ -9267,6 +9273,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01228':['开场留声机剧情改为单按钮，确认后接着走陈默的单'],
     '01227':['开局加载页换成旺财图','BGM 起播延后，开头不再卡一下'],
     '01226':['返回键改为游戏内确认框（再等等 / 退出）'],
     '01225':['更新提示和下载进度搬到游戏内，以后不用再装壳'],
