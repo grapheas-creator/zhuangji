@@ -302,6 +302,8 @@
     + 'transition:transform .16s,box-shadow .16s;user-select:none}'
     + '.wc-mp-fab:hover{transform:translateY(-2px) rotate(-6deg);box-shadow:0 12px 26px -8px rgba(214,120,140,.65),inset 0 0 0 3px #fff}'
     + '.wc-mp-fab.on{color:#d3566f;border-color:#ef9fb0}'
+    + '.wc-mp-fab.empty{opacity:.55;filter:grayscale(.35)}'
+    + '.wc-mp-fab.empty:hover{opacity:.8}'
     + '.wc-mp-fab svg{width:21px;height:21px;display:block;fill:currentColor}'
     + '.wc-mp-fab .ic{display:flex;align-items:center;justify-content:center;line-height:0}'
     + '.wc-mp-fab .dot{position:absolute;right:4px;top:4px;width:9px;height:9px;border-radius:50%;'
@@ -377,6 +379,7 @@
     var fab = document.createElement('div');
     fab.className = 'wc-mp-fab';
     fab.id = 'wcMpFab';
+    fab.style.display = 'none';        /* 等白名单确定后再决定显不显示，避免先亮后灭 */
     fab.title = '音乐播放器';
     fab.innerHTML = '<span class="ic">' + ICON.note + '</span><i class="dot"></i>';
 
@@ -485,10 +488,14 @@
     if (!keep.length) {
       if (S.el) { try { S.el.pause(); } catch (e) {} }
       S.playing = false;
-      if (S.ui) { S.ui.fab.style.display = 'none'; S.ui.box.style.display = 'none'; }
+      if (S.ui) {
+        S.ui.fab.style.display = '';           /* 没碟也留着按钮，点它给提示 */
+        S.ui.fab.classList.add('empty');
+        S.ui.box.style.display = 'none';
+      }
       return;
     }
-    if (S.ui) S.ui.fab.style.display = '';
+    if (S.ui) { S.ui.fab.style.display = ''; S.ui.fab.classList.remove('empty'); }
     try { paintState(); paintMeta(); } catch (e) {}
   }
 
@@ -503,6 +510,7 @@
       S.pack = pack;
       S.packOriginal = pack.tracks.slice();
       if (CFG.allow) applyAllow(CFG.allow);
+      else if (S.ui) S.ui.fab.style.display = '';
       S.ready = true;
       if (S.i < 0 || S.i >= pack.tracks.length) S.i = 0;
       paintState();

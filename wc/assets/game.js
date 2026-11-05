@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01220';
+const APP_BUILD='01221';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9135,6 +9135,11 @@ renderAll();
     }
   }
 
+  /* 在播放器启动前就把白名单设好：它 defer 执行，比这里晚 */
+  try{
+    window.MUSIC_PLAYER_OPTIONS = Object.assign({}, window.MUSIC_PLAYER_OPTIONS, {allow: allow()});
+  }catch(e){}
+
   /* ================= 挂到游戏上 ================= */
   /* 1) 开局：重置留声机状态 */
   try{
@@ -9245,4 +9250,28 @@ renderAll();
   }catch(e){}
 
   window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce};
+
+  /* ---- 内容更新提示：换了版本，标题页角上闪一条，不打断 ---- */
+  (function(){
+    try{
+      var KEY='wc_seen_build';
+      var cur=(typeof APP_BUILD!=='undefined')?APP_BUILD:'';
+      var last=localStorage.getItem(KEY);
+      if(!cur) return;
+      localStorage.setItem(KEY,cur);
+      if(!last||last===cur) return;           /* 第一次玩不提示 */
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh,60px) + 78px);'
+          +'z-index:9600;padding:9px 16px;border-radius:20px;background:rgba(255,253,249,.97);'
+          +'border:1.5px solid #f2c3cc;color:#b8546a;font-size:12px;box-shadow:0 8px 20px -8px rgba(180,90,110,.45);'
+          +'opacity:0;transition:opacity .35s';
+        el.textContent='内容已更新到 '+cur;
+        document.body.appendChild(el);
+        setTimeout(function(){el.style.opacity='1';},50);
+        setTimeout(function(){el.style.opacity='0';},4200);
+        setTimeout(function(){try{el.remove();}catch(e){}},4800);
+      },1500);
+    }catch(e){}
+  })();
 })();
