@@ -1,7 +1,7 @@
 {
-  "code": 1222,
-  "name": "0.12.12-01222",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01222.apk",
+  "code": 1223,
+  "name": "0.12.13-01223",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01223.apk",
   "size": 32074598,
-  "note": "壳冻结版：更新提示/进度改由游戏内实现，以后内容更新不用再装壳"
+  "note": "返回键改为游戏内确认框（再等等 / 退出），壳只提供 exitApp 桥"
 }
