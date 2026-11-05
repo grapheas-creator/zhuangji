@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01275';
+const APP_BUILD='01276';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9190,24 +9190,24 @@ renderAll();
       var page=0;
       var PAGES=[
         {t:'门口的两个纸箱',
-         html:'<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+         html:'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
            +'早上一拉卷帘门，门口摞着两个纸箱，边上还有一截胶带没撕干净。<br>'
            +'寄件人一栏是同一个名字，写着「爸」。<br><br>'
-           +'<span style="color:#9b8088;font-size:11.5px">他这人从来不打电——寄到了就是寄到了。</span></div>',
+           +'<span style="color:#9b8088;font-size:12.5px">他这人从来不打电——寄到了就是寄到了。</span></div>',
          ok:'拆第一个'},
         {t:'爸爸寄来的留声机',
          html:'<img src="assets/gramo.webp?v=01230" alt="" '
            +'style="width:100%;display:block;border-radius:12px;margin-bottom:12px;'
            +'border:1px solid #f3cdd5;box-shadow:0 6px 18px -10px rgba(180,90,110,.5)">'
-           +'<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+           +'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
            +'第一个箱子里是一台旧留声机，铜喇叭擦得能照出人影。<br>'
            +'底下压着一张字条，字迹还是他那手歪歪扭扭的字：<br><br>'
            +'<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
            +'碟得自己攒，好的东西都藏得深。」</i><br><br>'
-           +'<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span></div>',
+           +'<span style="color:#9b8088;font-size:12.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span></div>',
          ok:'再拆第二个'},
         {t:'第二个箱子里是台电脑',
-         html:'<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+         html:'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
            +'第二个箱子沉得多。掀开纸壳，是一台被拆得差不多的老机器，配件用气泡膜一件件裹好：<br><br>'
            +'<div style="background:#fff7f4;border:1px solid #f3cdd5;border-radius:12px;padding:10px 12px;line-height:1.95">'
            +'<b style="color:#b8546a">爸爸的旧整机</b><br>'
@@ -9218,7 +9218,7 @@ renderAll();
            +'电源　500W</div><br>'
            +'箱盖内侧用油性笔写了一句：<br>'
            +'<i style="color:#b8546a">「这台你留着练手。拆坏了不心疼，装好了就是你的第一台。」</i><br><br>'
-           +'<span style="color:#9b8088;font-size:11.5px">整机已经收进「仓库 · 整机」里了。</span></div>',
+           +'<span style="color:#9b8088;font-size:12.5px">整机已经收进「仓库 · 整机」里了。</span></div>',
          ok:'收下'}
       ];
       /* 返回键 / 点空白把弹窗关掉时，也算结束，绝不能让流程卡死。
@@ -9530,6 +9530,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01276':['留声机弹窗字号统一到 14.5px'],
     '01275':['删除引导卡「自愈」定时器（会凭空把框弹回来）'],
     '01274':['加载页只出现一次，不再二次闪现'],
     '01273':['修复留声机中间页一闪而过'],
