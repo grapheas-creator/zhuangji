@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01307';
+const APP_BUILD='01308';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3674,6 +3674,7 @@ function giftStarterStock(){
   /* 被打劫：清空仓库与整机 */
   A.doRobbery=function(){
     try{
+      try{ g().stolenInv=JSON.stringify(state.inv||[]); }catch(e){}
       state.inv=[]; state.machines=[];
       state.benchMachines={};
       build=newBuild();
@@ -3686,6 +3687,38 @@ function giftStarterStock(){
 
   A.onNewDay=function(){
     const f=g();
+    /* 486 难度：每月房租水电 + 重建贷款分期 */
+    try{
+      if(state.debt2||state.rent){
+        const last=(state.rent&&state.rent.lastDay)||1;
+        if(state.day-last>=30){
+          let due=0, lines=[];
+          if(state.rent){ due+=state.rent.month+state.rent.util; lines.push('房租 '+state.rent.month+' + 水电 '+state.rent.util); }
+          const d=state.debt2;
+          if(d&&d.paid<d.periods){
+            const interest=Math.round(d.remain*d.rate);
+            const pay=Math.round(d.monthly)+interest;
+            due+=pay; d.remain=Math.max(0,d.remain-Math.round(d.monthly)); d.paid++;
+            lines.push('重建贷款第 '+d.paid+' 期：本金 '+Math.round(d.monthly)+' + 利息 '+interest);
+          }
+          if(due>0){
+            state.cash=(state.cash||0)-due;
+            state.rent.lastDay=state.day;
+            try{
+              if(typeof modal==='function'){
+                modal('月底账单',
+                  '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+                  +lines.join('<br>')+'<br><br><b>合计扣款 '+due+' 元</b>'
+                  +'<br><span style="color:#9b8088;font-size:12.5px">'
+                  +'现金 '+(state.cash>=0?'':'−')+Math.abs(state.cash|0)+' 元</span></div>',null);
+                setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='知道了'; },30);
+              }
+            }catch(e){}
+          }
+          try{save();}catch(e){}
+        }
+      }
+    }catch(e){}
     /* 第 1 天夜里（接完陈默那一单之后）就被零元购 —— 这里是设计好的：
        开局这批货是"看得见用不上"的诱饵，玩家第一天是赚不到钱的。 */
     if(!f.robbery && state.day===2){ setTimeout(function(){ A.playRobbery(); },700); return; }
@@ -3730,10 +3763,32 @@ function giftStarterStock(){
   };
 
   A.playPolice=function(){
-    const f=g(); f.policeDone=1; try{save();}catch(e){}
+    const f=g(); f.policeDone=1;
+    const diff=(window.__DIFF||'mogu');
+    let backTxt='一件都没追回来。';
+    try{
+      const stolen=JSON.parse(f.stolenInv||'[]');
+      if(stolen.length){
+        let back=[];
+        if(diff==='wangcai') back=stolen.slice();
+        else if(diff==='mojie'){
+          /* 简单：追回三成左右，随机挑 */
+          const n=Math.max(1,Math.round(stolen.length*0.3));
+          back=stolen.slice().sort(function(){return Math.random()-0.5;}).slice(0,n);
+        }
+        back.forEach(function(it){ try{ state.inv.push(it); }catch(e){} });
+        if(back.length) backTxt='追回了 '+back.length+' 件。';
+      }
+    }catch(e){}
+    if(diff==='486'){
+      /* 困难：重建又借了三万，12 期、单利 5 个点；每月房租 5000 + 水电 1000 */
+      state.debt2={principal:30000, remain:30000, periods:12, paid:0, rate:0.05, monthly:30000/12};
+      state.rent={month:5000, util:1000, lastDay:0};
+    }
+    try{save();}catch(e){}
     modal('人抓到了',
       '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'刘警官把三个人押回来了，货已经被转手，只追回一点零碎。<br>'
+      +'刘警官把三个人押回来了。'+backTxt+'<br>'
       +'「对不住，」她说，「以后这条街我看着点。」<br><br>'
       +'<span style="color:#9b8088;font-size:12.5px">她留了张名片：以后店里有活儿，可以找她。</span></div>',null);
     setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='收下名片'; },30);
@@ -9108,6 +9163,38 @@ applyLayoutShell();
 renderAll();
 (function bindTitle(){
   const st=document.getElementById('tStart'),ld=document.getElementById('tLoad');
+  const beginWithDiff=(k)=>{ try{ window.__DIFF=k; }catch(e){} startNewRaw('guide'); };
+  const stStart=()=>{ pickDifficulty(beginWithDiff); };
+  /* ===== 难度 =====
+     只影响"被抢之后追回多少"和初始负债，不改其它数值。 */
+  const DIFFS=[
+    {k:'wangcai',n:'旺财难度',d:'赃物全部追回——被抢的货一件不少地回来了。最轻松的一档。',tag:'超简单'},
+    {k:'mojie',  n:'墨桀难度',d:'追回几件——大部分没了，好歹回来一点。',tag:'简单'},
+    {k:'mogu',   n:'某菇难度',d:'一件都没追回来，手里只剩借来的八千。',tag:'中等'},
+    {k:'486',    n:'486 难度',d:'一件没追回，八千是借的，重建又借了三万：12 期、单利 5 个点。每月还要交房租 5000、水电 1000。',tag:'困难'}
+  ];
+  function pickDifficulty(cb){
+    const old=document.getElementById('diffPick'); if(old) old.remove();
+    const ov=document.createElement('div'); ov.id='diffPick';
+    ov.innerHTML='<div class="dp-box"><div class="dp-hd">选个难度</div>'
+      + DIFFS.map(function(x,i){
+          return '<button class="dp-item" data-d="'+x.k+'">'
+            +'<span class="dp-tag">'+x.tag+'</span>'
+            +'<b>'+x.n+'</b>'
+            +'<span class="dp-desc">'+x.d+'</span></button>';
+        }).join('')
+      +'</div>';
+    document.body.appendChild(ov);
+    requestAnimationFrame(function(){ ov.classList.add('on'); });
+    ov.querySelectorAll('.dp-item').forEach(function(b){
+      b.onclick=function(){
+        const k=b.dataset.d;
+        ov.classList.remove('on');
+        setTimeout(function(){ try{ov.remove();}catch(e){} cb(k); },220);
+      };
+    });
+  }
+
   const startNew=(mode)=>{
     /* 先盖加载页，再动标题/底页；否则会闪出一帧没有 UI 的游戏页面。 */
     try{ window.__bootLoadDone=false; hideBootStill(); showBootLoad(); }catch(e){}
@@ -9172,7 +9259,12 @@ renderAll();
     const no=document.getElementById('mNo');if(no){no.style.display='';no.textContent='取消';}
     const yes=document.getElementById('mYes');if(yes)yes.textContent='开始新游戏';
   };
-  if(st)st.onclick=()=>begin('guided');
+  if(st)st.onclick=function(){
+    pickDifficulty(function(k){
+      window.__DIFF=k||'mogu';
+      begin('guided');
+    });
+  };
   /* 标题页 BGM：先自己试一次（APK 壳里已放开自动播放），不行再由首次点击兜底 */
   (function(){
     let started=false;
@@ -9827,6 +9919,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01308':['开始新游戏先选难度：旺财/墨桀/某菇/486'],
     '01307':['爸爸那台机器改为工作电脑（上网接单），不进仓库'],
     '01306':['爸爸寄留声机挪到重开张之后'],
     '01305':['神秘人卖碟挪到第 20 天后；加刘警官第一单（占位）'],
