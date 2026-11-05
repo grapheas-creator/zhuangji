@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01269';
+const APP_BUILD='01270';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6032,7 +6032,18 @@ function _coachSyncPage(step){
   try{renderAll();}catch(e){}
   return true;
 }
+/* 剧情立绘收尾：剧情/微信都关了之后，把它残留在屏幕上的立绘收掉，
+   否则会和引导自己的立绘叠成「两个旺财」 */
+function hideStraySprites(){
+  try{
+    if(document.getElementById('plotEvent')) return;   /* 剧情还在，不动 */
+    document.querySelectorAll('.gal-sprite,#galSprite,#galVid').forEach(function(el){
+      try{ el.style.display='none'; el.classList.remove('on'); }catch(e){}
+    });
+  }catch(e){}
+}
 function coachRefresh(){
+  hideStraySprites();
   /* 一次点击会从好几个地方排队调用（40/80/150ms…），而且每调一次就要重排遮罩。
      这里做一次合并：70ms 内的重复调用只留最后一次。 */
   const _now=performance.now();
@@ -9532,6 +9543,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01270':['修复引导出现时残留剧情立绘（两个旺财）'],
     '01269':['留声机弹窗按返回不再卡住；剧情文字统一字号'],
     '01268':['留声机剧情插进真正的开局流程 runBootIntro'],
     '01267':['修复留声机剧情没出现（等上一幕关掉再弹，防误触）'],
