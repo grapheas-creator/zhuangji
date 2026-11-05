@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01309';
+const APP_BUILD='01310';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -685,18 +685,20 @@ function repBadCount(){
 function repCatchChance(){
   return Math.min(0.92,0.55+0.07*repBadCount());
 }
-function repApply(ok){
+function repApply(ok,tier){
   const r=state.rep||(state.rep={score:3,log:[],bad:0});
   r.log=r.log||[];
   r.log.push(!!ok);
   if(r.log.length>10)r.log=r.log.slice(-10);
   const bad=repBadCount();
-  if(ok){
-    /* 连续达标涨得快一些，越接近 5 星涨得越慢 */
-    const gain=repScore()>=4.5?0.06:0.12;
-    r.score=Math.min(REP_MAX,r.score+gain);
+  /* tier：'perfect' 完美单（超额达标）| 'basic' 基本单（刚好过线）| 'fail' 不合格单 */
+  const t=tier||(ok?'basic':'fail');
+  if(t==='perfect'){
+    r.score=Math.min(REP_MAX,r.score+(repScore()>=4.5?0.04:0.07));
+  }else if(t==='basic'){
+    r.score=Math.min(REP_MAX,r.score+(repScore()>=4.5?0.02:0.04));
   }else{
-    r.score=Math.max(REP_MIN,r.score-(0.28+0.12*bad));
+    r.score=Math.max(REP_MIN,r.score-(0.22+0.10*bad));
   }
   r.bad=bad;
   return r.score;
@@ -3195,10 +3197,11 @@ function makeJobs(dateStr,day){
   const _fans=(state.fans||0);
   const _fanBonus=Math.min(3,Math.floor(_fans/1000));      /* 每 1000 粉 +1 单，最多 +3 */
   const _jobCap=5+_fanBonus;
-  let _base = day<=3 ? 1 : (day<=6 ? 2 : (day<=10 ? 3 : 4));
-  if(_rep>=5) _base+=1;
-  if(_rep>=8) _base+=1;
-  n=Math.max(1,Math.min(_jobCap+2, _base+Math.round(rand())));
+  /* 单量涨得慢：第 1 周 1~2 单，第二周 2~3，第三周 3，之后看口碑和粉丝 */
+  let _base = day<=3 ? 1 : (day<=7 ? 2 : (day<=14 ? 2 : 3));
+  if(_rep>=6) _base+=1;
+  if(_rep>=9) _base+=1;
+  n=Math.max(1,Math.min(_jobCap, _base + (rand()<0.35?1:0)));
   if(day===2)n=2;
   else if(day===3)n=3;
 
@@ -3208,7 +3211,12 @@ function makeJobs(dateStr,day){
   const _cap=_day<7?5000:(_day<14?8000:(_day<21?12000:(_day<28?20000:Infinity)));
   const _usedSw=new Set();
   const _playerCap=5;                 /* 一天最多亲自装 5 台 */
-  for(let i=0;i<n;i++){
+  try{
+    state.overflowJobs=Math.max(0,(state.dayTotalExtra||0));
+  }catch(e){}
+  const _realN=Math.min(n,_playerCap);
+  try{ state.overflowJobs=Math.max(0,n-_realN); }catch(e){}
+  for(let i=0;i<_realN;i++){
     /* 「整机单」：客户不懂配置，只要能装出一台能开机的机器。
        没有跑分门槛、没有软件要求，检查项就是「槽位齐 + 兼容」。
        以前这类单子全被性能门槛占满，弱硬件根本没活路，这里专门给一条。 */
@@ -8189,8 +8197,17 @@ function deliver(){
       }
     }else{
       const before=repScore();
-      repApply(true);
-      _repNote='客户验机满意，口碑 '+before.toFixed(1)+' → '+repScore().toFixed(1);
+      /* 判定：超出要求 20% 以上算完美单，否则算基本单 */
+      let perfect=false;
+      try{
+        const tg=jobTarget(j)||{};
+        const tsOK=!tg.ts||!sc.ts||sc.ts>=tg.ts*1.2;
+        const csOK=!tg.cs||!sc.cs||sc.cs>=tg.cs*1.2;
+        perfect=tsOK&&csOK;
+      }catch(e){}
+      repApply(true, perfect?'perfect':'basic');
+      _repNote='客户验机满意（'+(perfect?'完美单':'基本单')+'），口碑 '
+        +before.toFixed(1)+' → '+repScore().toFixed(1);
     }
   }
   try{SFX.success();}catch(e){}
@@ -9983,6 +10000,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01310':['单量增长放慢；超出5单只记数字；口碑分完美/基本/不合格三档'],
     '01309':['单量随口碑/粉丝增长（前期少）；每天最多自己做 5 台；B站拍视频涨粉；贷款改年化5%'],
     '01308':['开始新游戏先选难度：旺财/墨桀/某菇/486'],
     '01307':['爸爸那台机器改为工作电脑（上网接单），不进仓库'],
