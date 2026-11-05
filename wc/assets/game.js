@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01313';
+const APP_BUILD='01314';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5097,11 +5097,24 @@ function setCash(v){
   };
   _cashRAF=requestAnimationFrame(step);
 }
+/* 天数标签：重开张之后不再从开业第一天数，改成「重开第 N 天」 */
+function dayLabel(){
+  try{
+    const f=(state.story&&state.story.flags)||{};
+    if(f.reopen&&f.reopenDay){
+      const n=Math.max(1,(state.day||1)-(f.reopenDay-1));
+      return {full:'重开第 '+n+' 天', short:String(n)};
+    }
+  }catch(e){}
+  return {full:'第 '+(state.day||1)+' 天', short:String(state.day||1)};
+}
 let _lastDaySeen=null;
 function renderHeader(){
   const _d=document.getElementById('dateTxt'),_dd=document.getElementById('dayTxt');
   _d.textContent=state.date;
-  _dd.textContent=state.day;
+  const _dl=dayLabel();
+  _dd.textContent=_dl.short;
+  try{ const _hl=document.getElementById('dayLabelTxt'); if(_hl)_hl.textContent=(_dl.full.indexOf('重开')===0?'重开':'第'); }catch(e){}
   if(_lastDaySeen!==null&&_lastDaySeen!==state.day){
     animPulse(_d,'dateFlip',760);animPulse(_dd,'dateFlip',760);
   }
@@ -10052,6 +10065,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01314':['重开张后天数显示为「重开第 N 天」'],
     '01313':['电脑页改成显示器画面（外壳+屏幕+扫描线）'],
     '01312':['新增电脑桌面页：工单/商店/仓库/软件库/生活/存档/发展/B站/设置'],
     '01311':['交付时显示客户评价；维修单修好=完美，换低档件=不合格'],
@@ -10555,7 +10569,7 @@ renderAll();
     document.body.appendChild(el);
     requestAnimationFrame(function(){ el.classList.add('on'); });
     try{
-      el.querySelector('#pdDay').textContent='第 '+(state.day||1)+' 天';
+      el.querySelector('#pdDay').textContent=dayLabel().full;
       el.querySelector('#pdCash').textContent='现金 ¥'+Math.round(state.cash||0);
     }catch(e){}
     el.querySelectorAll('.pd-ic').forEach(function(ic){
