@@ -3,5 +3,6 @@
   "name": "0.12.13-01223",
   "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01223.apk",
   "size": 32074598,
-  "note": "返回键改为游戏内确认框（再等等 / 退出），壳只提供 exitApp 桥"
+  "note": "返回键改为游戏内确认框（再等等 / 退出），壳只提供 exitApp 桥",
+  "content": "01236"
 }

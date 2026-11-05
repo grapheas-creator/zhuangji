@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01235';
+const APP_BUILD='01236';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8287,6 +8287,8 @@ function openSettings(){
     '<div style="margin:10px 2px 2px;font-size:11px;color:#9b8088;line-height:1.9">'+
       '<div>内容版本　'+(typeof APP_BUILD!=='undefined'?APP_BUILD:'—')+'</div>'+
       '<div>壳版本　　'+shell+'</div>'+
+      '<div style="margin-top:6px"><button class="mini" id="setCheckUpd">检查更新</button>'+
+      '<span id="setUpdMsg" style="margin-left:8px;color:#b8546a"></span></div>'+
     '</div>'+
     '<div class="setActs"><button class="mini" id="setTest">试听</button>'+
     '<button class="primary" id="setOk">完成</button></div></div>';
@@ -8301,6 +8303,32 @@ function openSettings(){
   });
   const t=document.getElementById('setTest');
   if(t)t.onclick=()=>{try{AE.ctx&&AE.ctx.resume();SFX.msgOut();}catch(e){}};
+  const cu=document.getElementById('setCheckUpd');
+  if(cu)cu.onclick=()=>{
+    const msg=document.getElementById('setUpdMsg');
+    if(msg)msg.textContent='检查中…';
+    fetch('../apk/version.json?t='+Date.now(),{cache:'no-store'})
+      .then(r=>r.json())
+      .then(o=>{
+        const shellNow=(function(){try{return WCBridge.shellVersion()|0;}catch(e){return 0;}})();
+        const contentNow=(typeof APP_BUILD!=='undefined')?APP_BUILD:'';
+        const remoteC=o.content||'';
+        let text='';
+        if(o.code>shellNow){
+          text='发现新壳 '+o.name;
+          if(msg)msg.textContent=text;
+          setTimeout(()=>{ if(typeof window.__WC_SHOW_UPDATE==='function') window.__WC_SHOW_UPDATE(o); },300);
+          return;
+        }
+        if(remoteC&&remoteC!==contentNow){
+          text='内容不是最新（本地 '+contentNow+' → 线上 '+remoteC+'）';
+        }else{
+          text='已是最新'+(remoteC?'（'+remoteC+'）':'');
+        }
+        if(msg)msg.textContent=text;
+      })
+      .catch(()=>{ if(msg)msg.textContent='检查失败，请检查网络'; });
+  };
   const ok=document.getElementById('setOk');
   if(ok)ok.onclick=()=>{ov.classList.remove('on');setTimeout(()=>ov.remove(),220);};
   ov.onclick=(e)=>{if(e.target===ov){ov.classList.remove('on');setTimeout(()=>ov.remove(),220);}};
@@ -9283,6 +9311,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01236':['设置里加了「检查更新」按钮，能看内容/壳是否最新'],
     '01235':['游戏底色换成店门口那张（原来是工具桌）'],
     '01234':['恢复「已涂硅脂 / 工作区」标签，只去掉档位标签'],
     '01233':['引导卡片：立绘不再上下跳','去掉实时模糊，滚动更丝滑','便宜机箱提亮'],
@@ -9454,6 +9483,7 @@ renderAll();
   setTimeout(checkOnce,2500);
 
   window.__WC_UPDATE={check:checkOnce,shellVer:shellVer};
+  window.__WC_SHOW_UPDATE=showUpdate;
 })();
 
 
