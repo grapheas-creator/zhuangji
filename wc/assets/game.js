@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01304';
+const APP_BUILD='01305';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9624,11 +9624,33 @@ renderAll();
     return j;
   }
 
+  /* ---- 刘警官的第一单（脚本占位，等正式剧本替换） ---- */
+  function policeJobStory(){
+    modal('刘警官',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'「小店挺像样啊。」她把一台铁壳主机往柜台上一放，磕得响。<br>'
+      +'「所里的机器，开机风扇转，屏不亮。能修不？」<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">她看了眼货架，又看了眼你。</span></div>',null);
+    setTimeout(function(){
+      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y) y.textContent='能修，放这儿吧';
+      if(n) n.style.display='none';
+    },30);
+  }
+
   /* ---- 每天开始 ---- */
   function onDay(day){
     var g=G();
+    /* 刘警官的业务：抓到人之后过几天上门，只来一次 */
+    try{
+      if(g.policeDone&&!g.policeJob&&day>=(g.policeDay||4)+4){
+        g.policeJob=1; try{save();}catch(e){}
+        setTimeout(function(){ try{policeJobStory();}catch(e){} },1500);
+      }
+    }catch(e){}
     /* 开场的留声机包褒不在按天触发，改成加载页撤掉那一刻（见 hideBootLoad 挂钩） */
-    if(day===3&&!g.day3){
+    /* 神秘人卖碟：挪到重开张之后（第 20 天起才有） */
+    if(day>=20&&!g.day3){
       g.day3=1; setTimeout(offerLegend,1200);
     }
     sync();
@@ -9783,6 +9805,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01305':['神秘人卖碟挪到第 20 天后；加刘警官第一单（占位）'],
     '01304':['第 1 天不许卖货，旺财会拦着（这批是给顾客装机的）'],
     '01303':['零元购恢复为第 1 天夜里（设计如此：开局赚不到钱）'],
     '01302':['零元购推迟到第 4 天（首单做完之后），开局货能用上'],
