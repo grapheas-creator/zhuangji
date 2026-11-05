@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01299';
+const APP_BUILD='01300';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3603,25 +3603,42 @@ let uidSeq=1;
 function addInv(item){state.inv.push({uid:'i'+(uidSeq++),cat:item.cat,part:item.part,paid:item.paid,shop:item.shop,owner:item.owner||null,broken:!!item.broken,faulty:!!item.faulty});}
 function invList(cat){return state.inv.filter(x=>x.cat===cat);}
 
-/* 开局仓库里的一批新货：旺财自己拿存款进的第一批货，每个分类各十来件。
-   这些件按进货价记成本（paid=进价），不是白捡的 —— 卖了才算回本。 */
+/* 开局仓库里的一批新货：旺财自己拿存款进的第一批货。
+   走的是"像样但不奢侈"的路子 —— 中段价位，内存按套条（两条同型号）进货。 */
 function giftStarterStock(){
   try{
-    const plan=[['cpu',C,10],['mb',B,10],['cooler',H,10],['ram',M,12],
-                ['disk',ST,12],['gpu',G,10],['psu',P,10],['case',K,10]];
+    /* 取中段价位的型号：跳过最便宜的一批，也避开旗舰 */
+    function midPick(arr,count){
+      const seen={},list=[];
+      (arr||[]).slice().sort((a,b)=>(a.p||0)-(b.p||0)).forEach(function(x){
+        if(!x||!x.n||seen[x.n]) return;
+        seen[x.n]=1; list.push(x);
+      });
+      const n=list.length;
+      const from=Math.floor(n*0.30), to=Math.min(n,from+count);
+      return list.slice(from,to);
+    }
+    const plan=[['cpu',C,10],['mb',B,10],['cooler',H,10],
+                ['disk',ST,10],['gpu',G,10],['psu',P,10],['case',K,10]];
     plan.forEach(function(it){
-      const cat=it[0], arr=it[1]||[], n=it[2];
-      /* 去掉同名的重复项，按价格从低到高取，尽量覆盖不同型号 */
-      const seen={}, list=[];
-      arr.slice().sort((a,b)=>(a.p||0)-(b.p||0)).forEach(function(x){
-        if(!x||!x.n) return;
-        if(seen[x.n]) return;
-        seen[x.n]=1;
-        list.push(x);
+      midPick(it[1],it[2]).forEach(function(part){
+        try{ addInv({cat:it[0],part:part,paid:Math.round(part.p||0),shop:'own'}); }catch(e){}
       });
-      list.slice(0,n).forEach(function(part){
-        try{ addInv({cat:cat,part:part,paid:Math.round(part.p||0),shop:'own'}); }catch(e){}
-      });
+    });
+
+    /* 内存按套条进：同型号两条一组，DDR4 3200 8G 为主 */
+    const ramPool=(M||[]).filter(function(x){return /DDR4 3200 8G|DDR4 3200 16G/.test(x.n);});
+    const ramSorted=ramPool.slice().sort(function(a,b){return (b.p||0)-(a.p||0);});   /* 3200 的优先买好的 */
+    const kits=[];
+    const seenRam={};
+    ramSorted.forEach(function(r){
+      if(seenRam[r.n]) return;
+      seenRam[r.n]=1; kits.push(r);
+    });
+    kits.slice(0,5).forEach(function(r){
+      /* 一组两条，算一套 —— 双通道才是"套条" */
+      try{ addInv({cat:'ram',part:r,paid:Math.round(r.p||0),shop:'own'}); }catch(e){}
+      try{ addInv({cat:'ram',part:r,paid:Math.round(r.p||0),shop:'own'}); }catch(e){}
     });
   }catch(e){}
 }
@@ -9676,6 +9693,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01300':['开局库存走中段价位，内存按套条进货'],
     '01299':['开局这批货算旺财自己进的（按进价记成本）'],
     '01298':['开局库存改为每类十来件（共 80 余件）'],
     '01297':['零元购 CG 换成自家店门口实景夜戏'],
