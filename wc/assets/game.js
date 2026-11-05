@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01219';
+const APP_BUILD='01220';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8720,16 +8720,20 @@ renderAll();
     const yes=document.getElementById('mYes');if(yes)yes.textContent='开始新游戏';
   };
   if(st)st.onclick=()=>begin('guided');
-  /* 标题页：首次触摸/点击就启动 BGM（浏览器要求先有手势） */
+  /* 标题页 BGM：先自己试一次（APK 壳里已放开自动播放），不行再由首次点击兜底 */
   (function(){
     let started=false;
     const kick=()=>{
       if(started)return;started=true;
-      try{ if(typeof aeInit==='function')aeInit(); if(typeof aeMusicStart==='function'&&!AE.muted)aeMusicStart(); }catch(e){}
+      try{ if(typeof aeInit==='function')aeInit(); }catch(e){}
+      try{ if(typeof aeResume==='function')aeResume(); }catch(e){}
+      try{ if(typeof aeMusicStart==='function'&&!AE.muted)aeMusicStart(); }catch(e){}
       try{document.removeEventListener('pointerdown',kick);document.removeEventListener('keydown',kick);}catch(e){}
     };
     document.addEventListener('pointerdown',kick,{once:false});
     document.addEventListener('keydown',kick,{once:false});
+    /* 不靠点击：页面就绪后直接尝试一次 */
+    setTimeout(kick,600);
   })();
   const ts=document.getElementById('tSet');
   if(ts)ts.onclick=(e)=>{e.stopPropagation();try{if(typeof aeInit==='function')aeInit();}catch(err){}try{openSettings();}catch(err){}};
