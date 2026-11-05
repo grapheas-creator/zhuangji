@@ -1,7 +1,7 @@
 {
-  "code": 1221,
-  "name": "0.12.11-01221",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01221.apk",
+  "code": 1222,
+  "name": "0.12.12-01222",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01222.apk",
   "size": 32074598,
-  "note": "修复更新弹窗布局（文字/按钮被压扁）"
+  "note": "壳冻结版：更新提示/进度改由游戏内实现，以后内容更新不用再装壳"
 }
