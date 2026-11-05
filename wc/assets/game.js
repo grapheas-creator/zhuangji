@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01259';
+const APP_BUILD='01260';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9322,6 +9322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01260':['更新直接一步到最新版本；同一版本不再重复弹窗'],
     '01259':['APK 内开场 CG 改由原生播放器播放'],
     '01258':['修复启动动画不播放（改用 DOM 设 src，无播放键）'],
     '01257':['App 一打开就播动画（只播这一次，点一下可跳过）'],
@@ -9483,7 +9484,8 @@ renderAll();
       '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
       + '<div style="color:#b8546a;font-weight:800;font-size:14px">'+(o.name||('版本 '+o.code))+'</div>'
       + '<div style="color:#9b8088;font-size:11.5px;margin-top:2px">当前壳版本 '+shellVer()
-      + '　更新包 '+fmt(o.size)+'</div>'
+      + ' → 最新 '+((o.name)||o.code)+'　更新包 '+fmt(o.size)+'</div>'
+      + '<div style="color:#a98e95;font-size:11px;margin-top:6px">直接更新到最新版，不需要逐版本升级</div>'
       + (o.note?'<div style="margin-top:10px">'+o.note+'</div>':'')
       + '</div>', null);
     setTimeout(function(){
@@ -9499,24 +9501,37 @@ renderAll();
           }catch(e){ hideProgress(); }
         };
       }
+      if(n) n.onclick=function(){ markSkip(o.code); try{closeMask(document.getElementById('mask'));}catch(e){} };
       if(n) n.textContent='以后再说';
     },30);
   }
 
-  function checkOnce(){
-    var sv=shellVer(); if(!sv) return;                 /* 不是 APK（浏览器打开）就不查 */
-    fetch('../apk/version.json?t='+Date.now(),{cache:'no-store'})
+  function skipped(){ try{ return (localStorage.getItem('wc_upd_skip')|0)||0; }catch(e){ return 0; } }
+  function markSkip(code){ try{ localStorage.setItem('wc_upd_skip',String(code|0)); }catch(e){} }
+
+  /* 一次到位：直接读线上最新 version.json，装最大那个 code 的包（不做逐版本升级） */
+  function fetchLatest(){
+    return fetch('../apk/version.json?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(o){
-        if(!o||!o.code) return;
-        if((o.code|0) > sv) showUpdate(o);
-      })
-      .catch(function(){});
+        if(!o||!o.code) return null;
+        return o;                      /* version.json 永远指向最新一版 */
+      });
+  }
+
+  function checkOnce(force){
+    var sv=shellVer(); if(!sv) return;                 /* 不是 APK（浏览器打开）就不查 */
+    fetchLatest().then(function(o){
+      if(!o) return;
+      if((o.code|0) <= sv) return;                     /* 已经是最新，什么都不做 */
+      if(!force && (o.code|0) === skipped()) return;   /* 同一个版本不重复打扰 */
+      showUpdate(o);
+    }).catch(function(){});
   }
   /* 标题页出来之后再查，别和开场的弹窗撞 */
   setTimeout(checkOnce,2500);
 
-  window.__WC_UPDATE={check:checkOnce,shellVer:shellVer};
+  window.__WC_UPDATE={check:function(){ checkOnce(true); },shellVer:shellVer};
   window.__WC_SHOW_UPDATE=showUpdate;
 })();
 
