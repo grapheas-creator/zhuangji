@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01256';
+const APP_BUILD='01257';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7961,11 +7961,7 @@ function showBootLoad(){
     if(document.getElementById('startLoad'))return;
     const el=document.createElement('div');
     el.id='startLoad';
-    el.innerHTML='<video class="sl-vid" autoplay muted playsinline loop preload="auto" '+
-      'poster="assets/shop_bg.webp">'+
-        '<source src="assets/boot.webm" type="video/webm">'+
-        '<source src="assets/boot.mp4" type="video/mp4">'+
-      '</video><div class="sl-bg"></div><div class="sl-veil"></div>'+
+    el.innerHTML='<div class="sl-bg"></div><div class="sl-veil"></div>'+
       '<div class="sl-inner"><div class="sl-logo">旺财装机店</div>'+
       '<div class="sl-sub">一间小店 · 一台台机器 · 一单单生意</div>'+
       '<div class="sl-bar"><i></i></div><div class="sl-tip">正在生火开张…</div></div>';
@@ -9326,6 +9322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01257':['App 一打开就播动画（只播这一次，点一下可跳过）'],
     '01256':['开机页换成动画：旺财挥手、开箱、拿螺丝刀、指主机'],
     '01255':['标题页排版下移，标题/按钮间距更舒展'],
     '01254':['页面底色奶油覆盖彻底去掉，原图显示'],
@@ -9612,5 +9609,39 @@ renderAll();
       +';pointer-events:none;letter-spacing:.5px';
     function put(){ if(!document.body.contains(d)) document.body.appendChild(d); }
     if(document.body) put(); else document.addEventListener('DOMContentLoaded',put);
+  }catch(e){}
+})();
+
+
+/* ==================== 开机动画（App 一打开就播） ====================
+   和「开始新游戏」后的加载页共用同一个视频；这里只负责启动那一下，
+   播完（或页面就绪）淡出，交给标题页。 */
+(function(){
+  try{
+    if(document.getElementById('bootCinema')) return;
+    var el=document.createElement('div');
+    el.id='bootCinema';
+    el.innerHTML='<video class="bc-video" autoplay muted playsinline preload="auto">'
+        +'<source src="assets/boot.webm" type="video/webm">'
+        +'<source src="assets/boot.mp4" type="video/mp4">'
+      +'</video>'
+      +'<div class="bc-wrap"><div class="bc-title">旺财装机店</div>'
+      +'<div class="bc-sub">一间小店 · 一台台机器 · 一单单生意</div>'
+      +'<div class="bc-bar"><i></i></div></div>';
+    function mount(){
+      document.body.appendChild(el);
+      var v=el.querySelector('video');
+      try{ v.play().catch(function(){}); }catch(e){}
+      var done=false;
+      v.addEventListener('ended', bye, {once:true});
+      el.addEventListener('click', bye, {once:true});
+      function bye(){
+        if(done) return; done=true;
+        el.style.opacity='0';
+        setTimeout(function(){ try{ v.pause(); el.remove(); }catch(e){} }, 460);
+      }
+      setTimeout(bye, 12000);                      /* 兜底：最多 12 秒 */
+    }
+    if(document.body) mount(); else document.addEventListener('DOMContentLoaded', mount, {once:true});
   }catch(e){}
 })();
