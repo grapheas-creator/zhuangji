@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01292';
+const APP_BUILD='01293';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8104,8 +8104,9 @@ async function runBootIntro(){
     const ok=await _playScene(cb=>playChatScene('chat_chenmo_d1',cb));
     if(ok){S['chat_chat_chenmo_d1']=1;try{save();}catch(e){}}
   }
-  /* 3.5 兜底：确保加载页已经撤掉 */
+  /* 3.5 开场（招牌/留声机/微信）全部结束：这时才撤加载页、露出游戏页面 */
   try{ hideBootLoad(); }catch(e){}
+  try{document.body.classList.remove('story-mode');}catch(e){}
   await wait(80);
 
   /* 4 接单卡 */
@@ -8883,6 +8884,7 @@ renderAll();
       try{localStorage.removeItem(SAVE);}catch(e){}
       _openingSeq=true;try{_openingUntil=Date.now()+6000;}catch(e){}
       window.__booting=true;
+      try{document.body.classList.add('story-mode');}catch(e){}
       /* 12 秒保险：说明卡还开着就等它关；关了就立刻解锁开场锁。
          以前这里还要求 state.tut.onboarded 已置位，可说明卡只要不是从
          「开始干活」按钮关掉的（点空白、被剧情顶掉、旧存档没这个字段），
@@ -9274,7 +9276,7 @@ renderAll();
       function step(){
         if(i>=PAGES.length){ resolve(true); return; }
         var pg=PAGES[i];
-        if(i===0){ try{ hideBootLoad(); }catch(e){} }   /* 留声机第一页出现，加载页让位 */
+
         introCard(pg.t, pg.html, pg.ok, function(){
           if(i===PAGES.length-1){
             try{ giftDadPC(); }catch(e){}
@@ -9530,7 +9532,7 @@ renderAll();
   var INTRO_V=4;                       /* 剧情改版号：变了就让所有人再看一次 */
   function introOnce(){
     var g=G();
-    if(g.intro&&g.introV===INTRO_V){ try{hideBootLoad();}catch(e){} return Promise.resolve(false); }
+    if(g.intro&&g.introV===INTRO_V) return Promise.resolve(false);
     if(introDone) return introDone;
     var waitFree=function(tries){
       return new Promise(function(res){
@@ -9555,6 +9557,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01293':['开场全程用加载页当背景；游戏页面延后到接单后再显示'],
     '01292':['加载页盖到留声机第一页出现，不留空隙'],
     '01291':['加载页只在切场时出现；剧情画面底图统一用店门口那张'],
     '01290':['加载页盖到整段开场结束；剧情卡背景改用店门口图'],
