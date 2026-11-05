@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01264';
+const APP_BUILD='01265';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3576,6 +3576,7 @@ function applyState(st,bd){
   (state.jobs||[]).forEach(j=>{
     if(!j.story&&j.hideScore===undefined)j.hideScore=(hash(String(j.id))%100)<90;
   });
+  state.pcBox=state.pcBox||[];
   state.tb=state.tb||null;state.inv.forEach(x=>{if(x.owner===undefined)x.owner=null;});
   state.machines=state.machines||[];state.benchMachines=state.benchMachines||{};
   if(typeof state.dayStartCash!=='number')state.dayStartCash=state.cash;
@@ -3587,7 +3588,7 @@ function applyState(st,bd){
   const r=document.getElementById('result');if(r){r.className='';r.innerHTML='';}
 }
 function newGame(silent){const d=today();
-  state={date:d,day:1,cash:8000,jobs:[],dayTotal:0,activeId:null,panel:'jobs',inv:[],
+  state={date:d,day:1,cash:8000,jobs:[],dayTotal:0,activeId:null,panel:'jobs',inv:[],pcBox:[],
     story:{done:{},flags:{}},customers:{},tb:null,diag:{},benches:{},machines:[],benchMachines:{},
     dayStartCash:8000,todayIn:0,todayOut:0,todayStory:0,
     rep:{score:3,log:[],bad:0},life:{car:null,house:null},extraIncome:0,done:[],
@@ -6212,7 +6213,12 @@ function renderLeft(){
     body.innerHTML=(state.tut&&!state.tut.hidden?tutCardHTML():'')+jobsHTML();bindJobs();
   }
   else if(state.panel==='soft'){body.innerHTML=tutStripHTML()+softHTML();bindSoft();}
-  else{body.innerHTML=tutStripHTML()+shopHTML();bindShop();}
+  else{
+    body.innerHTML=tutStripHTML()
+      +(state.panel==='inv'?pcBoxHTML():'')
+      +shopHTML();
+    bindShop();bindPcBox();
+  }
   bindTut();
   maybeTutTip();
   try{tutAutoNav();}catch(e){}
@@ -6233,6 +6239,33 @@ function renderLeft(){
       else animPulse(body,'panelSwap',360);
     }
   }
+}
+/* ================= 仓库 · 整机 =================
+   一整台机器单独占一行，不拆成散件。目前只有爸爸给的那台开机机。
+   后续「整机上台 / 拆成散件 / 标价出售」再逐步接上。 */
+function pcBoxHTML(){
+  const list=state.pcBox||[];
+  if(!list.length) return '';
+  return '<div class="pcBoxWrap"><div class="pcBoxHd">整机 <span class="pcBoxCnt">'+list.length+'</span></div>'
+    + list.map((p,i)=>'<div class="pcCard" data-pc="'+i+'">'
+        +'<div class="pcIcon">▣</div>'
+        +'<div class="pcMain"><b>'+p.name+'</b>'
+        +'<div class="pcSpec">'+(p.spec||'')+'</div>'
+        +(p.note?'<div class="pcNote">'+p.note+'</div>':'')
+        +'</div><div class="pcOps"><button type="button" class="mini" data-pcinfo="'+i+'">查看</button></div>'
+      +'</div>').join('')
+    +'</div>';
+}
+function bindPcBox(){
+  document.querySelectorAll('[data-pcinfo]').forEach(b=>{
+    b.onclick=()=>{
+      const p=(state.pcBox||[])[+b.dataset.pcinfo]; if(!p) return;
+      modal(p.name,
+        '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+        +'<b style="color:#b8546a">配置</b><br>'+p.spec.replace(/ · /g,'<br>')
+        +'<br><br><span style="color:#9b8088;font-size:11.5px">'+(p.note||'')+'</span></div>',null);
+    };
+  });
 }
 function jobsHTML(){
   let html='';
@@ -9103,31 +9136,70 @@ renderAll();
   }
 
   function introPopup(){
-    /* 开头：爸爸寄来的留声机（带特写）
-       关掉之后接一条「手机消息」，再交给陈默的微信剧情 */
+    /* 开头：爸爸寄来的两个箱子 —— 留声机 + 一台旧电脑。
+       关掉之后接一条「手机消息」，再交给陈默的微信剧情。 */
     return new Promise(function(resolve){
-      modal('爸爸寄来的包裹',
-        '<img src="assets/gramo.webp?v=01230" alt="" '
-        + 'style="width:100%;display:block;border-radius:12px;margin-bottom:12px;'
-        + 'border:1px solid #f3cdd5;box-shadow:0 6px 18px -10px rgba(180,90,110,.5)">'
-        + '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
-        + '门口放着一个纸箱，寄件人写着「爸」。<br>'
-        + '里面是一台旧留声机，还有一张字条：<br><br>'
-        + '<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
-        + '碟得自己攒，好的东西都藏得深。」</i><br><br>'
-        + '<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span>'
-        + '</div>', null);
-      setTimeout(function(){
-        var y=document.getElementById('mYes'), n=document.getElementById('mNo');
-        if(y){
-          y.textContent='收下留声机';
-          y.onclick=function(){
-            try{closeMask(document.getElementById('mask'));}catch(e){}
-            setTimeout(function(){ phonePing(resolve); }, 420);
-          };
-        }
-        if(n) n.style.display='none';
-      },30);
+      var page=0;
+      var PAGES=[
+        {t:'门口的两个纸箱',
+         html:'<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+           +'早上一拉卷帘门，门口摞着两个纸箱，边上还有一截胶带没撕干净。<br>'
+           +'寄件人一栏是同一个名字，写着「爸」。<br><br>'
+           +'<span style="color:#9b8088;font-size:11.5px">他这人从来不打电——寄到了就是寄到了。</span></div>',
+         ok:'拆第一个'},
+        {t:'爸爸寄来的留声机',
+         html:'<img src="assets/gramo.webp?v=01230" alt="" '
+           +'style="width:100%;display:block;border-radius:12px;margin-bottom:12px;'
+           +'border:1px solid #f3cdd5;box-shadow:0 6px 18px -10px rgba(180,90,110,.5)">'
+           +'<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+           +'第一个箱子里是一台旧留声机，铜喇叭擦得能照出人影。<br>'
+           +'底下压着一张字条，字迹还是他那手歪歪扭扭的字：<br><br>'
+           +'<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
+           +'碟得自己攒，好的东西都藏得深。」</i><br><br>'
+           +'<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span></div>',
+         ok:'再拆第二个'},
+        {t:'第二个箱子里是台电脑',
+         html:'<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+           +'第二个箱子沉得多。掀开纸壳，是一台被拆得差不多的老机器，配件用气泡膜一件件裹好：<br><br>'
+           +'<div style="background:#fff7f4;border:1px solid #f3cdd5;border-radius:12px;padding:10px 12px;line-height:1.95">'
+           +'<b style="color:#b8546a">爸爸的旧整机</b><br>'
+           +'CPU　i3-10100<br>'
+           +'内存　8G × 2<br>'
+           +'硬盘　512G M.2 固态<br>'
+           +'显卡　GTX 750Ti<br>'
+           +'电源　500W</div><br>'
+           +'箱盖内侧用油性笔写了一句：<br>'
+           +'<i style="color:#b8546a">「这台你留着练手。拆坏了不心疼，装好了就是你的第一台。」</i><br><br>'
+           +'<span style="color:#9b8088;font-size:11.5px">整机已经收进「仓库 · 整机」里了。</span></div>',
+         ok:'收下'}
+      ];
+      function show(){
+        var pg=PAGES[page];
+        modal(pg.t, pg.html, null);
+        setTimeout(function(){
+          var y=document.getElementById('mYes'), n=document.getElementById('mNo');
+          if(y){
+            y.textContent=pg.ok;
+            y.onclick=function(){
+              if(page<PAGES.length-1){ page++; show(); return; }
+              try{closeMask(document.getElementById('mask'));}catch(e){}
+              /* 把旧整机放进仓库 */
+              try{
+                state.pcBox=state.pcBox||[];
+                if(!state.pcBox.some(function(x){return x.id==='dad_pc';})){
+                  state.pcBox.push({id:'dad_pc',name:'爸爸的旧整机',
+                    spec:'CPU i3-10100 · 内存 8G×2 · 硬盘 512G M.2 · 显卡 GTX 750Ti · 电源 500W',
+                    note:'箱盖内侧写着：拆坏了不心疼，装好了就是你的第一台。'});
+                  save();
+                }
+              }catch(e){}
+              setTimeout(function(){ phonePing(resolve); }, 420);
+            };
+          }
+          if(n) n.style.display='none';
+        },30);
+      }
+      show();
     });
   }
 
@@ -9370,12 +9442,13 @@ renderAll();
 
   /* 开场留声机：由剧情序列在「招牌剧情」之后调用，返回 Promise */
   var introDone=null;
+  var INTRO_V=2;                       /* 剧情改版号：变了就让所有人再看一次 */
   function introOnce(){
     var g=G();
-    if(g.intro) return Promise.resolve(false);
+    if(g.intro&&g.introV===INTRO_V) return Promise.resolve(false);
     if(introDone) return introDone;
     introDone=introPopup().then(function(){
-      g.intro=1;
+      g.intro=1; g.introV=INTRO_V;
       try{save();}catch(e){}
       return true;
     });
@@ -9386,6 +9459,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01265':['留声机剧情回归并加长（爸爸送的旧整机）；仓库新增整机栏；微信点一次一句'],
     '01264':['留声机挪到陈默剧情前+手机消息提示；微信剧情改点击推进；顶栏贴顶'],
     '01263':['剧情 CG 绝对定位铺满，彻底消除黑边'],
     '01262':['退出游戏/返回主菜单只在游戏内设置里出现'],

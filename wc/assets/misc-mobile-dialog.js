@@ -124,11 +124,6 @@ function playChatScene(id,onDone){
       clearTimeout(autoT);
       try{ hint.textContent='轻触继续 ▸'; hint.style.display=''; }catch(e){}
     };
-    ov.addEventListener('click',function(e){
-      /* 别把返回/关闭之类的按钮吃掉 */
-      if(e.target.closest('.wxBack,.wxMore')) return;
-      try{ next(); }catch(err){}
-    });
     const next=()=>{
       if(closed)return;
       clearTimeout(autoT);
@@ -165,7 +160,14 @@ function playChatScene(id,onDone){
       if(i>=sc.lines.length){hint.textContent='轻触结束 ▸';scheduleNext('结束');}
       else scheduleNext(txt);
     };
-    ov.addEventListener('click',e=>{next();});
+    let lastTap=0;
+    ov.addEventListener('click',e=>{
+      if(e.target&&e.target.closest&&e.target.closest('.wxBack,.wxMore')) return;
+      const now=Date.now();
+      if(now-lastTap<90) return;      /* 一次点击只走一句 */
+      lastTap=now;
+      next();
+    });
     next();
     return true;
   }catch(e){return false;}
