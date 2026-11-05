@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01261';
+const APP_BUILD='01262';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8295,9 +8295,14 @@ function openSettings(){
     '</div>'+
     '<div class="setActs"><button class="mini" id="setTest">试听</button>'+
     '<button class="primary" id="setOk">完成</button></div>'+
-    '<div class="setActs" style="margin-top:8px">'+
-      '<button class="mini" id="setToTitle">返回主菜单</button>'+
-      '<button class="mini bad" id="setQuit">退出游戏</button></div></div>';
+    (function(){
+      var t=document.getElementById('titleScr');
+      var onTitle=!!t && !t.classList.contains('hide');
+      if(onTitle) return '';                       /* 标题页的设置不显示这两个 */
+      return '<div class="setActs" style="margin-top:8px">'+
+        '<button class="mini" id="setToTitle">返回主菜单</button>'+
+        '<button class="mini bad" id="setQuit">退出游戏</button></div>';
+    })()+'</div>';
   document.body.appendChild(ov);
   requestAnimationFrame(()=>ov.classList.add('on'));
   ov.querySelectorAll('input[data-vol]').forEach(inp=>{
@@ -9352,6 +9357,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01262':['退出游戏/返回主菜单只在游戏内设置里出现'],
     '01261':['CG恢复铺满；加载页恢复背景；设置里加退出游戏/返回主菜单；返回键只在标题页生效'],
     '01260':['更新直接一步到最新版本；同一版本不再重复弹窗'],
     '01259':['APK 内开场 CG 改由原生播放器播放'],
