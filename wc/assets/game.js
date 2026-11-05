@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01272';
+const APP_BUILD='01273';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9235,15 +9235,17 @@ renderAll();
            +'<span style="color:#9b8088;font-size:11.5px">整机已经收进「仓库 · 整机」里了。</span></div>',
          ok:'收下'}
       ];
-      /* 返回键 / 点空白把弹窗关掉时，也算结束，绝不能让流程卡死 */
+      /* 返回键 / 点空白把弹窗关掉时，也算结束，绝不能让流程卡死。
+         但切页那一瞬间弹窗会短暂关闭 —— 那时候不能算「结束」，否则中间那页一闪而过。 */
+      var finished=false, switching=false;
       var watch=setInterval(function(){
+        if(switching) return;
         var m=document.getElementById('mask');
         if(!m||!m.classList.contains('on')){
           clearInterval(watch);
           if(!finished){ finished=true; resolve(false); }
         }
       },400);
-      var finished=false;
       function show(){
         var pg=PAGES[page];
         modal(pg.t, pg.html, null);
@@ -9254,8 +9256,14 @@ renderAll();
             y.textContent=pg.ok;
             y.onclick=function(){
               if(Date.now()-born<650) return;   /* 刚弹出来的手滑点击不算 */
+              if(page<PAGES.length-1){
+                /* 翻下一页：这段时间里弹窗会短暂消失，先别当成「关掉了」 */
+                switching=true;
+                page++; show();
+                setTimeout(function(){ switching=false; },900);
+                return;
+              }
               finished=true; clearInterval(watch);
-              if(page<PAGES.length-1){ page++; show(); return; }
               try{closeMask(document.getElementById('mask'));}catch(e){}
               /* 把旧整机放进仓库（用游戏里真实存在的零件拼） */
               try{ giftDadPC(); }catch(e){}
@@ -9536,6 +9544,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01273':['修复留声机中间页一闪而过'],
     '01272':['剧情字号调小到 14.5px'],
     '01271':['引导只保留一个立绘，去掉隐藏式补丁'],
     '01270':['修复引导出现时残留剧情立绘（两个旺财）'],
