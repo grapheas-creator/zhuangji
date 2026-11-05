@@ -1,8 +1,8 @@
 {
-  "code": 1224,
-  "name": "0.12.14-01224",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01224.apk",
-  "size": 32058288,
+  "code": 1225,
+  "name": "0.12.15-01225",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01225.apk",
+  "size": 32553980,
   "content": "01248",
-  "note": "内置离线版刷新到最新；走离线时会有提示"
+  "note": "内置离线副本刷新到最新；右下角标注在线/离线"
 }

@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01248';
+const APP_BUILD='01249';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9322,6 +9322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01249':['右下角标注运行模式（在线/离线副本）'],
     '01248':['加载页彻底去掉奶白遮罩层'],
     '01247':['加载页去掉半透明，文字上移到天空区'],
     '01246':['换上你扩好的 9:20 背景'],
@@ -9584,5 +9585,21 @@ renderAll();
     }
     tryHeal();
     window.addEventListener('online',function(){ if(!done){ tries=0; tryHeal(); } },{once:true});
+  }catch(e){}
+})();
+
+
+/* ==================== 运行模式角标（在线 / 离线副本） ==================== */
+(function(){
+  try{
+    var online=/^https?:/.test(location.protocol);
+    var d=document.createElement('div');
+    d.id='runModeBadge';
+    d.textContent=(online?'在线 ':'离线副本 ')+((typeof APP_BUILD!=='undefined')?APP_BUILD:'');
+    d.style.cssText='position:fixed;right:10px;bottom:8px;z-index:9999;padding:3px 8px;border-radius:999px;'
+      +'font:10px/1.6 system-ui;color:#fff;background:'+(online?'rgba(60,140,90,.75)':'rgba(190,90,90,.8)')
+      +';pointer-events:none;letter-spacing:.5px';
+    function put(){ if(!document.body.contains(d)) document.body.appendChild(d); }
+    if(document.body) put(); else document.addEventListener('DOMContentLoaded',put);
   }catch(e){}
 })();
