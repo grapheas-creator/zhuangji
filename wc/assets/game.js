@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01263';
+const APP_BUILD='01264';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8044,6 +8044,11 @@ async function playStoryForToday(onDone){
       if(ok1){S.seen['plot_opening']=1;S.flags.opening=true;try{save();}catch(e){}}
     }
 
+    /* 1.5 开场留声机（在招牌剧情之后、陈默微信之前） */
+    if(window.__GRAMO&&window.__GRAMO.introOnce){
+      try{ await window.__GRAMO.introOnce(); }catch(e){}
+    }
+
     /* 2. 第 1 天陈默微信（老存档已接单就跳过） */
     if(state.day===1&&!S.seen['chat_chat_chenmo_d1']){
       var started=!!(state.tut&&state.tut.done&&(state.tut.done.accept||state.tut.done.install));
@@ -9098,24 +9103,51 @@ renderAll();
   }
 
   function introPopup(){
-    /* 开头：爸爸寄来的留声机（带特写） */
-    modal('爸爸寄来的包裹',
-      '<img src="assets/gramo.webp?v=01230" alt="" '
-      + 'style="width:100%;display:block;border-radius:12px;margin-bottom:12px;'
-      + 'border:1px solid #f3cdd5;box-shadow:0 6px 18px -10px rgba(180,90,110,.5)">'
-      + '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
-      + '门口放着一个纸箱，寄件人写着「爸」。<br>'
-      + '里面是一台旧留声机，还有一张字条：<br><br>'
-      + '<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
-      + '碟得自己攒，好的东西都藏得深。」</i><br><br>'
-      + '<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span>'
-      + '</div>', null);
-    /* 只留一个按钮：收下留声机，接着就是陈默上门那单 */
+    /* 开头：爸爸寄来的留声机（带特写）
+       关掉之后接一条「手机消息」，再交给陈默的微信剧情 */
+    return new Promise(function(resolve){
+      modal('爸爸寄来的包裹',
+        '<img src="assets/gramo.webp?v=01230" alt="" '
+        + 'style="width:100%;display:block;border-radius:12px;margin-bottom:12px;'
+        + 'border:1px solid #f3cdd5;box-shadow:0 6px 18px -10px rgba(180,90,110,.5)">'
+        + '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+        + '门口放着一个纸箱，寄件人写着「爸」。<br>'
+        + '里面是一台旧留声机，还有一张字条：<br><br>'
+        + '<i style="color:#b8546a">「店里要是太安静了，就放点歌。<br>'
+        + '碟得自己攒，好的东西都藏得深。」</i><br><br>'
+        + '<span style="color:#9b8088;font-size:11.5px">留声机放在了柜台右下角。没有碟的时候它不会响。</span>'
+        + '</div>', null);
+      setTimeout(function(){
+        var y=document.getElementById('mYes'), n=document.getElementById('mNo');
+        if(y){
+          y.textContent='收下留声机';
+          y.onclick=function(){
+            try{closeMask(document.getElementById('mask'));}catch(e){}
+            setTimeout(function(){ phonePing(resolve); }, 420);
+          };
+        }
+        if(n) n.style.display='none';
+      },30);
+    });
+  }
+
+  /* 手机缩略图 + 消息音：留声机之后、陈默剧情之前的那一下 */
+  function phonePing(done){
+    try{ AE.ctx&&AE.ctx.resume(); }catch(e){}
+    try{ SFX.msgOut(); }catch(e){}
+    var box=document.createElement('div');
+    box.id='phonePing';
+    box.innerHTML='<div class="pp-ic">✉</div>'
+      + '<div class="pp-txt"><b>陈默</b><span>在吗</span></div>';
+    document.body.appendChild(box);
+    requestAnimationFrame(function(){ box.classList.add('on'); });
     setTimeout(function(){
-      var y=document.getElementById('mYes'), n=document.getElementById('mNo');
-      if(y) y.textContent='收下留声机';
-      if(n) n.style.display='none';
-    },30);
+      box.classList.remove('on');
+      setTimeout(function(){
+        try{ box.remove(); }catch(e){}
+        if(typeof done==='function') done();
+      }, 320);
+    }, 1600);
   }
 
   function offerLegend(){
@@ -9336,27 +9368,25 @@ renderAll();
   /* 5) 启动时同步一次（读档后也要生效） */
   setTimeout(function(){ try{ G(); sync(); }catch(e){} },1200);
 
-  /* 加载页撤掉之后再弹开场：不看心情、不轮询，就等这一刻 */
+  /* 开场留声机：由剧情序列在「招牌剧情」之后调用，返回 Promise */
+  var introDone=null;
   function introOnce(){
     var g=G();
-    if(g.intro) return;
-    g.intro=1;
-    try{save();}catch(e){}
-    introPopup();
+    if(g.intro) return Promise.resolve(false);
+    if(introDone) return introDone;
+    introDone=introPopup().then(function(){
+      g.intro=1;
+      try{save();}catch(e){}
+      return true;
+    });
+    return introDone;
   }
-
-  try{
-    var _hideBootLoad=hideBootLoad;
-    hideBootLoad=function(){
-      _hideBootLoad.apply(this,arguments);
-      setTimeout(function(){ try{ introOnce(); }catch(e){} }, 520);
-    };
-  }catch(e){}
 
   window.__GRAMO={G:G,allow:allow,owned:owned,buy:buy,sync:sync,DISCS:DISCS,onDay:onDay,introOnce:introOnce};
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01264':['留声机挪到陈默剧情前+手机消息提示；微信剧情改点击推进；顶栏贴顶'],
     '01263':['剧情 CG 绝对定位铺满，彻底消除黑边'],
     '01262':['退出游戏/返回主菜单只在游戏内设置里出现'],
     '01261':['CG恢复铺满；加载页恢复背景；设置里加退出游戏/返回主菜单；返回键只在标题页生效'],

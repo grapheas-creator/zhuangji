@@ -119,19 +119,21 @@ function playChatScene(id,onDone){
       tick();
     };
     let autoT=0;
+    /* 不再自动往下走：每句话都要玩家点一下（点哪都行） */
     const scheduleNext=(txt)=>{
       clearTimeout(autoT);
-      const n=String(txt||'').length;
-      /* 文字越长停得越久：基础 900ms + 每字 55ms（快速阅读也能跟上） */
-      /* 短句 0.7~0.9 秒，长句最多 2.2 秒，再乘随机抖动，避免每条一样长 */
-      const base=Math.max(700,Math.min(2200,650+n*36));
-      const wait=Math.round(base*(0.88+Math.random()*0.26));
-      autoT=setTimeout(()=>{try{next();}catch(e){}},wait);
+      try{ hint.textContent='轻触继续 ▸'; hint.style.display=''; }catch(e){}
     };
+    ov.addEventListener('click',function(e){
+      /* 别把返回/关闭之类的按钮吃掉 */
+      if(e.target.closest('.wxBack,.wxMore')) return;
+      try{ next(); }catch(err){}
+    });
     const next=()=>{
       if(closed)return;
       clearTimeout(autoT);
       if(typing){typing=false;narText.textContent=sc.lines[i-1][1];scheduleNext(sc.lines[i-1][1]);return;}
+      /* 点一次只走一句 */
       if(i>=sc.lines.length){close();return;}
       const [side,txt]=sc.lines[i++];
       if(side==='nar'){
