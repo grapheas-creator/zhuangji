@@ -31,7 +31,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01224';
+const APP_BUILD='01225';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9265,6 +9265,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01225':['更新提示和下载进度搬到游戏内，以后不用再装壳'],
     '01224':['设置页可以看内容版本和壳版本'],
     '01223':['右下角不再显示版本号','内容更新改为游戏风弹窗提示'],
     '01222':['留声机开场改成加载结束后弹出','没有碟时角落不再出现音符','标题页 BGM 自动播放'],
@@ -9322,4 +9323,107 @@ renderAll();
       },1500);
     }catch(e){}
   })();
+})();
+
+
+/* ==================== 应用更新（网页实现，壳只负责装包） ====================
+   · 更新检查、弹窗、进度条全在网页里，样式跟着游戏走
+   · 壳通过 WCBridge 提供 shellVersion() 和 installApk(url)
+   · 进度由壳回调 window.__apkProgress(pct, got, total, bps)
+   ==================================================================== */
+(function(){
+  function shellVer(){
+    try{ if(window.WCBridge&&WCBridge.shellVersion) return WCBridge.shellVersion()|0; }catch(e){}
+    try{ var m=/WCShell\/(\d+)/.exec(navigator.userAgent||''); if(m) return parseInt(m[1],10)||0; }catch(e){}
+    return 0;
+  }
+  function fmt(b){
+    b=+b||0;
+    if(b>=1048576) return (b/1048576).toFixed(1)+' MB';
+    if(b>=1024) return Math.round(b/1024)+' KB';
+    return b+' B';
+  }
+  function spd(bps){
+    bps=+bps||0;
+    if(bps>=1048576) return (bps/1048576).toFixed(1)+' MB/s';
+    if(bps>=1024) return Math.round(bps/1024)+' KB/s';
+    return bps? bps+' B/s':'--';
+  }
+
+  /* ---- 进度遮罩（网页自己做，样式跟游戏一致） ---- */
+  var progEl=null, progBar=null, progTxt=null, progSub=null;
+  function progressUI(){
+    if(progEl) return;
+    progEl=document.createElement('div');
+    progEl.style.cssText='position:fixed;inset:0;z-index:9800;background:rgba(20,16,18,.55);display:flex;'
+      +'align-items:center;justify-content:center;backdrop-filter:blur(2px)';
+    progEl.innerHTML='<div style="width:min(320px,86vw);background:linear-gradient(170deg,#fffdf9,#fff3f4);'
+      +'border:2px solid #f2c3cc;border-radius:20px;padding:20px 18px 18px;box-shadow:0 18px 42px -14px rgba(180,90,110,.5)">'
+      +'<div style="text-align:center;color:#b8546a;font-weight:700;font-size:15px">正在下载更新</div>'
+      +'<div id="__apkSub" style="text-align:center;color:#a98e95;font-size:11.5px;margin:6px 0 12px">连接中…</div>'
+      +'<div style="height:7px;border-radius:99px;background:#f6dfe3;overflow:hidden">'
+      +'<div id="__apkBar" style="height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#ffc2ce,#ff8fa8);transition:width .2s"></div>'
+      +'</div></div>';
+    document.body.appendChild(progEl);
+    progBar=progEl.querySelector('#__apkBar');
+    progSub=progEl.querySelector('#__apkSub');
+  }
+  function hideProgress(){ if(progEl){ try{progEl.remove();}catch(e){} progEl=null; } }
+
+  window.__apkProgress=function(p,got,total,bps){
+    try{
+      progressUI();
+      if(progBar) progBar.style.width=Math.max(0,Math.min(100,p|0))+'%';
+      if(progSub){
+        if(got<0) progSub.textContent='下载完成，正在调起安装…';
+        else progSub.textContent=(got&&total? fmt(got)+' / '+fmt(total)+'   '+spd(bps) : '连接中…');
+      }
+      if(p>=100){ setTimeout(hideProgress,1200); }
+    }catch(e){}
+  };
+  window.__apkFailed=function(msg){
+    hideProgress();
+    try{ toast('更新下载失败：'+(msg||'网络问题')); }catch(e){}
+  };
+
+  /* ---- 检查 + 弹窗 ---- */
+  function showUpdate(o){
+    modal('发现新版本',
+      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
+      + '<div style="color:#b8546a;font-weight:800;font-size:14px">'+(o.name||('版本 '+o.code))+'</div>'
+      + '<div style="color:#9b8088;font-size:11.5px;margin-top:2px">当前壳版本 '+shellVer()
+      + '　更新包 '+fmt(o.size)+'</div>'
+      + (o.note?'<div style="margin-top:10px">'+o.note+'</div>':'')
+      + '</div>', null);
+    setTimeout(function(){
+      var y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){
+        y.textContent='立即更新';
+        y.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          progressUI();
+          try{
+            if(window.WCBridge&&WCBridge.installApk) WCBridge.installApk(o.url);
+            else window.open(o.url,'_blank');
+          }catch(e){ hideProgress(); }
+        };
+      }
+      if(n) n.textContent='以后再说';
+    },30);
+  }
+
+  function checkOnce(){
+    var sv=shellVer(); if(!sv) return;                 /* 不是 APK（浏览器打开）就不查 */
+    fetch('../apk/version.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(o){
+        if(!o||!o.code) return;
+        if((o.code|0) > sv) showUpdate(o);
+      })
+      .catch(function(){});
+  }
+  /* 标题页出来之后再查，别和开场的弹窗撞 */
+  setTimeout(checkOnce,2500);
+
+  window.__WC_UPDATE={check:checkOnce,shellVer:shellVer};
 })();
