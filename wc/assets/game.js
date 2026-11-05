@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01312';
+const APP_BUILD='01313';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10052,6 +10052,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01313':['电脑页改成显示器画面（外壳+屏幕+扫描线）'],
     '01312':['新增电脑桌面页：工单/商店/仓库/软件库/生活/存档/发展/B站/设置'],
     '01311':['交付时显示客户评价；维修单修好=完美，换低档件=不合格'],
     '01310':['单量增长放慢；超出5单只记数字；口碑分完美/基本/不合格三档'],
@@ -10541,7 +10542,7 @@ renderAll();
     if(el){ closePcDesk(); return; }
     el=document.createElement('div');
     el.id='pcDesk';
-    el.innerHTML='<div class="pd-icons">'
+    el.innerHTML='<div class="pd-monitor"><div class="pd-screen"><div class="pd-icons">'
       + ICONS.map(function(x){
           return '<div class="pd-ic" data-k="'+x.k+'"><div class="pd-badge">'+x.ic+'</div><span>'+x.n+'</span></div>';
         }).join('')
@@ -10549,7 +10550,8 @@ renderAll();
       + '<div class="pd-win" style="display:none"></div>'
       + '<div class="pd-task"><span class="pd-start">开始</span>'
       + '<span id="pdDay">第 1 天</span><span id="pdCash"></span>'
-      + '<button class="pd-close" id="pdClose">关闭</button></div>';
+      + '<button class="pd-close" id="pdClose">关闭</button></div>'
+      + '</div></div><div class="pd-stand"></div>';
     document.body.appendChild(el);
     requestAnimationFrame(function(){ el.classList.add('on'); });
     try{

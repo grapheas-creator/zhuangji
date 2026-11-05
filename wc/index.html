@@ -4067,31 +4067,51 @@ body.story-mode #mNav{visibility:hidden!important}
 </style>
 <style id="pcDeskCss">
 /* ===== 电脑桌面 ===== */
+/* ===== 电脑：一台显示器的画面 ===== */
 #pcDesk{position:fixed;inset:0;z-index:9300;opacity:0;transition:opacity .22s ease;
-  background:url('assets/pc_wall.webp') center/cover no-repeat,#f7e7ee;overflow:hidden}
+  background:radial-gradient(120% 90% at 50% 0%,#3a2b33,#1b1418 70%);display:flex;
+  align-items:center;justify-content:center;padding:10px}
 #pcDesk.on{opacity:1}
-#pcDesk .pd-icons{position:absolute;left:14px;top:14px;display:flex;flex-direction:column;gap:10px}
-#pcDesk .pd-ic{width:74px;text-align:center;cursor:pointer;user-select:none}
-#pcDesk .pd-ic .pd-badge{width:52px;height:52px;margin:0 auto 4px;border-radius:14px;
-  display:grid;place-items:center;font-size:24px;
-  background:linear-gradient(180deg,#fffdf8,#ffe9f0);border:2px solid #f0bfd0;
-  box-shadow:0 8px 18px -10px rgba(180,90,120,.55)}
-#pcDesk .pd-ic span{font-size:11.5px;color:#6b4a52;background:rgba(255,252,248,.86);
-  border-radius:8px;padding:1px 6px;line-height:1.5;display:inline-block}
-#pcDesk .pd-win{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:min(420px,92vw);max-height:74vh;overflow:auto;border-radius:14px;
+/* 显示器外壳 */
+#pcDesk .pd-monitor{position:relative;width:100%;height:100%;max-width:520px;max-height:96vh;
+  border-radius:26px;padding:16px 16px 30px;
+  background:linear-gradient(170deg,#f6e6e0,#e9cfd0 60%,#dcbfc4);
+  box-shadow:0 30px 70px -30px rgba(0,0,0,.8),inset 0 2px 0 rgba(255,255,255,.7);
+  display:flex;flex-direction:column}
+/* 屏幕 */
+#pcDesk .pd-screen{position:relative;flex:1;border-radius:12px;overflow:hidden;
+  background:url('assets/pc_wall.webp') center/cover no-repeat,#f7e7ee;
+  box-shadow:inset 0 0 0 4px #2a2226,inset 0 0 60px rgba(60,30,40,.35)}
+/* 扫描线 + 反光 */
+#pcDesk .pd-screen::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:9;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),
+             linear-gradient(115deg,rgba(255,255,255,.16) 0%,transparent 32%,transparent 70%,rgba(255,255,255,.06) 100%)}
+/* 底座 */
+#pcDesk .pd-stand{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);
+  width:130px;height:26px;border-radius:0 0 14px 14px;
+  background:linear-gradient(180deg,#e3c9cb,#cfaeb4)}
+#pcDesk .pd-icons{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:8px;z-index:3}
+#pcDesk .pd-ic{width:66px;text-align:center;cursor:pointer;user-select:none}
+#pcDesk .pd-ic .pd-badge{width:46px;height:46px;margin:0 auto 3px;border-radius:12px;
+  display:grid;place-items:center;font-size:21px;
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,229,238,.92));border:2px solid #e9a9c0;
+  box-shadow:0 6px 14px -8px rgba(120,50,80,.6)}
+#pcDesk .pd-ic span{font-size:10.5px;color:#5c1f30;background:rgba(255,252,248,.9);
+  border-radius:6px;padding:0 5px;line-height:1.5;display:inline-block}
+#pcDesk .pd-win{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  width:min(340px,88%);max-height:64%;overflow:auto;border-radius:10px;
   background:linear-gradient(170deg,#fffdf9,#fff3f6);border:2px solid #e9b9c9;
-  box-shadow:0 30px 60px -30px rgba(120,60,80,.6)}
+  box-shadow:0 20px 40px -20px rgba(120,60,80,.6);z-index:5}
 #pcDesk .pd-bar{display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;background:linear-gradient(180deg,#f7cfdc,#efb6c9);
-  color:#5c1f30;font-size:12.5px;font-weight:700;border-radius:12px 12px 0 0}
-#pcDesk .pd-body{padding:14px 16px;font-size:13px;line-height:1.9;color:#6b5b60}
-#pcDesk .pd-task{position:absolute;left:0;right:0;bottom:0;height:44px;display:flex;align-items:center;
-  gap:10px;padding:0 12px;background:linear-gradient(180deg,rgba(255,250,246,.95),rgba(247,220,230,.95));
-  border-top:2px solid #f0bfd0;font-size:12px;color:#6b4a52}
+  padding:6px 10px;background:linear-gradient(180deg,#f7cfdc,#efb6c9);
+  color:#5c1f30;font-size:12px;font-weight:700}
+#pcDesk .pd-body{padding:12px 14px;font-size:12.5px;line-height:1.9;color:#6b5b60}
+#pcDesk .pd-task{position:absolute;left:0;right:0;bottom:0;height:36px;display:flex;align-items:center;
+  gap:8px;padding:0 10px;background:linear-gradient(180deg,rgba(255,250,246,.96),rgba(247,220,230,.96));
+  border-top:2px solid #f0bfd0;font-size:11.5px;color:#6b4a52;z-index:4}
 #pcDesk .pd-start{font-weight:800;color:#8a3f57;background:#fff;border:2px solid #f0bfd0;
-  border-radius:10px;padding:3px 12px}
-#pcDesk .pd-close{margin-left:auto;background:#fff;border:1px solid #e9b9c9;border-radius:8px;padding:3px 10px}
+  border-radius:8px;padding:1px 10px}
+#pcDesk .pd-close{margin-left:auto;background:#fff;border:1px solid #e9b9c9;border-radius:8px;padding:2px 9px}
 </style>
 </head>
 </head>
@@ -4099,11 +4119,11 @@ body.story-mode #mNav{visibility:hidden!important}
 <div id="bootStill" class="on"></div>
 <!-- 网页启动页已删除（只保留开局加载页） -->
 </div>
-<script src="assets/art-portrait-video.js?v=01312"></script>
-<script src="assets/art-coach-full.js?v=01312"></script>
-<script src="assets/art-coach-voice.js?v=01312"></script>
-<script src="assets/art-extra-1.js?v=01312"></script>
-<script src="assets/art-bench.js?v=01312"></script>
+<script src="assets/art-portrait-video.js?v=01313"></script>
+<script src="assets/art-coach-full.js?v=01313"></script>
+<script src="assets/art-coach-voice.js?v=01313"></script>
+<script src="assets/art-extra-1.js?v=01313"></script>
+<script src="assets/art-bench.js?v=01313"></script>
 
 
 <!-- QQ 内置浏览器（X5）兼容性太差：不尝试渲染游戏，直接引导去系统浏览器 -->
@@ -4117,7 +4137,7 @@ body.story-mode #mNav{visibility:hidden!important}
     <button class="qqBtn" id="qqCopy" type="button">复制网址</button>
   </div>
 </div>
-<script src="assets/misc-ua-guard.js?v=01312"></script>
+<script src="assets/misc-ua-guard.js?v=01313"></script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
@@ -4361,14 +4381,14 @@ body.story-mode #mNav{visibility:hidden!important}
   <div class="acts"><button id="smaskNo">关闭</button></div>
 </div></div>
 
-<script src="assets/lib-three.min.js?v=01312"></script>
-<script src="assets/lib-case3d.js?v=01312"></script>
-<script src="assets/art-extra-2.js?v=01312"></script>
-<script src="assets/art-core.js?v=01312"></script>
-<script src="assets/game.js?v=01312"></script>
-<script src="assets/misc-stats.js?v=01312"></script>
+<script src="assets/lib-three.min.js?v=01313"></script>
+<script src="assets/lib-case3d.js?v=01313"></script>
+<script src="assets/art-extra-2.js?v=01313"></script>
+<script src="assets/art-core.js?v=01313"></script>
+<script src="assets/game.js?v=01313"></script>
+<script src="assets/misc-stats.js?v=01313"></script>
 
-<script src="assets/lib-live2d.js?v=01312"></script>
+<script src="assets/lib-live2d.js?v=01313"></script>
 <div class="buildFlash" id="buildFlash">
   <div class="bfInner">
     <div class="bfTop"><span class="bfDot"></span>装机台 · 实时</div>
@@ -4390,8 +4410,8 @@ body.story-mode #mNav{visibility:hidden!important}
     <div class="tutActs"><button id="tutVoice" class="tutBtn ghost">🔊 语音</button><button id="tutSkip" class="tutBtn ghost">跳过引导</button><button id="tutNext" class="tutBtn main">知道了</button></div>
   </div>
 </div>
-<script src="assets/misc-tut-next.js?v=01312"></script>
-<script src="assets/misc-fx-prefs.js?v=01312"></script>
+<script src="assets/misc-tut-next.js?v=01313"></script>
+<script src="assets/misc-fx-prefs.js?v=01313"></script>
 <style id="a11yMotion">
 /* 立绘「非当前说话者」：降亮度/饱和，不做半透明 */
 #tutVid.is-idle{filter:brightness(.82) saturate(.88) drop-shadow(0 18px 30px rgba(0,0,0,.5))}
@@ -4441,13 +4461,13 @@ body.no-motion .tutGal .gal-sprite.show{animation:none!important}
 /* 标题页右下角已经有 #tVer 了，别叠两层 */
 body.title-open #verMark{display:none!important}
 </style>
-<script src="assets/misc-mobile-dialog.js?v=01312"></script>
-<script src="assets/art-sprites.js?v=01312"></script>
-<script src="assets/misc-version-check.js?v=01312"></script>
-<script src="assets/misc-debug-panel.js?v=01312"></script>
+<script src="assets/misc-mobile-dialog.js?v=01313"></script>
+<script src="assets/art-sprites.js?v=01313"></script>
+<script src="assets/misc-version-check.js?v=01313"></script>
+<script src="assets/misc-debug-panel.js?v=01313"></script>
 
-<script src="assets/misc-context-menu.js?v=01312"></script>
+<script src="assets/misc-context-menu.js?v=01313"></script>
 <!-- 音乐播放器：独立文件，资源包在 music/。删掉这一行就整体去掉，不影响游戏 -->
-<script src="music-player.js?v=01312" defer></script>
+<script src="music-player.js?v=01313" defer></script>
 </body>
 </html>
