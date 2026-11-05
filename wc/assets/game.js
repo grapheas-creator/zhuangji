@@ -31,11 +31,11 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01221';
+const APP_BUILD='01222';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
-const APP_VER_TXT=APP_VER+' · '+APP_BUILD;
+const APP_VER_TXT=APP_VER+' · 内容 '+APP_BUILD;   /* 这是游戏内容的版本；APK 壳版本另算 */
 /* 只要主脚本执行到这里，就在版本号后面加 · JS（用于排查脚本是否真的跑了） */
 try{(function(){var _v=document.getElementById('tVer');if(_v)_v.textContent=APP_VER_TXT;
 var _t=document.getElementById('verTag');if(_t)_t.textContent=APP_VER_TXT;})();}catch(e){}

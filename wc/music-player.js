@@ -489,8 +489,8 @@
       if (S.el) { try { S.el.pause(); } catch (e) {} }
       S.playing = false;
       if (S.ui) {
-        S.ui.fab.style.display = '';           /* 没碟也留着按钮，点它给提示 */
-        S.ui.fab.classList.add('empty');
+        S.ui.fab.style.display = 'none';       /* 没有碟：不显示音符 */
+        S.ui.fab.classList.remove('empty');
         S.ui.box.style.display = 'none';
       }
       return;
