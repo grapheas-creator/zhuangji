@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01308';
+const APP_BUILD='01309';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3190,14 +3190,24 @@ function makeJobs(dateStr,day){
   if(day===1)return jobs;
   const fl=(state.story&&state.story.flags)||{};
   let n=repOrderCount(rand);
-  if(day===2)n=2;                    /* 第二天：陈默回去说了，来了两单亲戚介绍的 */
-  else if(day===3)n=3;               /* 第三天：慢慢传开 */
+  /* 前期少、后期多：口碑 + 粉丝决定单量；玩家一天最多亲自装 5 台 */
+  const _rep=(state.rep&&state.rep.score)||3;
+  const _fans=(state.fans||0);
+  const _fanBonus=Math.min(3,Math.floor(_fans/1000));      /* 每 1000 粉 +1 单，最多 +3 */
+  const _jobCap=5+_fanBonus;
+  let _base = day<=3 ? 1 : (day<=6 ? 2 : (day<=10 ? 3 : 4));
+  if(_rep>=5) _base+=1;
+  if(_rep>=8) _base+=1;
+  n=Math.max(1,Math.min(_jobCap+2, _base+Math.round(rand())));
+  if(day===2)n=2;
+  else if(day===3)n=3;
 
   /* 预算随天数逐步放宽：第 1 周 ≤5k、第 2 周 ≤8k、第 3 周 ≤12k、第 4 周 ≤20k，之后不设限。
      超了就降一档重来（最多 3 次），保证前期不会蹦出高预算单，也不会卡死在「装不起」。 */
   const _day=state.day||1;
   const _cap=_day<7?5000:(_day<14?8000:(_day<21?12000:(_day<28?20000:Infinity)));
   const _usedSw=new Set();
+  const _playerCap=5;                 /* 一天最多亲自装 5 台 */
   for(let i=0;i<n;i++){
     /* 「整机单」：客户不懂配置，只要能装出一台能开机的机器。
        没有跑分门槛、没有软件要求，检查项就是「槽位齐 + 兼容」。
@@ -3222,6 +3232,7 @@ function makeJobs(dateStr,day){
         }
       }catch(e){}
     }
+    const _outsource=(i>=_playerCap);   /* 超过产能的单：只能请师傅 */
     const _cat0=pickCat(rand), _tierStart=pickTier(rand,_cat0);
     let _tier=_tierStart, _job=null;
     for(let _try=0;_try<4;_try++){
@@ -3696,7 +3707,7 @@ function giftStarterStock(){
           if(state.rent){ due+=state.rent.month+state.rent.util; lines.push('房租 '+state.rent.month+' + 水电 '+state.rent.util); }
           const d=state.debt2;
           if(d&&d.paid<d.periods){
-            const interest=Math.round(d.remain*d.rate);
+            const interest=Math.round(d.remain*0.05/12);   /* 年化 5%，按月计息 */
             const pay=Math.round(d.monthly)+interest;
             due+=pay; d.remain=Math.max(0,d.remain-Math.round(d.monthly)); d.paid++;
             lines.push('重建贷款第 '+d.paid+' 期：本金 '+Math.round(d.monthly)+' + 利息 '+interest);
@@ -3824,6 +3835,44 @@ function giftStarterStock(){
           try{ toast('闲鱼那边风险自负，跑分不过就得自己填'); }catch(e){}
         };
       }
+    },30);
+  };
+
+  /* ---- B站：用那台旧电脑拍装机视频，涨粉 → 单量变多 ---- */
+  A.videoUI=function(){
+    const f=g();
+    const fans=state.fans||0;
+    const cd=f.lastVideoDay||0;
+    const canPost=(state.day-(cd||0))>=2;
+    modal('拍条视频发 B 站',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'<b>当前粉丝：'+fans+'</b><br>'
+      +'粉丝每涨 1000，每天会多来一单。<br>'
+      +'（一天最多亲自装 5 台，再多就得请师傅了。）<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">'
+      +(canPost?'素材还在桌上，可以剪一条。':'素材不够，隔两天再拍。')+'</span></div>',null);
+    setTimeout(function(){
+      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){
+        y.textContent=canPost?'拍一条':'素材不够';
+        y.disabled=!canPost;
+        y.onclick=function(){
+          if(!canPost) return;
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          const gain=Math.round(80+Math.random()*220);
+          state.fans=(state.fans||0)+gain;
+          f.lastVideoDay=state.day;
+          try{save();}catch(e){}
+          try{ renderAll(); }catch(e){}
+          modal('视频发出去了',
+            '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+            +'这条涨了 '+gain+' 粉。<br>总粉丝：<b>'+(state.fans||0)+'</b><br><br>'
+            +'<span style="color:#9b8088;font-size:12.5px">'
+            +'粉丝多了，介绍来的人也多了。</span></div>',null);
+          setTimeout(function(){ const y2=document.getElementById('mYes'); if(y2)y2.textContent='好'; },30);
+        };
+      }
+      if(n) n.style.display='none';
     },30);
   };
 
@@ -5042,6 +5091,12 @@ function renderHeader(){
     const lb=document.getElementById('btnLife');
     if(lb){
       const L=state.life||{};const c=LIFE_CARS.find(x=>x.id===L.car),h=LIFE_HOUSES.find(x=>x.id===L.house);
+      try{
+        if(L.pc&&window.__ARC&&window.__ARC.videoUI){
+          var _vb=document.querySelector('[data-life-video]');
+          if(!_vb && typeof openSettings!=='function'){}
+        }
+      }catch(e){}
       try{
         if(L.pc){
           var _lb=document.getElementById('lifeBtn')||document.querySelector('[data-panel="life"]');
@@ -7974,8 +8029,17 @@ function openLife(){
      <div style="font-size:11px;color:#b08e63;letter-spacing:1.5px;margin:2px 0 7px">车</div>
      ${LIFE_CARS.map(x=>row(x,'car')).join('')}
      <div style="font-size:11px;color:#b08e63;letter-spacing:1.5px;margin:10px 0 7px">房子</div>
-     ${LIFE_HOUSES.map(x=>row(x,'house')).join('')}`,
+     ${LIFE_HOUSES.map(x=>row(x,'house')).join('')}
+     ${state.life&&state.life.pc?`<div style="font-size:11px;color:#b08e63;letter-spacing:1.5px;margin:12px 0 7px">电脑</div>
+     <div style="font-size:12px;color:#6b5b60;line-height:1.8">
+       爸爸的旧电脑（柜台后面，用来上网接单、剪视频）<br>
+       粉丝 <b>${state.fans||0}</b>
+       <button class="mini" id="lifeVideo" style="margin-left:8px">拍条视频</button>
+     </div>`:''}`,
     ()=>{});
+  const lv=document.getElementById('lifeVideo');
+  if(lv) lv.onclick=function(){ try{closeMask(document.getElementById('mask'));}catch(e){}
+    setTimeout(function(){ try{window.__ARC.videoUI();}catch(e){} },200); };
   const no=document.getElementById('mNo');if(no)no.style.display='';
   const yes=document.getElementById('mYes');if(yes)yes.textContent='关闭';
   document.querySelectorAll('[data-buy-life]').forEach(b=>b.onclick=()=>{
@@ -9919,6 +9983,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01309':['单量随口碑/粉丝增长（前期少）；每天最多自己做 5 台；B站拍视频涨粉；贷款改年化5%'],
     '01308':['开始新游戏先选难度：旺财/墨桀/某菇/486'],
     '01307':['爸爸那台机器改为工作电脑（上网接单），不进仓库'],
     '01306':['爸爸寄留声机挪到重开张之后'],
