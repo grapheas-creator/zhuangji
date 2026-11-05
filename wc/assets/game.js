@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01314';
+const APP_BUILD='01315';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3274,7 +3274,7 @@ function makeJobs(dateStr,day){
     if(_cap<=20000&&cat==='工作机')cat='办公机';
     const bonus=(fl.supplier?1.05:1)*(fl.bargain?1.06:1)*((fl.workPro&&cat==='工作机')?1.08:1);
     const ultra=(cat==='游戏机'&&tier===2&&rand()<0.3);
-    const pref=pickGpuPref(rand,cat,tier);
+    let pref=pickGpuPref(rand,cat,tier);
     const sp0=SPEC[cat][tier];
     const canAllNew=C.some(c=>sp0.cpu(c)&&c.p!=null)&&B.some(b=>sp0.mb(b)&&b.p!=null)&&M.some(r=>sp0.ram(r)&&r.p!=null)&&P.some(p=>sp0.psu(p)&&p.p!=null)&&K.some(k=>sp0.case(k)&&k.p!=null)&&ST.some(d=>sp0.disk(d)&&d.p!=null);
     /* 极限装机（ultra）一律全套全新件 */
@@ -10065,6 +10065,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01315':['修复旗舰单生成时崩溃（pref 常量赋值）'],
     '01314':['重开张后天数显示为「重开第 N 天」'],
     '01313':['电脑页改成显示器画面（外壳+屏幕+扫描线）'],
     '01312':['新增电脑桌面页：工单/商店/仓库/软件库/生活/存档/发展/B站/设置'],
