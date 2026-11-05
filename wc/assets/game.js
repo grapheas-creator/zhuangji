@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01290';
+const APP_BUILD='01291';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -8088,10 +8088,13 @@ async function runBootIntro(){
   if(state.day===1&&!S['plot_opening']){
     /* 先把 CG 创建出来（它自己带奶油底、铺满屏幕），
        等它画上屏之后再撤底图 —— 中间不留空隙 */
-    const ok=await _playScene(cb=>playPlotEvent('opening',cb));
+    const sceneP=_playScene(cb=>playPlotEvent('opening',cb));
+    setTimeout(function(){ try{hideBootLoad();}catch(e){} },140);
+    const ok=await sceneP;
     if(ok){S['plot_opening']=1;state.story.flags.opening=true;try{save();}catch(e){}}
   }
-  /* 2 剧情结束（加载页先别撤，底下还有留声机和微信要播） */
+  /* 2 剧情结束 */
+  try{ if(!document.getElementById('plotEvent')) hideBootLoad(); }catch(e){}
   await wait(60);
 
   /* 2.5 爸爸寄来的包裹（留声机 + 旧整机）——必须在陈默微信之前 */
@@ -8104,7 +8107,7 @@ async function runBootIntro(){
     const ok=await _playScene(cb=>playChatScene('chat_chenmo_d1',cb));
     if(ok){S['chat_chat_chenmo_d1']=1;try{save();}catch(e){}}
   }
-  /* 3.5 开场剧情全部结束：这时才撤加载页，露出游戏页面 */
+  /* 3.5 兜底：确保加载页已经撤掉 */
   try{ hideBootLoad(); }catch(e){}
   await wait(80);
 
@@ -9554,6 +9557,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01291':['加载页只在切场时出现；剧情画面底图统一用店门口那张'],
     '01290':['加载页盖到整段开场结束；剧情卡背景改用店门口图'],
     '01289':['开始新游戏改回加载页（图+标题+进度条）再接剧情'],
     '01288':['先创建剧情 CG 再撤底图，消除中间空隙'],
