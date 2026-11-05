@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01311';
+const APP_BUILD='01312';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10052,6 +10052,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01312':['新增电脑桌面页：工单/商店/仓库/软件库/生活/存档/发展/B站/设置'],
     '01311':['交付时显示客户评价；维修单修好=完美，换低档件=不合格'],
     '01310':['单量增长放慢；超出5单只记数字；口碑分完美/基本/不合格三档'],
     '01309':['单量随口碑/粉丝增长（前期少）；每天最多自己做 5 台；B站拍视频涨粉；贷款改年化5%'],
@@ -10474,4 +10475,97 @@ renderAll();
     }
     if(document.body) mount(); else document.addEventListener('DOMContentLoaded', mount, {once:true});
   }catch(e){}
+})();
+
+
+/* ================= 电脑桌面 =================
+   点顶栏「💻 电脑」打开：壁纸 + 桌面图标 + 任务栏。
+   图标都是入口，点了就开对应的窗口/面板，不复制逻辑。 */
+(function(){
+  const ICONS=[
+    {k:'jobs',   ic:'📋', n:'工单',   act:function(){ closePcDesk(); setPanel('jobs'); }},
+    {k:'shop',   ic:'🛒', n:'商店',   act:function(){ closePcDesk(); setPanel('shop'); }},
+    {k:'inv',    ic:'📦', n:'仓库',   act:function(){ closePcDesk(); setPanel('inv'); }},
+    {k:'soft',   ic:'💾', n:'软件库', act:function(){ closePcDesk(); setPanel('soft'); }},
+    {k:'life',   ic:'🏠', n:'生活',   act:function(){ closePcDesk(); try{openLife();}catch(e){} }},
+    {k:'save',   ic:'💽', n:'存档',   act:function(){ closePcDesk(); try{document.getElementById('btnSave').click();}catch(e){} }},
+    {k:'dev',    ic:'🏭', n:'店铺发展', act:function(){ devWin(); }},
+    {k:'bili',   ic:'🎬', n:'B站',    act:function(){ closePcDesk(); try{window.__ARC.videoUI();}catch(e){} }},
+    {k:'set',    ic:'⚙',  n:'设置',  act:function(){ closePcDesk(); try{openSettings();}catch(e){} }}
+  ];
+  let el=null;
+
+  function setPanel(k){
+    try{
+      state.panel=k;
+      if(k==='shop'||k==='inv'){ /* 保持当前分类 */ }
+      renderAll();
+    }catch(e){}
+  }
+
+  function devWin(){
+    const box=el.querySelector('.pd-win');
+    if(box){
+      box.innerHTML='<div class="pd-bar"><span>店铺发展</span><span class="pd-x">✕</span></div>'
+        +'<div class="pd-body">'
+        +'<b style="color:#b8546a">请师傅（外包）</b><br>'
+        +'今天接不完的单可以交给师傅做：拿 <b>四成</b> 人工费，不用自己装。<br>'
+        +'<span style="color:#9b8088;font-size:12px">外包单数：'+(state.overflowJobs||0)+' 单</span><br><br>'
+        +'<button class="mini" id="pdHire" style="'+(state.overflowJobs?'':'opacity:.5')+'">交一单给师傅</button><br><br>'
+        +'<b style="color:#b8546a">扩产能</b><br>'
+        +'<span style="color:#9b8088;font-size:12px">以后可以雇人长期装机，现在还没开。</span>'
+        +'</div>';
+      box.querySelector('.pd-x').onclick=function(){ box.style.display='none'; };
+      const hb=box.querySelector('#pdHire');
+      if(hb) hb.onclick=function(){
+        if(!(state.overflowJobs>0)){ try{toast('今天没有多出来的单');}catch(e){} return; }
+        const pay=Math.round(288*0.4);
+        state.overflowJobs--;
+        state.cash=(state.cash||0)+pay;
+        try{save();renderAll();}catch(e){}
+        try{toast('师傅装完一单，进账 '+pay);}catch(e){}
+        devWin();
+      };
+      box.style.display='';
+    }
+  }
+
+  function closePcDesk(){
+    if(!el) return;
+    el.classList.remove('on');
+    setTimeout(function(){ try{el.remove();}catch(e){} el=null; },260);
+  }
+  window.closePcDesk=closePcDesk;
+
+  window.openPcDesk=function(){
+    if(el){ closePcDesk(); return; }
+    el=document.createElement('div');
+    el.id='pcDesk';
+    el.innerHTML='<div class="pd-icons">'
+      + ICONS.map(function(x){
+          return '<div class="pd-ic" data-k="'+x.k+'"><div class="pd-badge">'+x.ic+'</div><span>'+x.n+'</span></div>';
+        }).join('')
+      + '</div>'
+      + '<div class="pd-win" style="display:none"></div>'
+      + '<div class="pd-task"><span class="pd-start">开始</span>'
+      + '<span id="pdDay">第 1 天</span><span id="pdCash"></span>'
+      + '<button class="pd-close" id="pdClose">关闭</button></div>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('on'); });
+    try{
+      el.querySelector('#pdDay').textContent='第 '+(state.day||1)+' 天';
+      el.querySelector('#pdCash').textContent='现金 ¥'+Math.round(state.cash||0);
+    }catch(e){}
+    el.querySelectorAll('.pd-ic').forEach(function(ic){
+      ic.onclick=function(){
+        const x=ICONS.find(function(y){return y.k===ic.dataset.k;});
+        if(x) x.act();
+      };
+    });
+    el.querySelector('#pdClose').onclick=closePcDesk;
+    el.onclick=function(e){ if(e.target===el) closePcDesk(); };
+  };
+
+  const btn=document.getElementById('btnPC');
+  if(btn) btn.onclick=function(){ window.openPcDesk(); };
 })();
