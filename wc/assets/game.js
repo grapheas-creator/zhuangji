@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01281';
+const APP_BUILD='01282';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5038,7 +5038,7 @@ document.addEventListener('click',function(e){
     if(!t||!t.closest)return;
     /* 剧情/微信/接单卡/引导/弹窗/设置 都属于「引导允许的界面」 */
     if(t.closest('#coach,#tutGal,#tutPortrait,#mask,#setSheet,#dbgPanel,.tutActs,'+
-                 '#plotEvent,#chatPop,#storyPop,#dayOverlay,.gal-box,.gal-next'))return;
+                 '#plotEvent,#chatPop,#storyPop,#dayOverlay,#introCard,.gal-box,.gal-next'))return;
     const tgt=(typeof tutTargetEl==='function')?tutTargetEl():null;
     if(tgt&&(tgt===t||tgt.contains(t)))return;
     /* 允许滚动容器本身，避免整页卡死 */
@@ -5263,7 +5263,7 @@ function tutGalShow(step){
     if((m&&m.classList.contains('on'))||
        document.getElementById('startLoad')||document.getElementById('chatPop')||
        document.getElementById('plotEvent')||document.getElementById('storyPop')||
-       document.getElementById('dayOverlay'))return false;
+       document.getElementById('dayOverlay')||document.getElementById('introCard'))return false;
     const g=document.getElementById('tutGal');if(!g)return false;
     const t=document.getElementById('tutText');if(t)t.textContent=(step&&step.text)||'';
     const vid=document.getElementById('tutVid');
@@ -6021,6 +6021,7 @@ function _coachSyncPage(step){
   return true;
 }
 function coachRefresh(){
+  if(document.getElementById('introCard')){ try{coachHide();}catch(e){} return; }
   /* 一次点击会从好几个地方排队调用（40/80/150ms…），而且每调一次就要重排遮罩。
      这里做一次合并：70ms 内的重复调用只留最后一次。 */
   const _now=performance.now();
@@ -9514,6 +9515,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01282':['剧情卡期间屏蔽引导与点击锁；字体统一'],
     '01281':['留声机三页改用独立剧情卡（不再被上一幕顶掉）'],
     '01280':['剧情框内边距留够，文字不再压花边'],
     '01279':['剧情框高度砍掉三分之一（212→142）'],
