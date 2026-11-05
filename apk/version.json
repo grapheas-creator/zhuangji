@@ -1,8 +1,8 @@
 {
-  "code": 1231,
-  "name": "0.12.21-01231",
-  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01231.apk",
+  "code": 1232,
+  "name": "0.12.22-01232",
+  "url": "https://grapheas-creator.github.io/zhuangji/apk/wangcai-01232.apk",
   "size": 38460701,
   "content": "01260",
-  "note": "开场 CG 改用 TextureView 铺满裁切，无黑边"
+  "note": "修正开场CG缩放（不再过度放大）"
 }
