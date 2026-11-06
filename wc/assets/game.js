@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01347';
+const APP_BUILD='01348';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3836,19 +3836,6 @@ function giftStarterStock(){
        开局这批货是"看得见用不上"的诱饵，玩家第一天是赚不到钱的。 */
     if(!f.robbery && state.day===2){ setTimeout(function(){ A.playRobbery(); },700); return; }
 
-    /* 重开张的第二天：陈默加显卡 */
-    if(f.reopen&&f.gpuPending&&!f.gpuDone){
-      f.gpuDone=1; try{save();}catch(e){}
-      setTimeout(function(){
-        try{
-          if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
-            playChatScene('chat_chenmo_gpu',function(){ setTimeout(function(){ A.gpuGuide(); },420); });
-          }else{ A.gpuGuide(); }
-        }catch(e){}
-      },1200);
-      return;
-    }
-
     /* 第 2 天：刘警官到店里看现场 */
     if(f.robbery&&f.robberyReported&&!f.policeVisit&&state.day>=2){
       f.policeVisit=1; try{save();}catch(e){}
@@ -4080,15 +4067,23 @@ function giftStarterStock(){
         y.onclick=function(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
           setTimeout(function(){
-            /* 爸爸包裹当天送到；陈默加显卡留到第二天 */
-            var markGpu=function(){ try{ const ff=g(); ff.gpuPending=1; save(); }catch(e){} };
+            /* 同一天，但要一件一件来：爸爸包裹 → 陈默微信 → 二手/全新 */
+            var gotoChat=function(){
+              try{
+                if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
+                  playChatScene('chat_chenmo_gpu',function(){
+                    setTimeout(function(){ A.gpuGuide(); },520);
+                  });
+                }else{ A.gpuGuide(); }
+              }catch(e){ A.gpuGuide(); }
+            };
             try{
               if(window.__GRAMO&&window.__GRAMO.introForce){
-                window.__GRAMO.introForce().then(function(){ setTimeout(markGpu,300); });
+                window.__GRAMO.introForce().then(function(){ setTimeout(gotoChat,520); });
                 return;
               }
             }catch(e){}
-            markGpu();
+            gotoChat();
           },380);
         };
       }
@@ -10356,6 +10351,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01348':['加显卡时间回到第16天，与重开张/爸爸包裹串联播放'],
     '01347':['陈默加显卡改到重开张第二天；买全新/二手踩坑两条剧情落实'],
     '01346':['爸爸改成老顽童口吻'],
     '01345':['爸爸字条改为「留着店里办公用，账记明白」'],
