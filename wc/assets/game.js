@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01318';
+const APP_BUILD='01319';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4228,7 +4228,15 @@ function makeTbOffer(){
       const g=boxPool[Math.floor(rand()*boxPool.length)];
       parts.push({cat:g[0],part:g[1][Math.floor(rand()*g[1].length)]});
     }
-    for(let j=0;j<1+Math.floor(rand()*3);j++){
+    /* 坏件 4~14 件；越少越常见（权重递减） */
+    let badN=4;
+    try{
+      const w=[];let sum=0;
+      for(let k=4;k<=14;k++){ const ww=(15-(k-4)); w.push(ww); sum+=ww; }
+      let r=rand()*sum;
+      for(let k=4;k<=14;k++){ r-=w[k-4]; if(r<=0){ badN=k; break; } badN=k; }
+    }catch(e){ badN=4; }
+    for(let j=0;j<badN;j++){
       const x=makeBroken(rand,boxPool);
       if(x)parts.push(x);
     }
@@ -4240,6 +4248,26 @@ function makeTbOffer(){
 }
 function tbOffer(){
   if(state.day<=7){ if(state.tb)state.tb=null; return null; }
+  /* 第一次有货之前：隔壁猫咖店的老板来说一声渠道 */
+  try{
+    const fl=(state.story&&state.story.flags)||{};
+    if(!fl.catCafeIntro&&state.day>=8){
+      fl.catCafeIntro=1; try{save();}catch(e){}
+      setTimeout(function(){
+        try{
+          modal('隔壁猫咖的老板',
+            '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+            +'「你也知道，我店里那群猫天天晒太阳，我人又走不开。」<br>'
+            +'他往柜台上一靠，「不过我有路子——城里有批清货的，一周给我一批。'
+            +'我吃不下，你要不要？&quot;<br><br>'
+            +'<span style="color:#9b8088;font-size:12.5px">'
+            +'「丑话说前头：整机整箱，不拆不挑。坏件我都给你标出来了，剩下的看你眼力。」</span></div>',null);
+          setTimeout(function(){ const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+            if(y) y.textContent='那就看看'; if(n) n.style.display='none'; },30);
+        }catch(e){}
+      },900);
+    }
+  }catch(e){}
   const wd=tbWeekday();
   if(wd<1||wd>5){ if(state.tb){state.tb=null;save();} return null; }
   if(!state.tb||state.tb.week!==tbWeekKey()||!state.tb.items){state.tb=makeTbOffer();save();}
@@ -10093,6 +10121,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01319':['周货改为隔壁猫咖老板的渠道；每箱坏件 4~14 件（少则常见）'],
     '01318':['利润率回调到温和区间（小单18~30%，旗舰6~10%）；坏件率12%'],
     '01317':['预算越高利润率越低（小单14~24%，大单2~5%）；人工费率同样递减'],
     '01316':['经济收紧：预算按最低成本定（6~16%余量）、房租15000+水电3000、二手坏件18%、退单/返工要赔钱'],
