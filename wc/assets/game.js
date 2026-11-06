@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01317';
+const APP_BUILD='01318';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3285,10 +3285,10 @@ function makeJobs(dateStr,day){
     const tight=!newOnly&&pad<1.4;
     const _budgetBase=cost*pad*bonus;
     const _laborRate=(function(c){
-      if(c<=3000) return 0.075+rand()*0.03;
-      if(c<=10000) return 0.045+rand()*0.02;
-      if(c<=30000) return 0.030+rand()*0.015;
-      return 0.020+rand()*0.010;
+      if(c<=3000) return 0.08+rand()*0.03;
+      if(c<=10000) return 0.055+rand()*0.02;
+      if(c<=30000) return 0.040+rand()*0.015;
+      return 0.030+rand()*0.010;
     })(cost);
     const labor=Math.max(200,R2(cost*_laborRate,10));
     const key=({'办公机':'0','游戏机':'1','工作机':'2'})[cat]+'-'+tier;
@@ -3399,11 +3399,11 @@ function makeJobs(dateStr,day){
       if(_floor){
         /* 预算越高，利润率越低：小单好赚，大单只是流水 */
         const _mk=(function(f){
-          if(f<=3000)  return 1.14+rand()*0.10;
-          if(f<=8000)  return 1.09+rand()*0.08;
-          if(f<=20000) return 1.05+rand()*0.06;
-          if(f<=50000) return 1.03+rand()*0.04;
-          return 1.02+rand()*0.03;
+          if(f<=3000)  return 1.18+rand()*0.12;   /* 小单：18~30% */
+          if(f<=8000)  return 1.14+rand()*0.10;   /* 中单：14~24% */
+          if(f<=20000) return 1.10+rand()*0.08;   /* 大单：10~18% */
+          if(f<=50000) return 1.08+rand()*0.06;   /* 更大：8~14% */
+          return 1.06+rand()*0.04;                /* 旗舰：6~10% */
         })(_floor);
         const _want=Math.ceil(_floor*_mk/50)*50;
         if(_special) partBudget=Math.max(partBudget,_want);
@@ -7269,7 +7269,7 @@ function bindShopList(){
       let _bad=false;
       try{
         const tutOn=!!(state.tut&&!state.tut.guideOff);
-        if(used&&curCat!=='case'&&!tutOn&&Math.random()<0.18)_bad=true;
+        if(used&&curCat!=='case'&&!tutOn&&Math.random()<0.12)_bad=true;
       }catch(e){}
       addInv({cat:curCat,part:_bad?Object.assign({},p,{faulty:true}):p,paid:price,shop:used?'xianyu':'taobao',faulty:_bad});
       if(state.tut){state.tut.done.buy=true;state.tut.bought=state.tut.bought||{};state.tut.bought[curCat]=true;}
@@ -10093,6 +10093,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01318':['利润率回调到温和区间（小单18~30%，旗舰6~10%）；坏件率12%'],
     '01317':['预算越高利润率越低（小单14~24%，大单2~5%）；人工费率同样递减'],
     '01316':['经济收紧：预算按最低成本定（6~16%余量）、房租15000+水电3000、二手坏件18%、退单/返工要赔钱'],
     '01315':['修复旗舰单生成时崩溃（pref 常量赋值）'],
