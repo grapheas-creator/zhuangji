@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01323';
+const APP_BUILD='01324';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3826,16 +3826,24 @@ function giftStarterStock(){
   A.playPolice=function(){
     const f=g(); f.policeDone=1; try{save();}catch(e){}
 
-    /* 第 4 天上午：刘警官来电，电话里定章程（也就是难度） */
+    /* 第 4 天一早：不是阿妈过来串门，顺口把「怎么处理」聊出来。
+       难度不在菜单里选，而是在对话里选。 */
+    const OPTIONS=[
+      ['wangcai','「一件都不能少。该追的，一样都别想赖。」','旺财难度 · 超简单',
+        ['不是阿妈','行，硬气。我跟那头说一声，按规矩来。']],
+      ['mojie','「能追回几件算几件吧，剩下的我认。」','墨桀难度 · 简单',
+        ['不是阿妈','实在。能回来的先拿回来，别为这个把店拖死。']],
+      ['mogu','「人抓住就行。货……就算了。」','某菇难度 · 中等',
+        ['不是阿妈','嗯，图个清净。货的事翻篇，人也别记仇。']],
+      ['486','「人抓住就行。店要重开，钱我自己去借。」','486 难度 · 困难',
+        ['不是阿妈','借钱？我认识个做小额贷的……你自己掂量。']]
+    ];
+
     function choose(){
       const old=document.getElementById('diffPick'); if(old) old.remove();
       const ov=document.createElement('div'); ov.id='diffPick';
-      ov.innerHTML='<div class="dp-box"><div class="dp-hd">电话里，你定个章程</div>'
-        +[['wangcai','A 往死里追，货一件不能少','旺财难度 · 超简单'],
-          ['mojie','B 能追回几件算几件','墨桀难度 · 简单'],
-          ['mogu','C 撂了，人抓着就行','某菇难度 · 中等'],
-          ['486','D 撂了，重建的账我自己扛','486 难度 · 困难']]
-          .map(function(x,i){
+      ov.innerHTML='<div class="dp-box"><div class="dp-hd">你怎么想的？</div>'
+        + OPTIONS.map(function(x){
             return '<button class="dp-item" data-d="'+x[0]+'">'
               +'<span class="dp-tag">'+x[2]+'</span><b>'+x[1]+'</b></button>';
           }).join('')
@@ -3853,7 +3861,7 @@ function giftStarterStock(){
 
     function apply(diff){
       window.__DIFF=diff;
-      let back=0, backTxt='一件没追回来。';
+      let backTxt='一件没追回来。';
       try{
         const stolen=JSON.parse(f.stolenInv||'[]');
         if(stolen.length){
@@ -3864,8 +3872,7 @@ function giftStarterStock(){
             list=stolen.slice().sort(function(){return Math.random()-0.5;}).slice(0,n);
           }
           list.forEach(function(it){ try{ state.inv.push(it); }catch(e){} });
-          back=list.length;
-          if(back) backTxt='追回了 '+back+' 件。';
+          if(list.length) backTxt='追回了 '+list.length+' 件。';
         }
       }catch(e){}
       if(diff==='486'){
@@ -3874,43 +3881,51 @@ function giftStarterStock(){
       }
       try{save();}catch(e){}
 
-      /* 当天下午：刘警官带着人来了（按分支说话） */
-      const lines={
-        wangcai:[['刘警官','人给你押来了。货，一件不少，你自己点点。'],
-                 ['旺财','（一件不少。这话，听着踏实。）']],
-        mojie:  [['刘警官','人给你押来了。货，就追回来这几件。'],
-                 ['刘警官','剩下的已经转手了，追不回来了。'],
-                 ['旺财','（剩下的，当学费。）']],
-        mogu:   [['刘警官','人给你押来了。货，一件没追回来。'],
-                 ['旺财','（人抓着就行。货，认了。）'],
-                 ['刘警官','也好。卡里那八千还在，比啥都强。']],
-        '486':  [['刘警官','人给你押来了。货，一件没追回来。'],
-                 ['旺财','（人抓着就行。货，认了。）'],
-                 ['刘警官','货没了，店还得开。重建的钱，你打算怎么弄？'],
-                 ['旺财','（三万，年化五个点，十二期。房租五千，水电一千——这些账，躲不掉。）'],
-                 ['刘警官','……行，你心里有数就行。']]
+      /* 不是阿妈的一句回应 */
+      const reply=(OPTIONS.find(function(x){return x[0]===diff;})||OPTIONS[2])[3];
+      const replyHtml=reply.map(function(x){ return '<b>'+x[0]+'</b>：'+x[1]; }).join('<br>');
+
+      /* 当天下午：刘警官带着人过来 */
+      const policeLines={
+        wangcai:['人给你押来了。货，一件不少，你自己点点。'],
+        mojie:  ['人给你押来了。货，就追回来这几件。剩下的已经转手了，追不回来了。'],
+        mogu:   ['人给你押来了。货，一件没追回来。'],
+        '486':  ['人给你押来了。货，一件没追回来。','货没了，店还得开。重建的钱，你打算怎么弄？']
       };
-      const body=(lines[diff]||lines.mogu).map(function(x){
-        return '<b>'+x[0]+'</b>：'+x[1];
-      }).join('<br>');
-      modal('刘警官',
-        '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+body
-        +'<br><br><span style="color:#9b8088;font-size:12.5px">'
-        +'她留了张名片：店里有活儿，可以找她。名片压在柜台玻璃下面。</span></div>',null);
-      setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='收下名片'; },30);
+      const pl=(policeLines[diff]||policeLines.mogu).map(function(t){ return '<b>刘警官</b>：'+t; }).join('<br>');
+
+      modal('不是阿妈',
+        '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+replyHtml+'</div>',null);
+      setTimeout(function(){
+        const y=document.getElementById('mYes');
+        if(y){
+          y.textContent='下午，刘警官来了';
+          y.onclick=function(){
+            try{closeMask(document.getElementById('mask'));}catch(e){}
+            setTimeout(function(){
+              modal('刘警官',
+                '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+pl
+                +'<br><br><span style="color:#9b8088;font-size:12.5px">'
+                +'她留了张名片：店里有活儿，可以找她。名片压在柜台玻璃下面。</span></div>',null);
+              setTimeout(function(){ const y2=document.getElementById('mYes'); if(y2)y2.textContent='收下名片'; },30);
+            },260);
+          };
+        }
+        const n=document.getElementById('mNo'); if(n) n.style.display='none';
+      },30);
     }
 
-    modal('电话响了',
+    modal('不是阿妈',
       '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'<b>刘警官</b>：旺财，人抓到了。<br>'
-      +'<b>旺财</b>：货呢？追回来多少？<br>'
-      +'<b>刘警官</b>：看你想怎么弄。你定个章程，我照办。<br><br>'
-      +'<span style="color:#9b8088;font-size:12.5px">（她这是把决定权交给我了。）</span></div>',null);
+      +'<b>不是阿妈</b>：听说你店里遭了？<br>'
+      +'<b>旺财</b>：嗯，一件不剩。<br>'
+      +'<b>不是阿妈</b>：这条街啊，一年总得有几回。我认识那边的人——你怎么想的，我帮你递个话。<br>'
+      +'<b>旺财</b>：（递个话？那就是我说了算。）</div>',null);
     setTimeout(function(){
       const y=document.getElementById('mYes'), n=document.getElementById('mNo');
       if(y){
-        y.textContent='嗯，我想想';
-        y.onclick=function(){ try{closeMask(document.getElementById('mask'));}catch(e){} setTimeout(choose,260); };
+        y.textContent='我想想';
+        y.onclick=function(){ try{closeMask(document.getElementById('mask'));}catch(e){} setTimeout(choose,240); };
       }
       if(n) n.style.display='none';
     },30);
@@ -10143,6 +10158,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01324':['第4天改成与不是阿妈的对话，难度在对话里选'],
     '01323':['破案时间修正到第4天；难度决定刘警官的台词'],
     '01322':['难度改到第4天刘警官来电时选（四选一，分支台词按剧本）'],
     '01321':['每箱坏件改为正态分布（均值7，标差2.2，4~14件）'],
