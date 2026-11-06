@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01353';
+const APP_BUILD='01354';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10006,7 +10006,7 @@ renderAll();
     var cash=state.cash||0;
     if(cash<d.price){ toast('钱不够，还差 ¥'+(d.price-cash)); return; }
     state.cash-=d.price; g.own[id]=1;
-    if(id==='legend'){ g.boughtLegend=1; g.orderDay=(state.day||1)+2; }
+    if(id==='legend'){ g.boughtLegend=1; g.phone=1; g.orderDay=(state.day||1)+2; }
     try{renderAll();}catch(e){} try{save();}catch(e){} sync();
     toast('买下了「'+d.name+'」，右下角留声机可以听了');
   }
@@ -10233,7 +10233,7 @@ renderAll();
     }catch(e){}
     /* 开场的留声机包褒不在按天触发，改成加载页撤掉那一刻（见 hideBootLoad 挂钩） */
     /* 神秘人卖碟：挪到重开张之后（第 20 天起才有） */
-    if(day>=20&&!g.day3){
+    if(day>=18&&!g.day3){
       g.day3=1; setTimeout(offerLegend,1200);
     }
     sync();
@@ -10393,6 +10393,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01354':['神秘人卖碟改第18天，买/不买都留名片'],
     '01353':['衔接剧情改成打游戏卡顿'],
     '01352':['爸爸的电脑→旺财升级显卡之间加了衔接剧情'],
     '01351':['陈默加显卡不再做二选一，放开了自己配'],
