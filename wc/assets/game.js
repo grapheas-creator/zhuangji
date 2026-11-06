@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01319';
+const APP_BUILD='01320';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4255,15 +4255,15 @@ function tbOffer(){
       fl.catCafeIntro=1; try{save();}catch(e){}
       setTimeout(function(){
         try{
-          modal('隔壁猫咖的老板',
+          modal('猫咖老板 · 不是阿妈',
             '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-            +'「你也知道，我店里那群猫天天晒太阳，我人又走不开。」<br>'
-            +'他往柜台上一靠，「不过我有路子——城里有批清货的，一周给我一批。'
-            +'我吃不下，你要不要？&quot;<br><br>'
+            +'「我店里那群猫天天晒太阳，我人走不开。」<br>'
+            +'他往柜台上一靠，「不过城里有批清货的，我认识人。'
+            +'我把联系方式给你，你自己去谈，我不掺和。」<br><br>'
             +'<span style="color:#9b8088;font-size:12.5px">'
-            +'「丑话说前头：整机整箱，不拆不挑。坏件我都给你标出来了，剩下的看你眼力。」</span></div>',null);
+            +'「丑话说前头：整机整箱，不拆不挑。坏件人家会标出来，剩下的看你眼力。」</span></div>',null);
           setTimeout(function(){ const y=document.getElementById('mYes'), n=document.getElementById('mNo');
-            if(y) y.textContent='那就看看'; if(n) n.style.display='none'; },30);
+            if(y) y.textContent='那就谢谢了'; if(n) n.style.display='none'; },30);
         }catch(e){}
       },900);
     }
@@ -10121,6 +10121,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01320':['货源人定名「不是阿妈」，他只给联系方式不参与买卖'],
     '01319':['周货改为隔壁猫咖老板的渠道；每箱坏件 4~14 件（少则常见）'],
     '01318':['利润率回调到温和区间（小单18~30%，旗舰6~10%）；坏件率12%'],
     '01317':['预算越高利润率越低（小单14~24%，大单2~5%）；人工费率同样递减'],
