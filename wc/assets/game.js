@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01381';
+const APP_BUILD='01382';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6496,7 +6496,7 @@ function drawCoach(el,step){
         let e2=null;try{e2=st.sel();}catch(e){}
         if(!e2)return;
         if(typeof coachNeedsScroll==='function'&&coachNeedsScroll(e2)){
-          coachScrollTo(e2,520,function(){ try{positionCoach(e2);}catch(e){} });
+          coachScrollTo(e2,coachSingleItem(e2)?1:520,function(){ try{positionCoach(e2);}catch(e){} });
         }else{
           coachReposition(step);
         }
@@ -6536,15 +6536,17 @@ function coachSafeBottom(){
   }catch(e){}
   return bottom;
 }
+/* 货架被引导筛成一件了没有：是的话，滚动要「瞬移」而不是动画 */
+function coachSingleItem(el){
+  try{
+    const box=el&&el.closest?el.closest('#leftBody,.list,#storeList'):null;
+    if(!box)return false;
+    const n=box.querySelectorAll('.item').length;
+    return n===1;
+  }catch(e){return false;}
+}
 function coachNeedsScroll(el){
   try{
-    /* 货架被筛成一件（引导固定型号之后就只剩这一件）：根本没有别的东西可找，
-       不做滚动动画，直接扣框。 */
-    const box=el.closest?el.closest('#leftBody,.list,#storeList'):null;
-    if(box){
-      const rows=box.querySelectorAll('.item,.job');
-      if(rows.length<=1)return false;
-    }
     const top=96,bottom=coachSafeBottom();
     const r=el.getBoundingClientRect();
     return !(r.top>=top&&r.bottom<=bottom);
@@ -6581,6 +6583,15 @@ function coachScrollTo(el,dur,done){
     delta=Math.max(-startTop,Math.min(max-startTop,delta));
   }else{
     delta=Math.max(-startTop,delta);
+  }
+  /* dur<=16 表示「不要动画，直接跳到位」：货架只剩一件时就用这个，
+     不然玩家会看到列表自己滑一下，而他其实没别的地方可去。 */
+  if((dur||0)<=16){
+    try{ if(box)box.scrollTop=startTop+delta; else window.scrollTo(0,startTop+delta); }catch(e){}
+    _coachAutoScrolling=false;
+    try{positionCoach(el);}catch(e){}
+    done&&done();
+    return true;
   }
   const total=Math.max(260,dur||900);
   const t0=performance.now();
@@ -7043,7 +7054,7 @@ function coachRefresh(){
        延迟的 drawCoach 不能把旧框再画回来，否则引导层会整块留在屏幕上 */
     const still=()=>{try{const s=(typeof coachStep==='function')?coachStep():null;return !!(s&&s.k===step.k);}catch(e){return false;}};
     try{
-      moved=coachScrollTo(el,900,()=>{
+      moved=coachScrollTo(el,coachSingleItem(el)?1:900,()=>{
         setTimeout(()=>{
           scrollLockOff();
           try{resetCardScrolls();}catch(e){}
@@ -10752,6 +10763,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01382':['只有一件货时目标仍然会被定位到（瞬移，不做滑动动画）'],
     '01381':['引导换页时把列表拉回顶部：筛到只剩一件时不会再继承上一页的滚动位置'],
     '01380':['开局：欢迎卡在加载页底下就摆好，揭幕时和店铺一起出现，不再晚一步弹出来'],
     '01379':['货架只剩一件时不做滚动动画，引导直接扣框'],
