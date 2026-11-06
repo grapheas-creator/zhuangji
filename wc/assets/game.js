@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01346';
+const APP_BUILD='01347';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3836,6 +3836,19 @@ function giftStarterStock(){
        开局这批货是"看得见用不上"的诱饵，玩家第一天是赚不到钱的。 */
     if(!f.robbery && state.day===2){ setTimeout(function(){ A.playRobbery(); },700); return; }
 
+    /* 重开张的第二天：陈默加显卡 */
+    if(f.reopen&&f.gpuPending&&!f.gpuDone){
+      f.gpuDone=1; try{save();}catch(e){}
+      setTimeout(function(){
+        try{
+          if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
+            playChatScene('chat_chenmo_gpu',function(){ setTimeout(function(){ A.gpuGuide(); },420); });
+          }else{ A.gpuGuide(); }
+        }catch(e){}
+      },1200);
+      return;
+    }
+
     /* 第 2 天：刘警官到店里看现场 */
     if(f.robbery&&f.robberyReported&&!f.policeVisit&&state.day>=2){
       f.policeVisit=1; try{save();}catch(e){}
@@ -4067,22 +4080,15 @@ function giftStarterStock(){
         y.onclick=function(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
           setTimeout(function(){
-            var gotoChat=function(){
-              try{
-                if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
-                  playChatScene('chat_chenmo_gpu',function(){
-                    setTimeout(function(){ A.gpuGuide(); },420);
-                  });
-                }else{ A.gpuGuide(); }
-              }catch(e){ A.gpuGuide(); }
-            };
+            /* 爸爸包裹当天送到；陈默加显卡留到第二天 */
+            var markGpu=function(){ try{ const ff=g(); ff.gpuPending=1; save(); }catch(e){} };
             try{
               if(window.__GRAMO&&window.__GRAMO.introForce){
-                window.__GRAMO.introForce().then(function(){ setTimeout(gotoChat,420); });
+                window.__GRAMO.introForce().then(function(){ setTimeout(markGpu,300); });
                 return;
               }
             }catch(e){}
-            gotoChat();
+            markGpu();
           },380);
         };
       }
@@ -4102,18 +4108,45 @@ function giftStarterStock(){
     setTimeout(function(){
       const y=document.getElementById('mYes'), n=document.getElementById('mNo');
       if(y){
-        y.textContent='去商店买全新';
+        y.textContent='买全新';
         y.onclick=function(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
-          try{ state.panel='shop'; curCat='gpu'; if(typeof isMobile==='function'&&isMobile()) mViewSet('docs',true); renderAll(); }catch(e){}
-          try{ toast('去「商店 · 显卡」挑一张全新的'); }catch(e){}
+          setTimeout(function(){
+            modal('商场的装机店',
+              '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+              +'<b>旁白</b>：商场三楼的装机店，柜台小哥嘴很甜，价格咬得很死。<br>'
+              +'<b>旺财</b>：来张预算内的入门卡。发票、保修、防伪贴，一样不少。<br>'
+              +'<b>旁白</b>：（装机、跑分、拷机，一气呵成。）<br>'
+              +'<b>陈默</b>：卧槽，4K 不卡了？导出快得跟开了挂一样！<br>'
+              +'<b>陈默</b>：老同学，靠谱！晚上请你吃饭。<br><br>'
+              +'<span style="color:#9b8088;font-size:12.5px">（这单利润薄，但稳。客户机器，稳就是最省钱的。）</span></div>',null);
+            setTimeout(function(){ const y2=document.getElementById('mYes'); if(y2)y2.textContent='好'; },30);
+          },320);
         };
       }
       if(n){
         n.textContent='先淘二手看看';
         n.onclick=function(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
-          try{ toast('闲鱼那边风险自负，跑分不过就得自己填'); }catch(e){}
+          setTimeout(function(){
+            /* 二手真的踩坑：先垫钱，最后自己补窟窿 */
+            const loss=600+Math.round(Math.random()*400);
+            state.cash=(state.cash||0)-loss;
+            try{ save(); renderAll(); }catch(e){}
+            modal('闲鱼捡漏',
+              '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+              +'<b>旁白</b>：闲鱼蹲了两天，捡到一张「自用退役、无矿无修」的卡，便宜小一半。<br>'
+              +'<b>旺财</b>：哥，这卡跑过分吗？<br>'
+              +'<b>卖家</b>：放心，自用退役，平时就看看视频。<br>'
+              +'<b>旁白</b>：（到货。装机、上机、跑分——分数还挺好看。）<br>'
+              +'<b>旁白</b>：（剪片一小时，画面开始花屏，温度飙到九十度。）<br>'
+              +'<b>旁白</b>：（查序列号：矿卡。散热器拆开，核心底下全是灰。）<br>'
+              +'<b>旺财</b>：（卖家已读不回。这条水，算是趟明白了。）<br>'
+              +'<b>旁白</b>：扯皮三天，拿回一半钱。剩下的窟窿自己补，连夜买了张全新卡。<br>'
+              +'<b>陈默</b>：这卡可以啊！渲 4K 一点不卡。<br><br>'
+              +'<span style="color:#9b8088;font-size:12.5px">（钱亏了 '+loss+'，人没亏。这单的教训，比赚的贵。）</span></div>',null);
+            setTimeout(function(){ const y2=document.getElementById('mYes'); if(y2)y2.textContent='记住了'; },30);
+          },320);
         };
       }
     },30);
@@ -10323,6 +10356,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01347':['陈默加显卡改到重开张第二天；买全新/二手踩坑两条剧情落实'],
     '01346':['爸爸改成老顽童口吻'],
     '01345':['爸爸字条改为「留着店里办公用，账记明白」'],
     '01344':['批量单不设交期'],
