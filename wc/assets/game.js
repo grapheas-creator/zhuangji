@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01386';
+const APP_BUILD='01387';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5987,8 +5987,8 @@ function tutCurrent(){
   }
   return null;
 }
-function tutScrollTop(){
-  try{window.scrollTo(0,0);}catch(e){}
+function tutScrollTop(resetWindow){
+  if(resetWindow!==false){try{window.scrollTo(0,0);}catch(e){}}
   try{
     ['leftBody','panelLeft'].forEach(function(id){
       const el=document.getElementById(id);
@@ -5997,12 +5997,60 @@ function tutScrollTop(){
     const main=document.querySelector('main');if(main&&main.scrollTop)main.scrollTop=0;
   }catch(e){}
 }
+/* ===== 引导的「滚到屏幕中间」：按屏幕刷新率逐帧滚，时间曲线，120Hz 屏就是 120 帧 =====
+   以前是 scrollIntoView 一步到位（瞬移），真机上看着就是「啪」一下跳过去。
+   现在自己算目标位置，用 easeInOutCubic 在 380~700ms 内滚过去；
+   每一帧都顺手把光圈贴回目标上，滚动过程中高亮不会飘。
+   不做固定步长：帧率越高越顺，120Hz 屏就是 120 帧/秒。 */
+let _tutScrollRAF=0,_tutScrollTok=0;
+function tutStopScroll(){
+  _tutScrollTok++;
+  if(_tutScrollRAF){try{cancelAnimationFrame(_tutScrollRAF);}catch(e){}_tutScrollRAF=0;}
+  try{_coachFrozen=false;}catch(e){}
+  _tutScrollAt=0;
+}
+function tutSmoothCenter(el,key){
+  try{
+    if(!el||!key)return false;
+    const vh=window.innerHeight||700;
+    const cur=window.scrollY||window.pageYOffset||0;
+    const r=el.getBoundingClientRect();
+    const max=Math.max(0,((document.documentElement&&document.documentElement.scrollHeight)||(document.body&&document.body.scrollHeight)||0)-vh);
+    const want=Math.max(0,Math.min(max,Math.round(cur+(r.top+r.height/2)-vh/2)));
+    const dist=want-cur;
+    if(Math.abs(dist)<3)return false;          /* 已经在中间：一动不动 */
+    if(_tutScrollRAF){try{cancelAnimationFrame(_tutScrollRAF);}catch(e){}_tutScrollRAF=0;}
+    const tok=++_tutScrollTok;
+    _coachFrozen=true;                         /* 冻结滚动监听：光圈由这个循环自己贴 */
+    const dur=Math.max(420,Math.min(760,Math.abs(dist)*1.3+120));
+    const t0=performance.now();
+    const ease=k=>k<0.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+    const step=function(now){
+      if(tok!==_tutScrollTok)return;
+      let alive=false;
+      try{const s2=coachStep();alive=!!(s2&&s2.k===key);}catch(e){alive=false;}
+      if(!alive){tutStopScroll();return;}       /* 换步/收卡：立刻停 */
+      const k=Math.min(1,(now-t0)/dur);
+      try{window.scrollTo(0,Math.round(cur+dist*ease(k)));}catch(e){}
+      try{positionCoach(el);}catch(e){}
+      if(k<1){_tutScrollRAF=requestAnimationFrame(step);}
+      else{
+        _tutScrollRAF=0;_coachFrozen=false;_tutScrollAt=performance.now();
+        try{positionCoach(el);}catch(e){}
+        try{tutDockSprite();}catch(e){}
+      }
+    };
+    _tutScrollRAF=requestAnimationFrame(step);
+    return true;
+  }catch(e){try{_coachFrozen=false;}catch(_){}return false;}
+}
 /* 进入一步时一次性把页面摆好：视口 / 面板 / 分类 / 搜索词 / 回顶。
    这里不做「要不要滚」的判断——买东西一律列表回顶，单件货自然就在页眉下面。 */
 let _tutEnterKey='',_tutScrollAt=0;
 function tutEnter(step){
   if(!step||_tutEnterKey===step.k)return false;
   _tutEnterKey=step.k;
+  _tutScrollAt=0;          /* 新的一步允许立刻开始平滑滚动 */
   let dirty=false;
   if(step.view&&typeof isMobile==='function'&&isMobile()){
     if(typeof mView!=='undefined'&&mView!==step.view){try{mViewSet(step.view,true);dirty=true;}catch(e){}}
@@ -6019,7 +6067,10 @@ function tutEnter(step){
     try{filt=defaultFilt();dirty=true;}catch(e){}
   }
   if(dirty){try{save();}catch(e){}try{renderAll();}catch(e){}}
-  tutScrollTop();
+  /* 手机上「居中」的步骤别先瞬移回顶：让平滑滚动从当前位置直接滑到目标，
+     否则会先啪一下到顶、再滑下去。 */
+  const _center=(step.scroll==='center'&&typeof isMobile==='function'&&isMobile());
+  tutScrollTop(!_center);
   return dirty;
 }
 
@@ -6503,7 +6554,7 @@ function coachVoiceToggle(){
   else{const t=document.getElementById('coachText');if(t)coachSay(t.textContent);}
 }
 try{document.addEventListener('click',e=>{if(e.target&&e.target.id==='coachVoice')coachVoiceToggle();});}catch(e){}
-function coachHide(){_coachHiddenAt=performance.now();try{if(typeof tutGalHide==='function')tutGalHide();}catch(e){}coachFaceHide();try{if(_coachAudio)_coachAudio.pause();}catch(e){}const c=document.getElementById('coach');if(c)c.classList.remove('on');try{document.body.classList.remove('coachOn');}catch(e){}_coachKey=null;_coachDrawnKey='';_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
+function coachHide(){_coachHiddenAt=performance.now();try{tutStopScroll();}catch(e){}try{if(typeof tutGalHide==='function')tutGalHide();}catch(e){}coachFaceHide();try{if(_coachAudio)_coachAudio.pause();}catch(e){}const c=document.getElementById('coach');if(c)c.classList.remove('on');try{document.body.classList.remove('coachOn');}catch(e){}_coachKey=null;_coachDrawnKey='';_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
 let _coachGlowEl=null;
 function coachGlow(el){
   if(_coachGlowEl===el)return;
@@ -6574,14 +6625,13 @@ function drawCoach(el,step){
   /* 需要滚的步骤：目标不在安全带里才滚，直接交给浏览器的 scrollIntoView，
      不再自己找滚动容器、算方向、算差值（那套算法一找错容器就会「滚反」）。
      每次重画都检查一次：剧情/弹窗刚关掉时页面位置可能被重置，看得见就一动不动。 */
-  if(step.scroll==='center'){
+  if(step.scroll==='center'&&!_tutScrollRAF){
     try{
       const _r=el.getBoundingClientRect(),_bot=coachSafeBottom();
-      if((_r.top<96||_r.bottom>_bot)&&performance.now()-(_tutScrollAt||0)>120){
-        _tutScrollAt=performance.now();
-        el.scrollIntoView({block:'center',inline:'nearest'});
+      if((_r.top<96||_r.bottom>_bot)&&performance.now()-(_tutScrollAt||0)>450){
+        tutSmoothCenter(el,step.k);
       }
-    }catch(e){try{el.scrollIntoView();}catch(e2){}}
+    }catch(e){}
   }
   if(!positionCoach(el)){
     /* 刚点完按钮时面板可能正在重画，这一瞬间量不到目标；
@@ -6790,8 +6840,9 @@ function positionCoach(el){
   put('csB',0,Math.max(0,B),vw,Math.max(0,vh-B));
   put('csL',0,Math.max(0,T),Math.max(0,L),Math.max(0,B-T));
   put('csR',Math.max(0,R),Math.max(0,T),Math.max(0,vw-R),Math.max(0,B-T));
-  /* 光圈换了位置，立绘也要跟着换个不挡道的地方（滚动跟随也会走到这里） */
-  try{tutDockSprite();}catch(e){}
+  /* 光圈换了位置，立绘也要跟着换个不挡道的地方（滚动跟随也会走到这里）。
+     平滑滚动期间跳过：每帧停靠太贵，滚完在动画末尾统一停一次。 */
+  try{if(!_coachFrozen)tutDockSprite();}catch(e){}
   return true;
 }
 
@@ -10816,6 +10867,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01387':['引导「滚到屏幕中间」从瞬移改成逐帧平滑滚动：easeInOutCubic，420~760ms，',
+             '光圈每帧贴着目标走；时间曲线驱动，120Hz 屏就是 120 帧，60Hz 屏自动 60 帧'],
     '01386':['买件/装件步也改成「目标出安全区才居中」：真机商品卡比无头浏览器高，',
              '「装上」压在引导卡下面时现在会把整张卡滚上来，不会再让你点一个看不见的按钮'],
     '01385':['新手引导改成一张写死的线性步骤表：按表一步步走，不再每步探测 DOM / 猜滚动',
