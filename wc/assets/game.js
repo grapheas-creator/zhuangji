@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01348';
+const APP_BUILD='01349';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4079,7 +4079,7 @@ function giftStarterStock(){
             };
             try{
               if(window.__GRAMO&&window.__GRAMO.introForce){
-                window.__GRAMO.introForce().then(function(){ setTimeout(gotoChat,520); });
+                window.__GRAMO.introForce().then(function(){ setTimeout(gotoChat,2000); });
                 return;
               }
             }catch(e){}
@@ -10351,6 +10351,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01349':['收下爸爸包裹后等2秒再弹陈默微信'],
     '01348':['加显卡时间回到第16天，与重开张/爸爸包裹串联播放'],
     '01347':['陈默加显卡改到重开张第二天；买全新/二手踩坑两条剧情落实'],
     '01346':['爸爸改成老顽童口吻'],
