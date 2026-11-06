@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01363';
+const APP_BUILD='01364';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4208,7 +4208,7 @@ function giftStarterStock(){
     modal('故障检测卡',
       '<img src="assets/diagcard.webp" style="width:100%;display:block;border-radius:12px;margin-bottom:10px">'
       +'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'数码管显示：<b style="font-family:monospace;font-size:22px;color:#b8546a">'+code+'</b><br>'
+      +'<div style="display:flex;justify-content:center;padding:8px 0 10px">'+segSvg(code)+'</div>'
       +meaning+'<br><br>'
       +'<span style="color:#9b8088;font-size:12.5px">'
       +'代码表：00/-- 不跑码 · C1/2A 内存 · 25 显卡 · A0/9C 自检通过</span></div>',null);
@@ -10427,6 +10427,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01364':['检测卡代码改为 SVG 七段码动态绘制'],
     '01363':['检测卡改成真实照片显示'],
     '01362':['散热故障不靠检测卡（听风扇/看温度）'],
     '01361':['电源故障=检测卡不亮'],
@@ -10903,6 +10904,39 @@ renderAll();
   }catch(e){}
 })();
 
+
+
+/* 七段数码管：纯 SVG 绘制，带辉光 */
+function segSvg(code){
+  const MAP={'0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd',
+             '6':'afgecd','7':'abc','8':'abcdefg','9':'abcdfg','C':'adef','A':'abcefg',
+             'F':'aefg','H':'bcefg','L':'def','P':'abefg','U':'bcdef','-':'g'};
+  const W=64,H=110,T=9;
+  const P={
+    a:[[T,0],[W-T,0],[W-2*T,T],[2*T,T]],
+    g:[[T,H/2],[W-T,H/2],[W-2*T,H/2+T],[2*T,H/2+T]],
+    d:[[T,H],[W-T,H],[W-2*T,H-T],[2*T,H-T]],
+    f:[[0,T],[T,2*T],[T,H/2-T],[0,H/2]],
+    b:[[W,T],[W-T,2*T],[W-T,H/2-T],[W,H/2]],
+    e:[[0,H/2],[T,H/2+T],[T,H-2*T],[0,H-T]],
+    c:[[W,H/2],[W-T,H/2+T],[W-T,H-2*T],[W,H-T]]
+  };
+  let out='';
+  String(code||'').toUpperCase().split('').forEach(function(ch,i){
+    const on=MAP[ch]||'';
+    Object.keys(P).forEach(function(k){
+      const pts=P[k].map(function(q){return (q[0]+i*W)+','+q[1];}).join(' ');
+      const lit=on.indexOf(k)>=0;
+      out+='<polygon points="'+pts+'" fill="'+(lit?'#ff4b3a':'#2a1a18')+'" '
+        +(lit?'filter="url(#glow)"':'')+' opacity="'+(lit?1:.55)+'"/>';
+    });
+  });
+  return '<svg width="'+(W*String(code).length)+'" height="'+H+'" viewBox="0 0 '+(W*String(code).length)+' '+H+'">'
+    +'<defs><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/>'
+    +'<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
+    +'<rect x="0" y="0" width="'+(W*String(code).length)+'" height="'+H+'" rx="8" fill="#12100f"/>'
+    +out+'</svg>';
+}
 
 /* ================= 电脑桌面 =================
    点顶栏「💻 电脑」打开：壁纸 + 桌面图标 + 任务栏。
