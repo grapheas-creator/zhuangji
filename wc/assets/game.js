@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01335';
+const APP_BUILD='01336';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10225,6 +10225,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01336':['店铺发展里可以50万盘下这家店（之后不用交房租）'],
     '01335':['月支出按难度：水电全交，房租只有中/困难，困难房租15000+税2000'],
     '01334':['重开张按难度分四段文案；房租水电回到5000/1000'],
     '01333':['刘警官台词删掉「一年总得有这么几回」'],
@@ -10709,9 +10710,35 @@ renderAll();
         +'<span style="color:#9b8088;font-size:12px">外包单数：'+(state.overflowJobs||0)+' 单</span><br><br>'
         +'<button class="mini" id="pdHire" style="'+(state.overflowJobs?'':'opacity:.5')+'">交一单给师傅</button><br><br>'
         +'<b style="color:#b8546a">扩产能</b><br>'
-        +'<span style="color:#9b8088;font-size:12px">以后可以雇人长期装机，现在还没开。</span>'
+        +'<span style="color:#9b8088;font-size:12px">以后可以雇人长期装机，现在还没开。</span><br><br>'
+        +'<b style="color:#b8546a">盘下这家店</b><br>'
+        + (state.ownShop
+            ? '<span style="color:#7a9a5a;font-size:12px">这家店是你的了，不用再交房租。</span>'
+            : '<span style="color:#9b8088;font-size:12px">房东开价 <b>¥500,000</b>。买下来就不用再交房租。</span><br>'
+              +'<button class="mini" id="pdBuyShop" style="margin-top:6px;'
+              +((state.cash||0)>=500000?'':'opacity:.5')+'">'
+              +((state.cash||0)>=500000?'盘下来':'钱不够')+'</button>')
         +'</div>';
       box.querySelector('.pd-x').onclick=function(){ box.style.display='none'; };
+      const bs=box.querySelector('#pdBuyShop');
+      if(bs) bs.onclick=function(){
+        if(state.ownShop) return;
+        if((state.cash||0)<500000){ try{toast('钱不够，还差 '+Math.round(500000-(state.cash||0)));}catch(e){} return; }
+        state.cash-=500000;
+        state.ownShop=1;
+        if(state.rent) state.rent.month=0;
+        try{ save(); renderAll(); }catch(e){}
+        try{
+          modal('这家店是你的了',
+            '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+            +'钥匙、房本、还有柜台底下那个铁盒子，房东一样一样交给你。<br>'
+            +'从此不用再交房租。<br><br>'
+            +'<span style="color:#9b8088;font-size:12.5px">'
+            +'（开店那天想着：什么时候能把这块牌子买下来。）</span></div>',null);
+          setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='收起来'; },30);
+        }catch(e){}
+        try{ devWin(); }catch(e){}
+      };
       const hb=box.querySelector('#pdHire');
       if(hb) hb.onclick=function(){
         if(!(state.overflowJobs>0)){ try{toast('今天没有多出来的单');}catch(e){} return; }
