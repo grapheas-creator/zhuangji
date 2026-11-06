@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01358';
+const APP_BUILD='01359';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10209,7 +10209,7 @@ renderAll();
         sw:'能开机就行（CPU 烧了）',level:'m',
         target:{ts:0,cs:2000,ram:8},newOnly:false,tight:false,
         partBudget:900,labor:600,
-        extra:['五六年前的配置，当时是主流','她说资料比机器重要','开机没反应，多半是 CPU 走了']}};
+        extra:['他说资料比机器重要','开机没反应，多半是 CPU 走了']}};
     var j=buildStoryJob(s);
     j.id='GR5';j.storyId='g5';j.dueDay=day;   /* 当天必须交 */
     return j;
@@ -10401,6 +10401,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01359':['某菇改为男性'],
     '01358':['某菇改成台式机、CPU坏'],
     '01357':['7co 追的年头改为五六年'],
     '01356':['7co剧情改到第21天：某菇的笔记本数据抢救'],
