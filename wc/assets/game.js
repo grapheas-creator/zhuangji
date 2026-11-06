@@ -7714,13 +7714,18 @@ function currentList(){
     if(pb==null)return -1;
     return /Desc$/.test(filt.sort)?pb-pa:pa-pb;
   });
-  /* 第 1 天引导：刚买的那一件永远排在仓库最前。
-     开局仓库存货很多，按价格排它可能排到十几行外，光圈就指到屏幕外了；
-     置顶之后「装上」必然在页眉下面第一张卡上，不需要任何滚动。 */
-  if(isInv&&typeof tutOn==='function'&&tutOn()){
+  /* 第 1 天引导：要买的那件 / 刚买的那件，永远排在列表最前。
+     开局仓库存货很多，商店搜索也可能命中同系列的另一件，按价格排目标会掉到第二行；
+     置顶之后光圈必然贴着页眉下面第一张卡，不需要任何滚动。 */
+  if(typeof tutOn==='function'&&tutOn()){
     try{
-      const t=state.tut;const uid=t&&t.buyUid&&t.buyUid[curCat];
-      if(uid!=null){const i=arr.findIndex(x=>String(x.uid)===String(uid));if(i>0)arr.unshift(arr.splice(i,1)[0]);}
+      if(isInv){
+        const t=state.tut;const uid=t&&t.buyUid&&t.buyUid[curCat];
+        if(uid!=null){const i=arr.findIndex(x=>String(x.uid)===String(uid));if(i>0)arr.unshift(arr.splice(i,1)[0]);}
+      }else{
+        const want=tutPick(curCat);
+        if(want){const i=arr.findIndex(x=>x.n===want.n);if(i>0)arr.unshift(arr.splice(i,1)[0]);}
+      }
     }catch(e){}
   }
   return arr;
