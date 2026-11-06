@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01330';
+const APP_BUILD='01331';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3920,7 +3920,7 @@ function giftStarterStock(){
       +'<b>不是阿妈</b>：哟，遭了？<br>'
       +'<b>旺财</b>：一件不剩。<br>'
       +'<b>不是阿妈</b>：美丽国嘛，一年总得来这么几回。<br>'
-      +'<b>不是阿妈</b>：你打算怎么着，说一声，我顺手给你带句话。</div>',null);
+      +'<b>不是阿妈</b>：你打算怎么着。</div>',null);
     setTimeout(function(){
       const y=document.getElementById('mYes'), n=document.getElementById('mNo');
       if(y){
@@ -10158,6 +10158,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01331':['不是阿妈台词精简到一句「你打算怎么着」'],
     '01330':['不是阿妈不再提警局，保持神秘'],
     '01329':['删掉不是阿妈那句自夸的台词'],
     '01328':['不是阿妈设定为黑白两道都有关系'],
