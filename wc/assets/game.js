@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01364';
+const APP_BUILD='01365';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10427,6 +10427,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01365':['七段码加字间距、减辉光，更好认'],
     '01364':['检测卡代码改为 SVG 七段码动态绘制'],
     '01363':['检测卡改成真实照片显示'],
     '01362':['散热故障不靠检测卡（听风扇/看温度）'],
@@ -10911,7 +10912,7 @@ function segSvg(code){
   const MAP={'0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd',
              '6':'afgecd','7':'abc','8':'abcdefg','9':'abcdfg','C':'adef','A':'abcefg',
              'F':'aefg','H':'bcefg','L':'def','P':'abefg','U':'bcdef','-':'g'};
-  const W=64,H=110,T=9;
+  const W=64,H=110,T=8,GAP=14;
   const P={
     a:[[T,0],[W-T,0],[W-2*T,T],[2*T,T]],
     g:[[T,H/2],[W-T,H/2],[W-2*T,H/2+T],[2*T,H/2+T]],
@@ -10921,20 +10922,22 @@ function segSvg(code){
     e:[[0,H/2],[T,H/2+T],[T,H-2*T],[0,H-T]],
     c:[[W,H/2],[W-T,H/2+T],[W-T,H-2*T],[W,H-T]]
   };
+  const str=String(code||'').toUpperCase();
+  const n=str.length||1, TW=W*n+GAP*(n-1);
   let out='';
-  String(code||'').toUpperCase().split('').forEach(function(ch,i){
+  str.split('').forEach(function(ch,i){
     const on=MAP[ch]||'';
     Object.keys(P).forEach(function(k){
-      const pts=P[k].map(function(q){return (q[0]+i*W)+','+q[1];}).join(' ');
+      const pts=P[k].map(function(q){return (q[0]+i*(W+GAP))+','+q[1];}).join(' ');
       const lit=on.indexOf(k)>=0;
       out+='<polygon points="'+pts+'" fill="'+(lit?'#ff4b3a':'#2a1a18')+'" '
         +(lit?'filter="url(#glow)"':'')+' opacity="'+(lit?1:.55)+'"/>';
     });
   });
-  return '<svg width="'+(W*String(code).length)+'" height="'+H+'" viewBox="0 0 '+(W*String(code).length)+' '+H+'">'
-    +'<defs><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/>'
+  return '<svg width="'+TW+'" height="'+H+'" viewBox="0 0 '+TW+' '+H+'">'
+    +'<defs><filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/>'
     +'<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
-    +'<rect x="0" y="0" width="'+(W*String(code).length)+'" height="'+H+'" rx="8" fill="#12100f"/>'
+    +'<rect x="0" y="0" width="'+TW+'" height="'+H+'" rx="8" fill="#12100f"/>'
     +out+'</svg>';
 }
 
