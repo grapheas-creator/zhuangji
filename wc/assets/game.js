@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01322';
+const APP_BUILD='01323';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3740,7 +3740,7 @@ function giftStarterStock(){
       state.benchMachines={};
       build=newBuild();
       g().robbery=1; g().robberyDay=state.day;
-      g().policeDay=state.day;
+      g().policeDay=(state.day||2)-1;   /* 被抓那夜算第 1 天 → 第 4 天破案 */
       g().reopenDay=state.day+15;
       save();
     }catch(e){}
@@ -10143,6 +10143,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01323':['破案时间修正到第4天；难度决定刘警官的台词'],
     '01322':['难度改到第4天刘警官来电时选（四选一，分支台词按剧本）'],
     '01321':['每箱坏件改为正态分布（均值7，标差2.2，4~14件）'],
     '01320':['货源人定名「不是阿妈」，他只给联系方式不参与买卖'],
