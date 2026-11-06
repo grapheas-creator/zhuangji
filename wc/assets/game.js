@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01342';
+const APP_BUILD='01343';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3243,7 +3243,8 @@ function makeJobs(dateStr,day){
   try{
     const _repNow=(state.rep&&state.rep.score)||3;
     const _fanNow=state.fans||0;
-    if(_repNow>=4.2&&_fanNow>=3000&&rand()<0.35){
+    const _bulkP=_repNow<4.2?0:Math.min(0.10,0.02+(_repNow-4.2)*0.03);
+    if(_fanNow>=3000&&_bulkP>0&&rand()<_bulkP){
       const qty=6+Math.floor(rand()*5);          /* 6~10 台 */
       const unitCost=Math.max(1200,Math.round(900+rand()*900));
       const unitBudget=Math.round(unitCost*1.18/50)*50;   /* 单台给 18% 的件费余量 */
@@ -3258,7 +3259,7 @@ function makeJobs(dateStr,day){
                '交期紧，别拖'],
         status:'open',deadline:5,dueDay:day+4,bornDay:day,
         hideScore:true,minMhz:0,assembly:true,grade:'low',
-        bulkQty:qty});
+        bulkQty:qty,bulkDone:0,bulkUnitBudget:unitBudget,bulkUnitCost:unitCost});
     }
   }catch(e){}
 
@@ -5373,6 +5374,7 @@ function renderMobileBar(){
         <span>${idx} / ${list.length}</span>
         <button type="button" data-sw="1" aria-label="下一单">›</button></div>`;})()}
     ${j.repair?'':`<div class="mbSw">能跑 ${j.sw}</div>`}
+    ${j.bulkQty?`<div class="mbSw" style="color:#b8546a">批量进度 ${j.bulkDone||0}/${j.bulkQty} 台（每天 3~5 台）</div>`:''}
     <div class="mbTgt">${(()=>{
       const bits=targetBits(j);
       if(!bits.length)return '目标 <b>能开机就行</b>';
@@ -9240,6 +9242,24 @@ document.getElementById('btnClose').onclick=()=>{
     setTimeout(()=>toast(_expired+' 单过了交期，客户退单了'),1400);
     try{if(repUnlocked()&&repScore()<REP_BUST){setTimeout(()=>{try{gameOver();}catch(e){}},1500);}}catch(e){}
   }
+  /* 批量单：每天自动推进 3~5 台，装完自动结款 */
+  try{
+    (state.jobs||[]).forEach(function(j){
+      if(!j.bulkQty||j.status!=='taken') return;
+      const per=3+Math.floor(Math.random()*3);      /* 3~5 台/天 */
+      j.bulkDone=Math.min(j.bulkQty,(j.bulkDone||0)+per);
+      if(j.bulkDone>=j.bulkQty){
+        const margin=(j.bulkUnitBudget-j.bulkUnitCost)*j.bulkQty;
+        const pay=Math.max(0,Math.round(margin+j.labor));
+        state.cash=(state.cash||0)+pay;
+        state.todayIn=(state.todayIn||0)+pay;
+        j.status='done';
+        try{ repApply(true,'perfect'); }catch(e){}
+        setTimeout(function(){ try{ toast('批量单交完了，进账 '+pay); }catch(e){} },1200);
+      }
+    });
+  }catch(e){}
+
   /* 昨天的机器跟着昨天的工单一起清掉，别一直堆在仓库里 */
   if(state.machines&&state.machines.length){
     state.machines=state.machines.filter(m=>!m.jobId||state.jobs.some(j=>j.id===m.jobId));
@@ -10302,6 +10322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01343':['批量单：变成多天进度（每天3~5台，显示进度），出现概率随口碑最高10%'],
     '01342':['批量单改为单位出件费，赚采买差价+人工'],
     '01341':['新增批量单（6~10台，客户供件，只赚人工），需要口碑≥4.2且粉丝≥3000'],
     '01340':['B站只增加单量，不产生现金收入'],
