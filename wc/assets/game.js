@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01341';
+const APP_BUILD='01342';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3245,18 +3245,20 @@ function makeJobs(dateStr,day){
     const _fanNow=state.fans||0;
     if(_repNow>=4.2&&_fanNow>=3000&&rand()<0.35){
       const qty=6+Math.floor(rand()*5);          /* 6~10 台 */
-      const unitBase=Math.max(1200,Math.round(900+rand()*900));
-      jobs.push({id:'B'+day+'-'+qty,cat:'办公机',tier:0,baseCost:unitBase,
+      const unitCost=Math.max(1200,Math.round(900+rand()*900));
+      const unitBudget=Math.round(unitCost*1.18/50)*50;   /* 单台给 18% 的件费余量 */
+      jobs.push({id:'B'+day+'-'+qty,cat:'办公机',tier:0,baseCost:unitCost,
         name:'批量单 · '+(qty)+' 台办公机',
         client:['城东的物流公司','街口的会计事务所','一所职高','社区活动中心'][Math.floor(rand()*4)],
         clientRole:'单位采购',sw:'Office',swList:'Office',level:'m',
         target:{ts:0,cs:0,ram:8},newOnly:false,tight:false,ultra:false,gpuPref:null,
-        partBudget:0,                          /* 客户自己供件 */
+        partBudget:unitBudget*qty,             /* 单位按台数给件费，价差是你的 */
         labor:qty*220,
-        extra:['客户把 '+qty+' 台机器的件全搬来了','你只负责组装、涂硅脂、点亮','件是客户的，不能拿去卖'],
+        extra:['一次性 '+qty+' 台，件你负责采买','按台数结算件费，价差归你',
+               '交期紧，别拖'],
         status:'open',deadline:5,dueDay:day+4,bornDay:day,
         hideScore:true,minMhz:0,assembly:true,grade:'low',
-        bulkQty:qty,bulkOwner:true});
+        bulkQty:qty});
     }
   }catch(e){}
 
@@ -8507,7 +8509,13 @@ function deliver(){
   /* 通过 */
   const labor=jobLabor(j);
   /* 差价全部归玩家（不做分成）。超预算时玩家自己承担。 */
-  const income=j.partBudget+labor-cost;
+  /* 批量单：只装一台，但件费是按台数给的，成本也要按台数扣 */
+  let income=j.partBudget+labor-cost;
+  try{
+    if(j.bulkQty&&j.bulkQty>1){
+      income=j.partBudget+labor-cost*j.bulkQty;
+    }
+  }catch(e){}
   const billed=j.partBudget+labor;
   const snap=JSON.parse(JSON.stringify(build));
   state.cash+=billed;state.todayIn=(state.todayIn||0)+billed;if(j.story)state.todayStory=(state.todayStory||0)+1;
@@ -10294,6 +10302,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01342':['批量单改为单位出件费，赚采买差价+人工'],
     '01341':['新增批量单（6~10台，客户供件，只赚人工），需要口碑≥4.2且粉丝≥3000'],
     '01340':['B站只增加单量，不产生现金收入'],
     '01339':['被动收入上调：师傅每天900/人，B站按粉丝3%结算'],
