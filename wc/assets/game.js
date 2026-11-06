@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01366';
+const APP_BUILD='01367';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10243,7 +10243,7 @@ renderAll();
       job:{cat:'办公机',tier:0,name:'维修单 · 某菇的老台式（不开机）',
         sw:'能开机就行',level:'m',
         target:{ts:0,cs:2000,ram:8},newOnly:false,tight:false,
-        partBudget:900,labor:600,
+        partBudget:900,labor:300,
         extra:['他把整台机器抱了过来','他说资料比机器重要'],
         /* 七八年前的客户件：8 代 i5 + B365 + DDR4 + SATA 盘，只坏 CPU */
         repair:{fault:'cpu',
@@ -10451,6 +10451,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01367':['某菇那单人工费降到 300（原来 600，比别的维修单高一倍）'],
     '01366':['检测卡接进维修单：买过卡就能在单子上插卡看跑码',
              '电脑桌面加了「故障码纸条」：完整的 POST 代码表',
              '某菇的单子改成维修单：七八年前的客户机，CPU 烧了',
