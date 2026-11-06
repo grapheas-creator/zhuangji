@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01334';
+const APP_BUILD='01335';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3754,7 +3754,14 @@ function giftStarterStock(){
         const last=(state.rent&&state.rent.lastDay)||1;
         if(state.day-last>=30){
           let due=0, lines=[];
-          if(state.rent){ due+=state.rent.month+state.rent.util; lines.push('房租 '+state.rent.month+' + 水电 '+state.rent.util); }
+          if(state.rent){
+            due+=state.rent.month+state.rent.util+(state.rent.tax||0);
+            const parts=[];
+            if(state.rent.month) parts.push('房租 '+state.rent.month);
+            parts.push('水电 '+state.rent.util);
+            if(state.rent.tax) parts.push('税 '+state.rent.tax);
+            lines.push(parts.join(' + '));
+          }
           const d=state.debt2;
           if(d&&d.paid<d.periods){
             const interest=Math.round(d.remain*0.05/12);   /* 年化 5%，按月计息 */
@@ -3882,9 +3889,14 @@ function giftStarterStock(){
           if(list.length) backTxt='追回了 '+list.length+' 件。';
         }
       }catch(e){}
+      /* 每月固定支出：水电所有人交；房租只有中/困难交；困难再加税 */
       if(diff==='486'){
         state.debt2={principal:30000, remain:30000, periods:12, paid:0, rate:0.05, monthly:30000/12};
-        state.rent={month:5000, util:1000, lastDay:0};
+        state.rent={month:15000, util:1000, tax:2000, lastDay:0};
+      }else if(diff==='mogu'){
+        state.rent={month:5000, util:1000, tax:0, lastDay:0};
+      }else{
+        state.rent={month:0, util:1000, tax:0, lastDay:0};
       }
       try{save();}catch(e){}
 
@@ -3993,7 +4005,7 @@ function giftStarterStock(){
       '486':  ['半个月。卷帘门修好了，货架重新钉了一遍，门口重新挂上红布。',
                '货架是空的。卡里只剩墨桀借的八千，一件配件都没有。',
                '重建贷了三万：年化五个点，十二期，每月还两千六百二十五。',
-               '房租五千，水电一千，月月要交。',
+               '房租一万五，水电一千，税两千，月月要交。',
                '（三万块的账，月月在等。这店，得跑起来。）']
     };
     const lines=TEXT[diff]||TEXT.mogu;
@@ -10213,6 +10225,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01335':['月支出按难度：水电全交，房租只有中/困难，困难房租15000+税2000'],
     '01334':['重开张按难度分四段文案；房租水电回到5000/1000'],
     '01333':['刘警官台词删掉「一年总得有这么几回」'],
     '01332':['报警后警察第2天到场，不再是当场来'],
