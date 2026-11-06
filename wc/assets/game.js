@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01375';
+const APP_BUILD='01376';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5831,7 +5831,10 @@ function tutLocked(){
     /* 装机实拍层播放期间先别启用点击锁：它盖住全屏，锁只会让玩家白点并弹错提示。
        等实拍层收起、coachRefresh 重新画下一步后，锁自然恢复。 */
     if(typeof _benchDemoOn!=='undefined'&&_benchDemoOn)return false;
-    /* 以 coachStep 有没有下一步为准：还有步骤就是引导中 */
+    /* 还有步骤 = 引导中；但「步骤还在、卡却被收掉了」时绝不能锁：
+       否则玩家点什么都弹「先跟着旺财的提示操作」，而屏幕上根本没有提示。 */
+    const c=document.getElementById('coach');
+    if(!c||!c.classList.contains('on'))return false;
     return !!coachStep();
   }catch(e){return false;}
 }
@@ -6436,7 +6439,10 @@ function drawCoach(el,step){
     _coachMiss=(_coachMiss||0)+1;
     try{const h=document.getElementById('coachHole');if(h)h.style.opacity='0';}catch(e){}
     if(_coachMiss<6){setTimeout(()=>{try{coachRefresh();}catch(e){}},90);return;}
-    _coachMiss=0;coachHide();return;
+    _coachMiss=0;coachHide();
+    clearTimeout(coachRefresh._slow);
+    coachRefresh._slow=setTimeout(()=>{try{coachRefresh();}catch(e){}},700);
+    return;
   }
   _coachMiss=0;
   try{const h=document.getElementById('coachHole');if(h)h.style.opacity='';}catch(e){}
@@ -6915,7 +6921,12 @@ function coachRefresh(){
   if(!el||typeof el.getBoundingClientRect!=='function'){
     /* DOM 可能刚被重画（刚切页签 / 刚买完件），别急着判定「没得指」，稍等再看一眼 */
     if(!_coachRetry){_coachRetry=setTimeout(()=>{_coachRetry=null;try{coachRefresh();}catch(e){}},90);return;}
-    coachHide();return;
+    coachHide();
+    /* 收掉卡片之后挂一个慢重试：面板/列表稳下来就能自己回来。
+       以前这里收掉就再也不画了，而步骤还在，点击锁把玩家死死锁住。 */
+    clearTimeout(coachRefresh._slow);
+    coachRefresh._slow=setTimeout(()=>{try{coachRefresh();}catch(e){}},700);
+    return;
   }
   /* 换步的瞬间就让旧光圈让位：
      能直接定位（目标已经在屏幕上）就把框和文案一起挪过去；
@@ -9752,7 +9763,7 @@ function maybeOnboard(after){
      以前用 localStorage 永久记住，刷新一次就再也不出现了。 */
   let seen=false;
   try{seen=!!(state.tut&&state.tut.onboarded);}catch(e){}
-  if(seen){_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},240);if(after)after();return;}
+  if(seen){_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},80);if(after)after();return;}
   setTimeout(()=>{
     const _mobileWhere=(typeof isMobile==='function'&&isMobile());
     modal('欢迎来到旺财装机店',
@@ -9764,7 +9775,7 @@ function maybeOnboard(after){
         不用记流程：清单会告诉你现在该做什么。<br>
         客户给的部件费是预算，花得越少赚得越多——但别省到跑不动客户的软件。
       </div>`,
-      ()=>{try{state.tut=state.tut||{};state.tut.onboarded=1;save();}catch(e){}try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},600);
+      ()=>{try{state.tut=state.tut||{};state.tut.onboarded=1;save();}catch(e){}try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},140);
         /* 弹窗关掉后延时 0.9 秒补念第一条：画框那条若被弹窗挡掉，这里兜住；
            已经念过则被 coachSay 的 2.5 秒去重挡掉，不会念两遍。 */
         setTimeout(function(){try{var _s=coachStep();if(_s&&typeof coachSay==='function')coachSay(_s.k,_s.title+'。'+_s.text);}catch(e){}},900);
@@ -10670,6 +10681,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01376':['引导卡被收掉时点击锁跟着松开：不会再出现「屏幕上没提示、点什么都弹先跟着旺财走」',
+             '引导目标一时量不到时不再永久消失，会自己回来；引导出现得更快'],
     '01375':['引导卡不再挡住列表末尾：被高亮的「装上/买下」能滚到卡片上面来'],
     '01374':['修「检查更新」把自己往旧版本退的 bug：只认比现在新，不再回退'],
     '01373':['重开张当作第 1 天：墨桀、章节、还债、卖碟、某菇、刘警官全按「重开第 N 天」算',
