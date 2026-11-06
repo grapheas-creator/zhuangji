@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01331';
+const APP_BUILD='01332';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3784,6 +3784,22 @@ function giftStarterStock(){
        开局这批货是"看得见用不上"的诱饵，玩家第一天是赚不到钱的。 */
     if(!f.robbery && state.day===2){ setTimeout(function(){ A.playRobbery(); },700); return; }
 
+    /* 第 2 天：刘警官到店里看现场 */
+    if(f.robbery&&f.robberyReported&&!f.policeVisit&&state.day>=2){
+      f.policeVisit=1; try{save();}catch(e){}
+      setTimeout(function(){
+        try{
+          modal('刘警官',
+            '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+            +'「昨儿夜里的事吧？」她翻了翻本子，「这美丽国啊，一年总得有这么几回。」<br>'
+            +'「监控我调了，跑不掉。三天，我给你把人找着。」<br><br>'
+            +'<span style="color:#9b8088;font-size:12.5px">'
+            +'「货追不追得回来，我不敢打包票。」<br>她说话不绕弯子，是个干活的警察。</span></div>',null);
+          setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='等消息'; },30);
+        }catch(e){}
+      },1400);
+      return;
+    }
     /* 3 天后：刘警官破案 */
     if(f.robbery && !f.policeDone && state.day>=(f.policeDay||1)+3){ setTimeout(function(){ A.playPolice(); },700); return; }
     /* 半月后：重开张 */
@@ -3801,22 +3817,12 @@ function giftStarterStock(){
     setTimeout(function(){
       const y=document.getElementById('mYes'), n=document.getElementById('mNo');
       if(y){
-        y.textContent='报警';
+        y.textContent='打电话报警';
         y.onclick=function(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
           A.doRobbery();
-          setTimeout(function(){
-            modal('刘警官',
-              '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-              +'「昨儿夜里的事吧？」她翻了翻本子，「这条街今年第三起了。<br>'
-              +'监控我调了，跑不掉。三天，我给你把人找着。」<br><br>'
-              +'<span style="color:#9b8088;font-size:12.5px">货追不追得回来，她没敢打包票。</span></div>',null);
-            setTimeout(function(){
-              const y2=document.getElementById('mYes'), n2=document.getElementById('mNo');
-              if(y2){ y2.textContent='等消息'; }
-              if(n2) n2.style.display='none';
-            },30);
-          },420);
+          try{ const ff=g(); ff.robberyReported=1; save(); }catch(e){}
+          try{ toast('报了警，说最迟明天过来看看'); }catch(e){}
         };
       }
       if(n) n.style.display='none';
@@ -10158,6 +10164,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01332':['报警后警察第2天到场，不再是当场来'],
     '01331':['不是阿妈台词精简到一句「你打算怎么着」'],
     '01330':['不是阿妈不再提警局，保持神秘'],
     '01329':['删掉不是阿妈那句自夸的台词'],
