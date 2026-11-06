@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01377';
+const APP_BUILD='01378';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5710,16 +5710,43 @@ const TUT_Q={case:'MATX',mb:'LGA1150',cpu:'',cooler:'',ram:'DDR3 8G',disk:'SATA 
 function tutBuyQuery(cat){
   const p=tutPick(cat),base=TUT_Q[cat]||'';
   if(!p)return base;
+  /* 固定型号优先：搜索框直接写死型号名，货架上就只剩这一件，不会点错 */
+  const pin=tutPinPick(cat);
+  if(pin)return pin.n;
   const saved=filt.q;
   const has=q=>{filt.q=q;let ok=false;try{ok=currentList().some(x=>x.n===p.n);}catch(e){ok=false;}filt.q=saved;return ok;};
   if(has(base))return base;
   if(has(p.n))return p.n;
   return '';
 }
+/* 引导固定用这几件：按型号名钉死，价格怎么抖都不会换人。
+   以前是「同一条件下最便宜的那件」，货架一改就换一颗，台词/框跟玩家买的对不上。 */
+const TUT_PIN={
+  cpu:   ['Intel Core i5-4590','Intel Core i5-4460','Intel Xeon E3-1226 v3'],
+  mb:    ['华硕 H81M-K','华硕 B85M-G','微星 H81M-P33'],
+  cooler:['原装散热 Intel 下压','超频三 青鸟四'],
+  ram:   ['光威 DDR3 1600 8G 单条','协德 DDR3 1600 8G 单条'],
+  disk:  ['铠侠 SATA SSD 120G','梵想 SATA SSD 120G'],
+  psu:   ['爱国者 ES 300W','航嘉 MVP 300W'],
+  case:  ['九尾狐 U1','积至 家悦X1']
+};
+function tutPinPick(cat){
+  const arr={cpu:C,mb:B,ram:M,disk:ST,psu:P,case:K,cooler:H}[cat];
+  if(!arr)return null;
+  const has=x=>x.u!=null||x.p!=null;
+  const list=TUT_PIN[cat]||[];
+  for(let i=0;i<list.length;i++){
+    const it=arr.find(x=>x.n===list[i]&&has(x));
+    if(it)return it;
+  }
+  return null;
+}
 function tutPick(cat){
   const price=x=>(x.u!=null?x.u:(x.p!=null?x.p:Infinity));           /* 优先二手 */
   const has=x=>x.u!=null||x.p!=null;
   const pick=(arr,f)=>{const l=arr.filter(x=>has(x)&&f(x)).sort((a,b)=>price(a)-price(b));return l[0]||null;};
+  const pin=tutPinPick(cat);
+  if(pin)return pin;
   /* CPU 这步的台词和语音都写死了「i5-4590」，所以指针必须也落在 i5-4590 上。
      以前这里是「i5-4590 或任何 LGA1150 带核显 3000 分」混在一起按价格排序，
      于是 92 块的 Xeon E3-1226 v3 排到了 105 块的 i5-4590 前面 ——
@@ -6766,10 +6793,10 @@ function coachGo(step){
     /* 买件步骤把列表收窄到这类货上，并且保证「要买的那一件」一定在列表里 */
     if(k.indexOf('buy:')===0){
       const cat=k.slice(4);
-      if(cat!=='cpu'){                     /* CPU 那步要保留「带核显 / 性能滑块」的教学筛选 */
-        if(filt.minPerf){filt.minPerf=0;changed=true;}
-        if(filt.ig!=='all'){filt.ig='all';changed=true;}
-      }
+      /* 到了「买这件」这一步，之前的教学筛选（带核显/性能滑块）就该让位：
+         留着它们会把固定的那一件筛掉，货架又变回一整列，玩家就点错件了。 */
+      if(filt.minPerf){filt.minPerf=0;changed=true;}
+      if(filt.ig!=='all'){filt.ig='all';changed=true;}
       if(filt.price.length){filt.price=[];changed=true;}
       if(Array.isArray(filt.cond)&&filt.cond.length){filt.cond=[];changed=true;}
       if(filt.extra.length){filt.extra=[];changed=true;}
@@ -10700,6 +10727,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01378':['引导用的配件固定成具体型号（i5-4590 / H81M-K / DDR3 8G…），货架只显示这一件，不会再点错'],
     '01377':['引导卡弹出后重新量一次目标位置：被卡片压住的「装上」会自动滚上来'],
     '01376':['引导卡被收掉时点击锁跟着松开：不会再出现「屏幕上没提示、点什么都弹先跟着旺财走」',
              '引导目标一时量不到时不再永久消失，会自己回来；引导出现得更快'],
