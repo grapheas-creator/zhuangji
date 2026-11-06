@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01370';
+const APP_BUILD='01371';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2654,6 +2654,20 @@ const PLOT_EVENTS={
       '那就先把这一单做好。店是一单一单攒起来的。'
     ],
     tip:'第一单是提前约好的老同学；街坊还不知道这家店，从明天起才会慢慢有人上门。'},
+  police1:{id:'police1',who:'刘警官',role:'民警 · 街坊',av:'刘',col:'#6b8cff',
+    lines:[
+      '快打烊的时候，卷帘门被人从外面敲了两下。',
+      '刘警官：旺财，还没走呢？',
+      '刘警官：家里那台老电脑，开机得五分钟。家里人天天骂我，你看看能收拾不？',
+      '我：行，搬过来吧。多半是硬盘不行了，换个固态就好。',
+      '刘警官：多少钱？',
+      '我：街坊价，五十。',
+      '（她笑了笑，没还价。）',
+      '刘警官：所里那几台老电脑，也该换换了。回头我问问头儿。',
+      '（这单赚得不多。但她这句话，比钱值钱。）',
+      '我：随时来。'
+    ],
+    tip:'刘警官第一次以私人身份上门。这单不赚钱，铺的是后面的生意。'},
   mojie2:{id:'mojie2',who:'墨桀',role:'死党 · 八千块的债主',av:'墨',col:'#4fc4a8',
     lines:[
       '昨天我想给自家那台老电脑升个显卡，在二手市场淘了张 1060 3G。',
@@ -10296,28 +10310,98 @@ renderAll();
     return j;
   }
 
-  /* ---- 刘警官的第一单（脚本占位，等正式剧本替换） ---- */
+  /* ---- 刘警官的第一单：修她家里的旧电脑（重开张后四五天） ----
+     只赚五十块，但她在最后一句里给所里的三台老机器留了话。 */
+  function makePoliceFixJob(day){
+    return {
+      id:'PL1', client:'刘警官', cat:'办公机', tier:0,
+      name:'维修单 · 刘警官家的旧电脑（开机五分钟）',
+      sw:'能开机就行', swList:'能开机就行', level:'m',
+      target:{ts:0,cs:0,ram:8}, newOnly:false, tight:false, ultra:false, gpuPref:null,
+      partBudget:80, labor:50,
+      extra:['她说家里人都快被这台机器逼疯了','街坊价，只收五十'],
+      repair:{fault:'disk', clues:[
+        '开机要五分钟，进了系统还得再等一会儿',
+        '硬盘灯一直亮着不灭，机器像在喘气',
+        '机箱是老式铁壳的，里面还是一块 3.5 寸机械盘'
+      ]},
+      status:'open', deadline:3, dueDay:(day||1)+3, bornDay:day||1,
+      hideScore:true, minMhz:0, bornAt:day
+    };
+  }
+
+  /* ---- 派出所的三台办公机：接了她那台旧电脑之后才有的后续 ----
+     和随机批量单同一种：接了就每天装 3~5 台，装完一起结。 */
+  function makePoliceBulkJob(day){
+    var unitCost=1200, unitBudget=Math.round(unitCost*1.18/50)*50;   /* 1400 */
+    var qty=3;
+    return {
+      id:'PL2', cat:'办公机', tier:0, baseCost:unitCost,
+      name:'批量单 · 派出所的三台办公机',
+      client:'刘警官', clientRole:'派出所', sw:'Office', swList:'Office', level:'m',
+      target:{ts:0,cs:0,ram:8}, newOnly:false, tight:false, ultra:false, gpuPref:null,
+      partBudget:unitBudget*qty, labor:qty*220,
+      extra:['所里的老机器一起换，一次三台','按台数结算件费，价差归你'],
+      status:'open', deadline:null, dueDay:null, bornDay:day,
+      hideScore:true, minMhz:0, assembly:true, grade:'low',
+      bulkQty:qty, bulkDone:0, bulkUnitBudget:unitBudget, bulkUnitCost:unitCost
+    };
+  }
+
+  /* 播完这场戏才发单：场景没播起来（正有别的剧情占着屏）就返回 false，第二天重试 */
   function policeJobStory(){
+    var started=playPlotEvent('police1',function(){
+      try{
+        var j=makePoliceFixJob(state.day||20);
+        state.jobs=state.jobs||[];
+        if(!state.jobs.some(function(x){return x&&x.id===j.id;})) state.jobs.push(j);
+        var gfs=G(); gfs.policeFixId=j.id;
+        state.dayTotal=state.jobs.length;
+        try{save();}catch(e){}
+        try{renderAll();}catch(e){}
+        try{toast('刘警官的机器留在店里了，维修单在工单列表里');}catch(e){}
+      }catch(e){}
+    });
+    return started;
+  }
+
+  function policeBulkCall(){
+    var j=makePoliceBulkJob(state.day||1);
+    state.jobs=state.jobs||[];
+    if(!state.jobs.some(function(x){return x&&x.id===j.id;})) state.jobs.push(j);
+    var gfs=G(); gfs.policeBulk=1;
+    state.dayTotal=state.jobs.length;
+    try{save();}catch(e){}
+    try{renderAll();}catch(e){}
     modal('刘警官',
       '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'「小店挺像样啊。」她把一台铁壳主机往柜台上一放，磕得响。<br>'
-      +'「所里的机器，开机风扇转，屏不亮。能修不？」<br><br>'
-      +'<span style="color:#9b8088;font-size:12.5px">她看了眼货架，又看了眼你。</span></div>',null);
+      +'「旺财，我头儿批了。」<br>'
+      +'「所里那三台老机器，一起换。」<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">三台办公机，接了这一单，每天装几台，装完一起结。</span></div>',null);
     setTimeout(function(){
-      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
-      if(y) y.textContent='能修，放这儿吧';
-      if(n) n.style.display='none';
+      var y=document.getElementById('mYes'),n=document.getElementById('mNo');
+      if(y)y.textContent='接了';
+      if(n)n.style.display='none';
     },30);
   }
 
   /* ---- 每天开始 ---- */
   function onDay(day){
     var g=G();
-    /* 刘警官的业务：抓到人之后过几天上门，只来一次 */
+    /* 刘警官的私单：重开张之后四五天，傍晚上门 */
     try{
-      if(g.policeDone&&!g.policeJob&&day>=(g.policeDay||4)+4){
-        g.policeJob=1; try{save();}catch(e){}
-        setTimeout(function(){ try{policeJobStory();}catch(e){} },1500);
+      if(g.policeDone&&!g.policeJob&&day>=((g.reopenDay||16)+3)){
+        setTimeout(function(){
+          try{
+            if(policeJobStory()){ g.policeJob=1; save(); }
+          }catch(e){}
+        },3000);   /* 等每日开场动画（1.5s）收掉，否则场景互斥会挡下来 */
+      }
+    }catch(e){}
+    /* 她那台旧电脑修好两天后：派出所的批量单来电话 */
+    try{
+      if(g.policeBulkDay&&!g.policeBulk&&day>=g.policeBulkDay){
+        setTimeout(function(){ try{policeBulkCall();}catch(e){} },2600);
       }
     }catch(e){}
     /* 开场的留声机包褒不在按天触发，改成加载页撤掉那一刻（见 hideBootLoad 挂钩） */
@@ -10393,6 +10477,17 @@ renderAll();
           /* 只有真的交付成功（story.done 里记了 g5）才解锁，失败不算 */
           var done=(state.story&&state.story.done)||{};
           if(done['g5']) onDelivered({id:'GR5',storyId:'g5'});
+        }catch(e){}
+        try{
+          /* 刘警官那台旧电脑修好了：两天后派出所的批量单来电话。
+             没交出去（退了/过期了）就还挂着，等玩家真修好再说。 */
+          if(before&&before.id==='PL1'&&!state.jobs.some(function(x){return x&&x.id==='PL1';})){
+            var gfs=G();
+            if(!gfs.policeBulkDay){
+              gfs.policeBulkDay=(state.day||1)+2;
+              try{save();}catch(e){}
+            }
+          }
         }catch(e){}
       },300);
       return r;
@@ -10482,6 +10577,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01371':['刘警官的私单：重开张后第 20 天傍晚上门，修她家那台旧电脑（只收五十）',
+             '修好两天后，派出所三台办公机的批量单会来电话'],
     '01370':['工作站的 128G 内存配得出来了：套条按两槽、容量×2 算',
              '128G 工作站以前是无解单（既给不出预算，也装不出来）'],
     '01369':['顶配单和工作机的预算改成按「最低可行成本」算',
