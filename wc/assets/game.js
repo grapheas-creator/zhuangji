@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01365';
+const APP_BUILD='01366';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -634,6 +634,9 @@ K.forEach(k=>{const ru=rngFrom(hash('ku2'+k.n))();k.u=Math.max(15,Math.min(360,M
 /* 散热限高校准：中塔/办公箱实际都能吃 155mm 风冷，之前 150 会把主流散热挡在门外 */
 K.forEach(k=>{if(k.mc>=120&&k.mc<155)k.mc=155;});
 H.length=0;REAL_COOLS.forEach(x=>H.push(x));
+/* LGA1151 和 LGA1151V2 是同一个 1151 针脚，扣具通用：
+   以前真实型号表里只写了 LGA1151，导致 8/9 代（1151V2）整机配不到散热器。 */
+H.forEach(h=>{if(h.s.includes('LGA1151')&&!h.s.includes('LGA1151V2'))h.s.push('LGA1151V2');});
 /* 水冷兼容 HEDT/服务器大底座平台（游戏内简化处理） */
 H.forEach(h=>{if(h.rad>0){['LGA2066','TR4','sTR5','TRX40','SP3','SP5'].forEach(_s=>{if(!h.s.includes(_s))h.s.push(_s);});}});REAL_COOLS_EXTRA.forEach(x=>H.push(x));
 const ST=[];
@@ -7693,7 +7696,9 @@ const REPAIR_KB=[
 ];
 function repairKB(k){return REPAIR_KB.find(x=>x.k===k)||null;}
 function repairMachine(job){
-  const sp=SPEC[job.cat][job.tier];
+  /* 客户机默认按品类/档位抽；剧情单可以指定 era（比如七八年前的老机器），
+     不写 spec 就还是走 SPEC，随机维修单不受影响。 */
+  const sp=(job.repair&&job.repair.spec)||SPEC[job.cat][job.tier];
   const cpu=pickCheap(C,sp.cpu,true);
   const mb=pickCheap(B,b=>sp.mb(b)&&(!cpu||b.s===cpu.s),true);
   const ram=pickCheap(M,r=>sp.ram(r)&&(!mb||r.m===mb.m),true);
@@ -7733,6 +7738,7 @@ function repairHTML(j){
       <button class="minibtn ${d.dust?'done':''}" data-fix="dust">${d.dust?'已清灰换硅脂':'清灰 + 换硅脂 ¥20'}</button>
       <button class="minibtn ${d.os?'done':''}" data-fix="os">${d.os?'系统已重装':'重装系统'}</button>
       <button class="minibtn" data-kb="1">维修手册</button>
+      ${state.hasDiagCard?`<button class="minibtn" data-diag="1">插检测卡</button>`:''}
     </div>
     <div class="kb" id="kbBox" style="display:none">${manual}</div>
     <div class="dnote">对着现象判断是哪一件，拆下来换掉。换错的件钱白花，客户还得再来一趟。</div>
@@ -8003,6 +8009,8 @@ function renderBench(){
     document.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>doRepairFix(j.id,b.dataset.fix));
     const kb=document.querySelector('[data-kb]');
     if(kb)kb.onclick=()=>{const box=document.getElementById('kbBox');if(box)box.style.display=box.style.display==='none'?'':'none';};
+    const dg=document.querySelector('[data-diag]');
+    if(dg)dg.onclick=()=>{try{window.__ARC.diagCard();}catch(e){}};
   }
   renderBenchDOM();renderChecks();renderActionBar();
 }
@@ -10223,19 +10231,35 @@ renderAll();
     toast('生活里多了一样东西：某菇的碟片');
   }
 
-  /* ---- 第 5 天：某菇的救命单 ---- */
+  /* ---- 第 21 天：某菇的救命单（维修单，客户机是七八年前配的） ---- */
   function makeSevenJob(day){
     var s={day:day,id:'g5',who:'某菇',role:'7co 的粉丝',av:'菇',col:'#ff9ac7',
       lines:[
         '老板，我这台台式机开不了机了，还能救吗？',
         '里面全是我攒的 7co——演唱会录像、签售的合影，五六年了。',
+        '机器是刚工作那年配的，一直没舍得换。',
         '要是能把里面的东西弄出来，钱你说多少就多少。'
       ],
-      job:{cat:'办公机',tier:0,name:'救命单 · 某菇的老台式（不开机）',
-        sw:'能开机就行（CPU 烧了）',level:'m',
+      job:{cat:'办公机',tier:0,name:'维修单 · 某菇的老台式（不开机）',
+        sw:'能开机就行',level:'m',
         target:{ts:0,cs:2000,ram:8},newOnly:false,tight:false,
         partBudget:900,labor:600,
-        extra:['他说资料比机器重要','开机没反应，多半是 CPU 走了']}};
+        extra:['他把整台机器抱了过来','他说资料比机器重要'],
+        /* 七八年前的客户件：8 代 i5 + B365 + DDR4 + SATA 盘，只坏 CPU */
+        repair:{fault:'cpu',
+          spec:{
+            cpu:c=>c.s==='LGA1151V2'&&/i5-8400/.test(c.n),
+            mb:b=>b.s==='LGA1151V2'&&b.m==='DDR4',
+            ram:r=>r.m==='DDR4'&&r.cap>=8,
+            psu:p=>p.w>=300,
+            case:k=>k.ff.includes('MATX'),
+            disk:d=>d.kind==='sata'
+          },
+          clues:[
+            '风扇转、屏幕不亮，主板连着短鸣',
+            '机器是六年前配的，机箱里的灰能刮下一层',
+            '上周楼里跳闸，再来电就怎么都开不了机'
+          ]}}};
     var j=buildStoryJob(s);
     j.id='GR5';j.storyId='g5';j.dueDay=day;   /* 当天必须交 */
     return j;
@@ -10285,7 +10309,7 @@ renderAll();
           modal('某菇',
             '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
             + '「修好了！我的宝贝资料全在！」<br>'
-            + '她抱着机箱笑，然后压低声音：<br><br>'
+            + '他抱着机箱笑，然后压低声音：<br><br>'
             + '<i style="color:#b8546a">「我是某菇，你修好了我的电脑，真是我的救命恩人，'
             + '以后你可以到我这里来买好汀的～我家还蛮大的，买完了可以直接睡，没问题的。」</i><br><br>'
             + '<span style="color:#9b8088;font-size:11.5px">生活 里解锁了「7co 典藏集」的购买。</span>'
@@ -10427,6 +10451,10 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01366':['检测卡接进维修单：买过卡就能在单子上插卡看跑码',
+             '电脑桌面加了「故障码纸条」：完整的 POST 代码表',
+             '某菇的单子改成维修单：七八年前的客户机，CPU 烧了',
+             '8/9 代平台（1151）补齐散热器兼容，以前配不到散热'],
     '01365':['七段码加字间距、减辉光，更好认'],
     '01364':['检测卡代码改为 SVG 七段码动态绘制'],
     '01363':['检测卡改成真实照片显示'],
@@ -10953,10 +10981,41 @@ function segSvg(code){
     {k:'life',   ic:'🏠', n:'生活',   act:function(){ closePcDesk(); try{openLife();}catch(e){} }},
     {k:'save',   ic:'💽', n:'存档',   act:function(){ closePcDesk(); try{document.getElementById('btnSave').click();}catch(e){} }},
     {k:'dev',    ic:'🏭', n:'店铺发展', act:function(){ devWin(); }},
+    {k:'post',   ic:'📝', n:'故障码纸条', act:function(){ closePcDesk(); postSheet(); }},
     {k:'bili',   ic:'🎬', n:'B站',    act:function(){ closePcDesk(); try{window.__ARC.videoUI();}catch(e){} }},
     {k:'set',    ic:'⚙',  n:'设置',  act:function(){ closePcDesk(); try{openSettings();}catch(e){} }}
   ];
   let el=null;
+
+  /* 故障码纸条：检测卡负责「看得到代码」，这张纸条负责「看得懂」。
+     和维修手册一样是工具书，不算提示——代码停在哪一步，就是哪一步没过。 */
+  function postSheet(){
+    const rows=[
+      ['——','数码管全灭','没供电：电源或主板供电模块'],
+      ['00','不跑码','CPU 或主板没起来'],
+      ['C1 / 2A','内存不过','内存条或插槽'],
+      ['25','显卡','卡在显卡初始化'],
+      ['9C','自检过了','卡在引导：系统盘'],
+      ['A0','自检通过','硬件没事，问题在系统或硬盘']
+    ].map(r=>'<tr>'
+        +'<td style="padding:6px 4px;text-align:center;font-family:ui-monospace,Menlo,monospace;'
+        +'font-weight:800;color:#c2456b;letter-spacing:1px;white-space:nowrap">'+r[0]+'</td>'
+        +'<td style="padding:6px 4px;color:#6b5b60;white-space:nowrap">'+r[1]+'</td>'
+        +'<td style="padding:6px 4px;color:#9b8088;font-size:12.5px">'+r[2]+'</td>'
+      +'</tr>').join('');
+    modal('故障码纸条',
+      '<div style="font-size:13px;line-height:1.8;color:#9b8088;margin-bottom:8px">'
+      +'一张夹在维修手册里的便条，字迹是自己的。</div>'
+      +'<table style="width:100%;border-collapse:collapse;'
+      +'border-top:1px solid #f0dfe4;border-bottom:1px solid #f0dfe4">'+rows+'</table>'
+      +'<div style="font-size:12px;color:#b39aa2;line-height:1.8;margin-top:9px">'
+      +'数码管不亮，先量电源；有代码就按代码找。代码停在那儿不动，就是卡在那一步。</div>',null);
+    setTimeout(function(){
+      const y=document.getElementById('mYes'),n=document.getElementById('mNo');
+      if(y)y.textContent='收起来';
+      if(n)n.style.display='none';
+    },30);
+  }
 
   function setPanel(k){
     try{
