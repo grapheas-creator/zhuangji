@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01357';
+const APP_BUILD='01358';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10201,15 +10201,15 @@ renderAll();
   function makeSevenJob(day){
     var s={day:day,id:'g5',who:'某菇',role:'7co 的粉丝',av:'菇',col:'#ff9ac7',
       lines:[
-        '老板，我这笔记本开不了机了，还能救吗？',
+        '老板，我这台台式机开不了机了，还能救吗？',
         '里面全是我攒的 7co——演唱会录像、签售的合影，五六年了。',
         '要是能把里面的东西弄出来，钱你说多少就多少。'
       ],
-      job:{cat:'办公机',tier:0,name:'救命单 · 某菇的笔记本（数据抢救）',
-        sw:'资料救援（不重装也行）',level:'m',
+      job:{cat:'办公机',tier:0,name:'救命单 · 某菇的老台式（不开机）',
+        sw:'能开机就行（CPU 烧了）',level:'m',
         target:{ts:0,cs:2000,ram:8},newOnly:false,tight:false,
         partBudget:900,labor:600,
-        extra:['她说资料比机器重要，别乱重装系统']}};
+        extra:['五六年前的配置，当时是主流','她说资料比机器重要','开机没反应，多半是 CPU 走了']}};
     var j=buildStoryJob(s);
     j.id='GR5';j.storyId='g5';j.dueDay=day;   /* 当天必须交 */
     return j;
@@ -10401,6 +10401,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01358':['某菇改成台式机、CPU坏'],
     '01357':['7co 追的年头改为五六年'],
     '01356':['7co剧情改到第21天：某菇的笔记本数据抢救'],
     '01355':['卖碟剧情改成幽默对话'],
