@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01385';
+const APP_BUILD='01386';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5885,17 +5885,17 @@ const TUT_SCRIPT=[
 
   {k:'buy:mb', view:'docs', panel:'shop', cat:'mb', buy:1,
    title:'买主板', text:()=>tutBuyText('mb'),
-   sel:()=>tutBuyEl('mb'), scroll:'top', done:()=>tutHas('mb')},
+   sel:()=>tutBuyEl('mb'), scroll:'center', done:()=>tutHas('mb')},
   {k:'install:mb', view:'docs', panel:'inv', cat:'mb',
    title:'装上主板', text:'点这件右边的「装上」，主板就上台面了。',
-   sel:()=>tutInvEl('mb'), scroll:'top', done:()=>tutHasPart('mb')},
+   sel:()=>tutInvEl('mb'), scroll:'center', done:()=>tutHasPart('mb')},
 
   {k:'buy:cpu', view:'docs', panel:'shop', cat:'cpu', buy:1,
    title:'买 CPU', text:()=>tutBuyText('cpu'),
-   sel:()=>tutBuyEl('cpu'), scroll:'top', done:()=>tutHas('cpu')},
+   sel:()=>tutBuyEl('cpu'), scroll:'center', done:()=>tutHas('cpu')},
   {k:'install:cpu', view:'docs', panel:'inv', cat:'cpu',
    title:'装上 CPU', text:'点「装上」，CPU 会插到主板插槽里。',
-   sel:()=>tutInvEl('cpu'), scroll:'top', done:()=>tutHasPart('cpu')},
+   sel:()=>tutInvEl('cpu'), scroll:'center', done:()=>tutHasPart('cpu')},
 
   {k:'paste', view:'bench',
    title:'涂硅脂',
@@ -5904,38 +5904,38 @@ const TUT_SCRIPT=[
 
   {k:'buy:cooler', view:'docs', panel:'shop', cat:'cooler', buy:1,
    title:'买散热器', text:()=>tutBuyText('cooler'),
-   sel:()=>tutBuyEl('cooler'), scroll:'top', done:()=>tutHas('cooler')},
+   sel:()=>tutBuyEl('cooler'), scroll:'center', done:()=>tutHas('cooler')},
   {k:'install:cooler', view:'docs', panel:'inv', cat:'cooler',
    title:'压上散热器', text:'点「装上」，散热器压到涂好硅脂的 CPU 上。',
-   sel:()=>tutInvEl('cooler'), scroll:'top', done:()=>tutHasPart('cooler')},
+   sel:()=>tutInvEl('cooler'), scroll:'center', done:()=>tutHasPart('cooler')},
 
   {k:'buy:ram', view:'docs', panel:'shop', cat:'ram', buy:1,
    title:'买内存', text:()=>tutBuyText('ram'),
-   sel:()=>tutBuyEl('ram'), scroll:'top', done:()=>tutHas('ram')},
+   sel:()=>tutBuyEl('ram'), scroll:'center', done:()=>tutHas('ram')},
   {k:'install:ram', view:'docs', panel:'inv', cat:'ram',
    title:'插内存', text:'点「装上」，内存条会插进主板的内存槽。',
-   sel:()=>tutInvEl('ram'), scroll:'top', done:()=>tutHasPart('ram')},
+   sel:()=>tutInvEl('ram'), scroll:'center', done:()=>tutHasPart('ram')},
 
   {k:'buy:disk', view:'docs', panel:'shop', cat:'disk', buy:1,
    title:'买硬盘', text:()=>tutBuyText('disk'),
-   sel:()=>tutBuyEl('disk'), scroll:'top', done:()=>tutHas('disk')},
+   sel:()=>tutBuyEl('disk'), scroll:'center', done:()=>tutHas('disk')},
   {k:'install:disk', view:'docs', panel:'inv', cat:'disk',
    title:'装硬盘', text:'点「装上」，系统盘就位。',
-   sel:()=>tutInvEl('disk'), scroll:'top', done:()=>tutHasPart('disk')},
+   sel:()=>tutInvEl('disk'), scroll:'center', done:()=>tutHasPart('disk')},
 
   {k:'buy:psu', view:'docs', panel:'shop', cat:'psu', buy:1,
    title:'买电源', text:()=>tutBuyText('psu'),
-   sel:()=>tutBuyEl('psu'), scroll:'top', done:()=>tutHas('psu')},
+   sel:()=>tutBuyEl('psu'), scroll:'center', done:()=>tutHas('psu')},
   {k:'install:psu', view:'docs', panel:'inv', cat:'psu',
    title:'装电源', text:'点「装上」，先把电源接好，整机才能进箱。',
-   sel:()=>tutInvEl('psu'), scroll:'top', done:()=>tutHasPart('psu')},
+   sel:()=>tutInvEl('psu'), scroll:'center', done:()=>tutHasPart('psu')},
 
   {k:'buy:case', view:'docs', panel:'shop', cat:'case', buy:1,
    title:'买机箱', text:()=>tutBuyText('case'),
-   sel:()=>tutBuyEl('case'), scroll:'top', done:()=>tutHas('case')},
+   sel:()=>tutBuyEl('case'), scroll:'center', done:()=>tutHas('case')},
   {k:'install:case', view:'docs', panel:'inv', cat:'case',
    title:'装进机箱', text:'点「装上」，整机进箱，这一单就装完了。',
-   sel:()=>tutInvEl('case'), scroll:'top', done:()=>tutHasPart('case')},
+   sel:()=>tutInvEl('case'), scroll:'center', done:()=>tutHasPart('case')},
 
   {k:'deliver', view:'checks', panel:'checks',
    title:'检查后交付',
@@ -5946,7 +5946,7 @@ const TUT_SCRIPT=[
   {k:'close', view:'docs', panel:'jobs',
    title:'打烊',
    text:'今天的单做完了。点右上角「打烊」，进第二天。',
-   sel:()=>document.getElementById('btnClose'), scroll:'top',
+   sel:()=>document.getElementById('btnClose'), scroll:'none',
    done:()=>!!(state.tut&&state.tut.done&&state.tut.done.close)}
 ];
 /* 老存档迁移：从当前工作台倒推出「哪几件已经装上过」，
@@ -10816,6 +10816,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01386':['买件/装件步也改成「目标出安全区才居中」：真机商品卡比无头浏览器高，',
+             '「装上」压在引导卡下面时现在会把整张卡滚上来，不会再让你点一个看不见的按钮'],
     '01385':['新手引导改成一张写死的线性步骤表：按表一步步走，不再每步探测 DOM / 猜滚动',
              '买件一律列表回顶、装件只在需要时居中一次；去掉自己算滚动容器的逻辑，「滚反」从根上没了',
              '引导期收起新手任务条和商店筛选，第一件货必然落在页眉下面，不会被底部卡片压住',
