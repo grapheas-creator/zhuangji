@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01324';
+const APP_BUILD='01325';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3829,20 +3829,20 @@ function giftStarterStock(){
     /* 第 4 天一早：不是阿妈过来串门，顺口把「怎么处理」聊出来。
        难度不在菜单里选，而是在对话里选。 */
     const OPTIONS=[
-      ['wangcai','「一件都不能少。该追的，一样都别想赖。」','旺财难度 · 超简单',
-        ['不是阿妈','行，硬气。我跟那头说一声，按规矩来。']],
-      ['mojie','「能追回几件算几件吧，剩下的我认。」','墨桀难度 · 简单',
-        ['不是阿妈','实在。能回来的先拿回来，别为这个把店拖死。']],
-      ['mogu','「人抓住就行。货……就算了。」','某菇难度 · 中等',
-        ['不是阿妈','嗯，图个清净。货的事翻篇，人也别记仇。']],
-      ['486','「人抓住就行。店要重开，钱我自己去借。」','486 难度 · 困难',
-        ['不是阿妈','借钱？我认识个做小额贷的……你自己掂量。']]
+      ['wangcai','「货必须全追回来。我这边还撑得住，不能白吃这个亏。」','旺财难度 · 超简单',
+        ['不是阿妈','行，那我按规矩给你办。货一样都别想短。']],
+      ['mojie','「追回多少算多少吧。剩下的，我慢慢补。」','墨桀难度 · 简单',
+        ['不是阿妈','实在。能回来的先拿回来，店还得转。']],
+      ['mogu','「先不折腾了。卡里还剩八千，我得赶紧进货开张。」','某菇难度 · 中等',
+        ['不是阿妈','是想把日子过下去。行，我跟那头说一声。']],
+      ['486','「先不折腾了。店要重开，我还得再借一笔。」','486 难度 · 困难',
+        ['不是阿妈','再借？……行吧，我认识个做小额贷的，你自己掂量。']]
     ];
 
     function choose(){
       const old=document.getElementById('diffPick'); if(old) old.remove();
       const ov=document.createElement('div'); ov.id='diffPick';
-      ov.innerHTML='<div class="dp-box"><div class="dp-hd">你怎么想的？</div>'
+      ov.innerHTML='<div class="dp-box"><div class="dp-hd">旺财说实话</div>'
         + OPTIONS.map(function(x){
             return '<button class="dp-item" data-d="'+x[0]+'">'
               +'<span class="dp-tag">'+x[2]+'</span><b>'+x[1]+'</b></button>';
@@ -3919,12 +3919,12 @@ function giftStarterStock(){
       '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
       +'<b>不是阿妈</b>：听说你店里遭了？<br>'
       +'<b>旺财</b>：嗯，一件不剩。<br>'
-      +'<b>不是阿妈</b>：这条街啊，一年总得有几回。我认识那边的人——你怎么想的，我帮你递个话。<br>'
-      +'<b>旺财</b>：（递个话？那就是我说了算。）</div>',null);
+      +'<b>不是阿妈</b>：这条街啊，一年总得有几回。你手里现在什么情况？我认识那边的人，好帮你说话。<br>'
+      +'<b>旺财</b>：（他这是问我：还剩多少底子。）</div>',null);
     setTimeout(function(){
       const y=document.getElementById('mYes'), n=document.getElementById('mNo');
       if(y){
-        y.textContent='我想想';
+        y.textContent='说实话';
         y.onclick=function(){ try{closeMask(document.getElementById('mask'));}catch(e){} setTimeout(choose,240); };
       }
       if(n) n.style.display='none';
@@ -10158,6 +10158,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01325':['难度选项改成旺财陈述现状（不是直白的四选一）'],
     '01324':['第4天改成与不是阿妈的对话，难度在对话里选'],
     '01323':['破案时间修正到第4天；难度决定刘警官的台词'],
     '01322':['难度改到第4天刘警官来电时选（四选一，分支台词按剧本）'],
