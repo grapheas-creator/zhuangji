@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01350';
+const APP_BUILD='01351';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4072,10 +4072,11 @@ function giftStarterStock(){
               try{
                 if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
                   playChatScene('chat_chenmo_gpu',function(){
-                    setTimeout(function(){ A.gpuGuide(); },520);
+                    /* 不再给二手/全新二选一：放开了，玩家自己决定怎么配 */
+                    try{ toast('陈默这单：自己看着配，客户机器别糊弄'); }catch(e){}
                   });
-                }else{ A.gpuGuide(); }
-              }catch(e){ A.gpuGuide(); }
+                }else{ /* 没有微信场景就到此为止 */ }
+              }catch(e){}
             };
             try{
               if(window.__GRAMO&&window.__GRAMO.introForce){
@@ -10388,6 +10389,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01351':['陈默加显卡不再做二选一，放开了自己配'],
     '01350':['新增旺财自己淘1060 3G踩坑剧情（爸爸包裹之后、陈默之前）'],
     '01349':['收下爸爸包裹后等2秒再弹陈默微信'],
     '01348':['加显卡时间回到第16天，与重开张/爸爸包裹串联播放'],
