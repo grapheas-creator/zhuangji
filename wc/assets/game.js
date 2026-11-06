@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01384';
+const APP_BUILD='01385';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5730,6 +5730,30 @@ const TUT_PIN={
   psu:   ['爱国者 ES 300W','航嘉 MVP 300W'],
   case:  ['九尾狐 U1','积至 家悦X1']
 };
+/* 固定型号只是「优先」，不能盖过兼容性：以前这里一按名字就返回，
+   结果把 65W 的下压散热钉给了一颗需要 71W 的 i5-4590，装完检查红叉，
+   玩家还得自己回去退换。现在先验一遍这件的硬指标，不合格就顺位下一件，
+   都不合格就交给下面按条件挑。 */
+function tutPinOk(cat,x){
+  if(!x)return false;
+  try{
+    if(cat==='cpu')return x.s==='LGA1150'&&x.ig===1;
+    if(cat==='mb')return x.s==='LGA1150'&&x.m==='DDR3'&&x.dimm>=2;
+    if(cat==='ram')return x.m==='DDR3'&&x.cap>=8;
+    if(cat==='disk')return x.kind==='sata'&&x.cap>=120;
+    if(cat==='psu')return x.w>=300;
+    if(cat==='cooler'){
+      const cpu=tutBest('cpu');
+      return (!cpu||x.cap>=coolNeed(cpu))&&!x.rad;
+    }
+    if(cat==='case'){
+      const mb=tutBest('mb'),cl=tutBest('cooler');
+      const ff=mb?mb.ff:'MATX',needH=cl?cl.h:155;
+      return x.ff.indexOf(ff)>=0&&x.bay>=1&&x.mc>=needH;
+    }
+  }catch(e){return false;}
+  return true;
+}
 function tutPinPick(cat){
   const arr={cpu:C,mb:B,ram:M,disk:ST,psu:P,case:K,cooler:H}[cat];
   if(!arr)return null;
@@ -5737,16 +5761,14 @@ function tutPinPick(cat){
   const list=TUT_PIN[cat]||[];
   for(let i=0;i<list.length;i++){
     const it=arr.find(x=>x.n===list[i]&&has(x));
-    if(it)return it;
+    if(it&&tutPinOk(cat,it))return it;
   }
   return null;
 }
-function tutPick(cat){
+function tutBest(cat){
   const price=x=>(x.u!=null?x.u:(x.p!=null?x.p:Infinity));           /* 优先二手 */
   const has=x=>x.u!=null||x.p!=null;
   const pick=(arr,f)=>{const l=arr.filter(x=>has(x)&&f(x)).sort((a,b)=>price(a)-price(b));return l[0]||null;};
-  const pin=tutPinPick(cat);
-  if(pin)return pin;
   /* CPU 这步的台词和语音都写死了「i5-4590」，所以指针必须也落在 i5-4590 上。
      以前这里是「i5-4590 或任何 LGA1150 带核显 3000 分」混在一起按价格排序，
      于是 92 块的 Xeon E3-1226 v3 排到了 105 块的 i5-4590 前面 ——
@@ -5758,20 +5780,25 @@ function tutPick(cat){
   }
   if(cat==='mb')return pick(B,x=>x.s==='LGA1150'&&x.m==='DDR3'&&x.dimm>=2);
   if(cat==='case'){
-    const mb=tutPick('mb'),ff=mb?mb.ff:'MATX';
+    const mb=tutBest('mb'),ff=mb?mb.ff:'MATX';
     /* 引导用的机箱必须装得下这一单会买的散热器，否则装到一半卡住 */
-    const cl=tutPick('cooler'),needH=cl?cl.h:155;
+    const cl=tutBest('cooler'),needH=cl?cl.h:155;
     const fit=x=>x.ff.indexOf(ff)>=0&&x.bay>=1;
     return pick(K,x=>fit(x)&&x.mc>=needH) || pick(K,x=>fit(x));
   }
   if(cat==='cooler'){
-    const cpu=tutPick('cpu'),need=coolNeed(cpu);
+    const cpu=tutBest('cpu'),need=coolNeed(cpu);
     return pick(H,x=>x.cap>=need&&!x.rad);
   }
   if(cat==='ram')return pick(M,x=>x.m==='DDR3'&&x.cap>=8);
   if(cat==='disk')return pick(ST,x=>x.kind==='sata'&&x.cap>=120);
   if(cat==='psu')return pick(P,x=>x.w>=300);
   return null;
+}
+function tutPick(cat){
+  const pin=tutPinPick(cat);
+  if(pin)return pin;
+  return tutBest(cat);
 }
 /* 引导文案按「算出来的那件」写，玩家看到的就是要点的东西 */
 function tutBuyText(cat){
@@ -5798,6 +5825,204 @@ function tutBuyText(cat){
   }
   return T[cat]||'挑一件合适的就行。';
 }
+/* ===== 新手引导：一张写死的线性步骤表 =====
+   以前每一步都在 DOM 里现算「现在该显示什么、要不要滚、滚哪个容器」，
+   目标一换、列表一滚，就会出现「框指错件 / 往反方向滚 / 不该滚也在滚」。
+   现在整条引导就是下面这张表：从上往下走，做完一步指针挪一格，永不回头。
+   每一步只声明四件事：在哪个视口/面板、搜什么、指哪个控件、怎么滚动。
+   done() 只回答「这一步做完没有」，不参与任何页面判断。 */
+function tutOn(){
+  return !!(state&&state.day===1&&state.tut&&!state.tut.guideOff);
+}
+function tutHas(cat){
+  const t=state.tut||{};
+  return !!((t.bought&&t.bought[cat])||(t.parts&&t.parts[cat]));
+}
+function tutHasPart(cat){
+  const t=state.tut||{};
+  return !!(t.parts&&t.parts[cat]);
+}
+function tutBuyEl(cat){
+  const q=tutPick(cat);
+  if(q){
+    const kind=q.u!=null?'used':'new';
+    const el=document.querySelector(`[data-buy="${q.n}"][data-kind="${kind}"]`)
+      ||document.querySelector(`[data-buy="${q.n}"]`);
+    if(el)return el;
+  }
+  return document.querySelector('[data-buy]');
+}
+function tutInvEl(cat){
+  const t=state.tut||{};
+  const all=(state.inv||[]).filter(x=>x.cat===cat&&!x.broken);
+  if(!all.length)return null;
+  let inv=null;
+  if(t.buyUid&&t.buyUid[cat])inv=all.find(x=>String(x.uid)===String(t.buyUid[cat]))||null;
+  if(!inv){
+    /* 没有记录（旧存档）就按引导算出来的型号找，别指到开局存货里的另一件 */
+    let want='';try{const p=tutPick(cat);want=p?p.n:'';}catch(e){}
+    if(want)inv=all.find(x=>x.part&&x.part.n===want)||null;
+  }
+  if(!inv)inv=all[0];
+  const b=document.querySelector(`[data-install="${inv.uid}"]`);
+  return (b&&b.offsetParent!==null)?b:null;
+}
+function tutPasteDone(){
+  const t=state.tut||{};
+  return !!((t.done&&t.done.paste)||build.paste||(t.parts&&t.parts.cooler));
+}
+function tutDeliverEl(){
+  const vis=x=>!!(x&&x.getBoundingClientRect&&x.getBoundingClientRect().width>0);
+  const a=document.getElementById('abDeliver'),b=document.getElementById('btnDeliver');
+  return vis(a)?a:(vis(b)?b:(a||b));
+}
+const TUT_SCRIPT=[
+  {k:'accept', view:'docs', panel:'jobs',
+   title:'先接一单',
+   text:'老同学这台剪辑机挂在「工单」里。点绿色的「接受」，工作台就归你了。',
+   sel:()=>document.querySelector('[data-accept]'), scroll:'center',
+   done:()=>!!(state.activeId||(state.tut&&state.tut.done&&state.tut.done.accept))},
+
+  {k:'buy:mb', view:'docs', panel:'shop', cat:'mb', buy:1,
+   title:'买主板', text:()=>tutBuyText('mb'),
+   sel:()=>tutBuyEl('mb'), scroll:'top', done:()=>tutHas('mb')},
+  {k:'install:mb', view:'docs', panel:'inv', cat:'mb',
+   title:'装上主板', text:'点这件右边的「装上」，主板就上台面了。',
+   sel:()=>tutInvEl('mb'), scroll:'top', done:()=>tutHasPart('mb')},
+
+  {k:'buy:cpu', view:'docs', panel:'shop', cat:'cpu', buy:1,
+   title:'买 CPU', text:()=>tutBuyText('cpu'),
+   sel:()=>tutBuyEl('cpu'), scroll:'top', done:()=>tutHas('cpu')},
+  {k:'install:cpu', view:'docs', panel:'inv', cat:'cpu',
+   title:'装上 CPU', text:'点「装上」，CPU 会插到主板插槽里。',
+   sel:()=>tutInvEl('cpu'), scroll:'top', done:()=>tutHasPart('cpu')},
+
+  {k:'paste', view:'bench',
+   title:'涂硅脂',
+   text:'CPU 装好了，不涂硅脂等于白装。点「涂硅脂」，挤一点，薄薄抹开。',
+   sel:pasteClickEl, scroll:'center', done:()=>tutPasteDone()},
+
+  {k:'buy:cooler', view:'docs', panel:'shop', cat:'cooler', buy:1,
+   title:'买散热器', text:()=>tutBuyText('cooler'),
+   sel:()=>tutBuyEl('cooler'), scroll:'top', done:()=>tutHas('cooler')},
+  {k:'install:cooler', view:'docs', panel:'inv', cat:'cooler',
+   title:'压上散热器', text:'点「装上」，散热器压到涂好硅脂的 CPU 上。',
+   sel:()=>tutInvEl('cooler'), scroll:'top', done:()=>tutHasPart('cooler')},
+
+  {k:'buy:ram', view:'docs', panel:'shop', cat:'ram', buy:1,
+   title:'买内存', text:()=>tutBuyText('ram'),
+   sel:()=>tutBuyEl('ram'), scroll:'top', done:()=>tutHas('ram')},
+  {k:'install:ram', view:'docs', panel:'inv', cat:'ram',
+   title:'插内存', text:'点「装上」，内存条会插进主板的内存槽。',
+   sel:()=>tutInvEl('ram'), scroll:'top', done:()=>tutHasPart('ram')},
+
+  {k:'buy:disk', view:'docs', panel:'shop', cat:'disk', buy:1,
+   title:'买硬盘', text:()=>tutBuyText('disk'),
+   sel:()=>tutBuyEl('disk'), scroll:'top', done:()=>tutHas('disk')},
+  {k:'install:disk', view:'docs', panel:'inv', cat:'disk',
+   title:'装硬盘', text:'点「装上」，系统盘就位。',
+   sel:()=>tutInvEl('disk'), scroll:'top', done:()=>tutHasPart('disk')},
+
+  {k:'buy:psu', view:'docs', panel:'shop', cat:'psu', buy:1,
+   title:'买电源', text:()=>tutBuyText('psu'),
+   sel:()=>tutBuyEl('psu'), scroll:'top', done:()=>tutHas('psu')},
+  {k:'install:psu', view:'docs', panel:'inv', cat:'psu',
+   title:'装电源', text:'点「装上」，先把电源接好，整机才能进箱。',
+   sel:()=>tutInvEl('psu'), scroll:'top', done:()=>tutHasPart('psu')},
+
+  {k:'buy:case', view:'docs', panel:'shop', cat:'case', buy:1,
+   title:'买机箱', text:()=>tutBuyText('case'),
+   sel:()=>tutBuyEl('case'), scroll:'top', done:()=>tutHas('case')},
+  {k:'install:case', view:'docs', panel:'inv', cat:'case',
+   title:'装进机箱', text:'点「装上」，整机进箱，这一单就装完了。',
+   sel:()=>tutInvEl('case'), scroll:'top', done:()=>tutHasPart('case')},
+
+  {k:'deliver', view:'checks', panel:'checks',
+   title:'检查后交付',
+   text:'红叉应该都消掉了。点下面的「交付」，当场收钱。',
+   sel:tutDeliverEl, scroll:'none',
+   done:()=>!!(state.tut&&state.tut.done&&state.tut.done.deliver)},
+
+  {k:'close', view:'docs', panel:'jobs',
+   title:'打烊',
+   text:'今天的单做完了。点右上角「打烊」，进第二天。',
+   sel:()=>document.getElementById('btnClose'), scroll:'top',
+   done:()=>!!(state.tut&&state.tut.done&&state.tut.done.close)}
+];
+/* 老存档迁移：从当前工作台倒推出「哪几件已经装上过」，
+   免得中途存档的玩家一升级又被要求重装一件已经装好的主板。 */
+let _tutSynced=false;
+function tutSyncBuild(){
+  if(_tutSynced)return;
+  _tutSynced=true;
+  try{
+    const t=state.tut;if(!t)return;
+    t.bought=t.bought||{};t.parts=t.parts||{};
+    if(typeof build==='undefined'||!build)return;
+    if(build.mb&&build.mb.part)t.parts.mb=true;
+    if(build.cpu&&build.cpu.part)t.parts.cpu=true;
+    if(build.cooler&&build.cooler.part)t.parts.cooler=true;
+    if((build.rams||[]).some(Boolean))t.parts.ram=true;
+    if((build.m2||[]).some(Boolean)||(build.sata||[]).some(Boolean))t.parts.disk=true;
+    if(build.psu&&build.psu.part)t.parts.psu=true;
+    if(build.case&&build.case.part)t.parts.case=true;
+    if(state.activeId){t.done=t.done||{};t.done.accept=true;}
+  }catch(e){}
+}
+/* 指针就是「第一件还没做完的事」：表里顺序固定，所以永远只会往后走 */
+function tutCurrent(){
+  if(!tutOn())return null;
+  tutSyncBuild();
+  if(typeof _benchDemoOn!=='undefined'&&_benchDemoOn&&window._benchDemoAt&&Date.now()-window._benchDemoAt>6000)_benchDemoOn=false;
+  for(let i=0;i<TUT_SCRIPT.length;i++){
+    const s=TUT_SCRIPT[i];
+    let done=false;
+    try{done=!!s.done();}catch(e){done=false;}
+    if(!done){
+      const out=Object.assign({},s);
+      if(typeof s.title==='function')out.title=s.title();
+      if(typeof s.text==='function')out.text=s.text();
+      return out;
+    }
+  }
+  return null;
+}
+function tutScrollTop(){
+  try{window.scrollTo(0,0);}catch(e){}
+  try{
+    ['leftBody','panelLeft'].forEach(function(id){
+      const el=document.getElementById(id);
+      if(el){el.scrollTop=0;el.scrollLeft=0;}
+    });
+    const main=document.querySelector('main');if(main&&main.scrollTop)main.scrollTop=0;
+  }catch(e){}
+}
+/* 进入一步时一次性把页面摆好：视口 / 面板 / 分类 / 搜索词 / 回顶。
+   这里不做「要不要滚」的判断——买东西一律列表回顶，单件货自然就在页眉下面。 */
+let _tutEnterKey='',_tutScrollAt=0;
+function tutEnter(step){
+  if(!step||_tutEnterKey===step.k)return false;
+  _tutEnterKey=step.k;
+  let dirty=false;
+  if(step.view&&typeof isMobile==='function'&&isMobile()){
+    if(typeof mView!=='undefined'&&mView!==step.view){try{mViewSet(step.view,true);dirty=true;}catch(e){}}
+  }
+  if(step.panel&&step.panel!=='checks'&&state.panel!==step.panel){state.panel=step.panel;dirty=true;}
+  if(step.cat&&curCat!==step.cat){curCat=step.cat;dirty=true;}
+  if(step.buy){
+    if((typeof shopLimit!=='undefined')&&(shopLimit||0)<40)shopLimit=40;
+    let q='';
+    try{q=tutBuyQuery(step.cat);}catch(e){q='';}
+    try{filt=defaultFilt();filt.q=q;shopFilterOpen[_filterKey()]=false;dirty=true;}catch(e){}
+  }else if(step.k&&step.k.indexOf('install:')===0){
+    /* 仓库里不能留着上一步的搜索词：那会把刚买的件筛没 */
+    try{filt=defaultFilt();dirty=true;}catch(e){}
+  }
+  if(dirty){try{save();}catch(e){}try{renderAll();}catch(e){}}
+  tutScrollTop();
+  return dirty;
+}
+
 /* 引导进行中时，商店里那件目标货加个「按这个买」标记 */
 function tutMarkItem(cat,x){
   const t=state.tut;
@@ -5910,121 +6135,8 @@ function pasteClickEl(){
   return im||document.getElementById('art2d');
 }
 function coachStep(){
-  if(coachStep._gameStamp!==window.__gameNo){
-    coachStep._gameStamp=window.__gameNo;
-    coachStep._tgtAt=0;coachStep._ramReset=0;
-  }
-  if(_benchDemoOn&&window._benchDemoAt&&Date.now()-window._benchDemoAt>6000){_benchDemoOn=false;}
-  /* 以前这里在「装件动画」的 1.6~2.3 秒里直接返回 null，引导整块消失再重新出现，
-     看起来像闪了一下。现在动画期间照常给步骤，只是不切页。 */
-  const t=state.tut||{};
-  if(t.guideOff||state.day>1)return null;
-  const d=tutDone();
-  if(!d.accept)return {k:'accept',title:'旺财来带你装机',text:'先接单吧……老同学这台剪辑机，看起来不难。',sel:()=>document.querySelector('[data-accept]')};
-  /* 交完第一单、还没打烊：直接收尾。
-     以前这里会继续走配件循环，而交付后工作台已清空（totalScore 归零），
-     「核显够不够」的判断随之失效，引导又回头让你买显卡——交完单还在催买配件。 */
-  if(d.deliver&&!d.close)return {k:'close',title:'打烊',text:'今天的单处理完，打烊，明天继续。',sel:()=>document.getElementById('btnClose')};
-  const p=tutParts();
-  /* 买件步的「框」统一在这里生成：换到别处（丢件重买）时也能直接复用 */
-  const buyStep=it=>({k:'buy:'+it.cat,cat:it.cat,title:'买'+it.label,text:tutBuyText(it.cat),
-    sel:()=>{
-      /* 指向「算出来的那一件」，不是列表第一件 */
-      const q=tutPick(it.cat);
-      if(q){
-        const kind=q.u!=null?'used':'new';
-        const el=document.querySelector(`[data-buy="${q.n}"][data-kind="${kind}"]`)
-          ||document.querySelector(`[data-buy="${q.n}"]`);
-        if(el)return el;
-      }
-      return document.querySelector('[data-buy]');
-    }});
-  for(const it of TUT_PARTS){
-    /* 显卡这一步：这单「核显够用」，台词都在劝你别买，但步骤本身却要求 bought.gpu 为真，
-       而 tutPick('gpu') 根本没有显卡分支（返回 null），框最后落到「随便一个购买按钮」上——
-       玩家照着台词不买，引导就永远停在这一步，最后检查/交付永远到不了。
-       所以：整机性能已经达标就直接跳过这一步。 */
-    if(it.cat==='gpu'&&!p.bought.gpu&&!p.parts.gpu){
-      const needGPU=(function(){
-        try{
-          const jj=job();if(!jj||!jj.target)return false;
-          const t=jj.target;
-          /* 核显单（igp 标记，或压根没有 3DMark 门槛）一律不需要显卡，
-             不要再拿「参考机分数」去比，否则装完机箱会跳回买显卡这一步来回闪。 */
-          if(t.igp||(t.ts||0)<=0)return false;
-          if(lvlName&&/核显/.test(String(lvlName(jj)||'')))return false;
-          return (t.ts||0)>totalScore().ts;
-        }catch(e){return false;}
-      })();
-      if(!needGPU){p.skipGpu=1;continue;}   /* 用独立标记：伪装成 bought 会被下面的「买了却不在仓库」清掉，导致来回跳步 */
-    }
-    if(it.cat==='gpu'&&p.skipGpu)continue;    /* 这单核显够用：显卡步骤整体跳过 */
-    if(!p.bought[it.cat]){
-      if(it.cat==='cpu'&&curCat==='cpu'&&filt.ig!=='ig'&&state.panel==='shop')
-        return {k:'cpu_ig',cat:'cpu',title:'带核显',text:'这单没有显卡预算——先点「带核显」，靠 CPU 自带的显卡输出。',sel:()=>document.querySelector('[data-ig="ig"]')};
-      /* 已删除「任务要求3000」「拖滑块」两步：工单卡上已写明 CB 3,000，
-         再讲一遍只会打断买件节奏（筛选由 tutPick 自动完成）。 */
-      return buyStep(it);
-    }
-    if(it.cat==='ram'){
-      let _need=false;
-      if(filt.cap.length||filt.mem.length||filt.mhz.length||filt.price.length||filt.extra.length||filt.q){filt=defaultFilt();_need=true;}
-      try{const _k=_filterKey();if(shopFilterOpen[_k]){shopFilterOpen[_k]=false;_need=true;}}catch(e){}
-      /* 复位筛选后只重画一次，而且放到下一帧，避免在取步骤的过程中打断布局 */
-      if(_need&&!coachStep._ramReset){
-        coachStep._ramReset=1;
-        setTimeout(()=>{coachStep._ramReset=0;try{renderLeft();renderAll();if(typeof coachRefresh==='function')coachRefresh();}catch(e){}},0);
-      }
-    }
-    if(!p.parts[it.cat]){
-      const inv=state.inv.find(x=>x.cat===it.cat&&!x.broken);
-      /* 买了却不在仓库、也没装上（中途被卖掉 / 存档残留）：把「已买」清掉、直接回到买件，
-         不然这一步会指着一个根本不存在的「装上」，永远走不下去 */
-      if(p.bought[it.cat]&&!inv){p.bought[it.cat]=false;return buyStep(it);}
-      /* 件躺在仓库里、玩家却站在商店/工作台时，屏幕上没有「装上」可点：
-         先把框打在上面的「仓库」页签上，让他自己点过去 */
-      /* 买错了件（插槽/代际对不上）：placePart 只会弹一句 toast 就没了，
-         引导却继续指着「装上」，玩家会一直点、一直失败。这里直接告诉他怎么补救。 */
-      if(inv){
-        let why='';
-        try{
-          const mbp=part('mb');
-          if(mbp&&it.cat==='cpu'&&inv.part.s&&inv.part.s!==mbp.s)
-            why='这颗 CPU 是 '+inv.part.s+'，主板是 '+mbp.s+'，插不上去';
-          if(mbp&&it.cat==='ram'&&inv.part.m&&inv.part.m!==mbp.m)
-            why='这条内存是 '+inv.part.m+'，主板只吃 '+mbp.m;
-        }catch(e){}
-        if(why)return {k:'badPart:'+it.cat,cat:it.cat,title:'这件装不上',
-          text:why+'。在仓库里点它右边的「卖」出掉，再回头买一件对得上的。',
-          sel:()=>document.querySelector('[data-sell]')||document.querySelector('#modes button[data-panel="inv"]')};
-      }
-      if(inv&&state.panel!=='inv')
-        return {k:'gotoInv',cat:it.cat,title:'去仓库装上',
-          text:`${it.label}已经躺在仓库里了：点上面的「仓库」，再点它右边的「装上」。`,
-          sel:()=>document.querySelector('#modes button[data-panel="inv"]')||document.querySelector('#modes')};
-      return {k:(state.panel==='inv'?'install2':'install:'+it.cat),cat:it.cat,title:'装上'+it.label,
-        text:(state.panel==='inv'?'点这件右边的「装上」，它会进到工作台对应的槽位。':it.inst),
-        sel:()=>tutInstallEl(it)};
-    }
-    /* 交付之后工作台会被清空（build.paste 回到 false），这一条以前会让引导又跳回
-       「去工作区涂硅脂」，交完单还追着你要涂硅脂。台面上没 CPU 就不该再提这件事。 */
-    if(it.cat==='cpu'&&!build.paste&&part('cpu')){
-      /* 手机上「工作台」是底部页签（mView），不是 #modes 里的按钮，
-         而 state.panel 永远不会等于 'bench' —— 以前这里判断的是 state.panel，
-         于是从装好 CPU 起引导就一直卡在「去工作区」，框还指着一个不存在的按钮。 */
-      if(!onBenchView())return {k:'paste',cat:'cpu',title:'去工作区',text:'先切到「工作区」，CPU 装好了要涂硅脂。',
-        sel:benchTabEl};
-      return {k:'paste2',cat:'cpu',title:'涂硅脂',text:'点「涂硅脂」（或点台面上的 CPU 顶盖），挤一点硅脂，薄薄抹开。',
-        sel:pasteClickEl};
-    }
-  }
-  if(!d.checks)return {k:'checks',title:'让检查变绿',text:'红叉都消掉才能开机……再检查一遍。',sel:()=>document.getElementById('checks')};
-  if(!d.deliver)return {k:'deliver',title:'交付',text:'检查全绿就交付，赚的钱就是利润。',
-    sel:()=>{const vis=x=>x&&x.getBoundingClientRect&&x.getBoundingClientRect().width>0;
-      const a=document.getElementById('abDeliver'),b=document.getElementById('btnDeliver');
-      return vis(a)?a:(vis(b)?b:(a||b));}};
-  if(!d.close)return {k:'close',title:'打烊',text:'今天的单处理完，打烊，明天继续。',sel:()=>document.getElementById('btnClose')};
-  return null;
+  /* 只看那张写死的表：第几件没做完就是哪一步，不再探测 DOM、不再猜页面。 */
+  return tutCurrent();
 }
 let _coachHiddenAt=0;
 
@@ -6081,15 +6193,15 @@ function tutFixedDock(){
     const g=document.getElementById('tutGal');
     if(!g)return;
     g.classList.remove('box-top');
-    /* 默认贴到底部页签上方；只有「交付/检查/打烊」这些真正要点操作栏的步骤，
-       才把卡片抬到操作栏上面，避免把交付按钮盖死。 */
-    const step=(typeof coachStep==='function')?coachStep():null;
-    const k=step&&step.k||'';
-    const needBar=(k==='deliver'||k==='close'||k==='checks');
+    /* 贴到底部页签上方；底部那条「交付」操作栏只要露出来，卡片就抬到它上面，
+       任何时候都不把交付按钮盖死（不再按步骤挑，免得漏一步就挡死）。 */
     const navh=parseFloat(getComputedStyle(document.body).getPropertyValue('--navh'))||60;
     const ab=document.getElementById('actionBar');
     let abh=0;
-    if(needBar&&ab){const r=ab.getBoundingClientRect();if(r&&r.height&&getComputedStyle(ab).display!=='none')abh=r.height+10;}
+    if(ab&&ab.classList.contains('on')){
+      const r=ab.getBoundingClientRect();
+      if(r&&r.height&&getComputedStyle(ab).display!=='none')abh=r.height+8;
+    }
     g.style.setProperty('--tut-card-gap',Math.round(navh+8+abh)+'px');
   }catch(e){}
 }
@@ -6459,6 +6571,18 @@ function drawCoach(el,step){
       if(_tp&&!_wasOn&&!_recentHide){_tp.classList.remove('cFade');void _tp.offsetWidth;_tp.classList.add('cFade');}
     }catch(e){}
   }
+  /* 需要滚的步骤：目标不在安全带里才滚，直接交给浏览器的 scrollIntoView，
+     不再自己找滚动容器、算方向、算差值（那套算法一找错容器就会「滚反」）。
+     每次重画都检查一次：剧情/弹窗刚关掉时页面位置可能被重置，看得见就一动不动。 */
+  if(step.scroll==='center'){
+    try{
+      const _r=el.getBoundingClientRect(),_bot=coachSafeBottom();
+      if((_r.top<96||_r.bottom>_bot)&&performance.now()-(_tutScrollAt||0)>120){
+        _tutScrollAt=performance.now();
+        el.scrollIntoView({block:'center',inline:'nearest'});
+      }
+    }catch(e){try{el.scrollIntoView();}catch(e2){}}
+  }
   if(!positionCoach(el)){
     /* 刚点完按钮时面板可能正在重画，这一瞬间量不到目标；
        以前这里直接 coachHide()，于是「撤掉 → 重画 → 再撤」= 闪屏。
@@ -6485,24 +6609,6 @@ function drawCoach(el,step){
   c.classList.add('on');try{document.body.classList.add('coachOn');}catch(e){}_coachKey=step.k;_coachDrawnKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
   coachScrollGuard();
   coachWatchScroll();
-  if(stepChanged){
-    setTimeout(()=>{
-      try{
-        /* 卡片刚弹出时高度还没量准（height=0），安全底边会算到屏幕最底下，
-           于是「目标被卡片压着」也不触发滚动，玩家只能自己瞎滑。
-           等布局稳一下，重新量底边：需要就滚，不需要就只重画光圈。 */
-        const st=(typeof coachStep==='function')?coachStep():null;
-        if(!st||st.k!==step.k)return;
-        let e2=null;try{e2=st.sel();}catch(e){}
-        if(!e2)return;
-        if(typeof coachNeedsScroll==='function'&&coachNeedsScroll(e2)){
-          coachScrollTo(e2,coachSingleItem(e2)?1:520,function(){ try{positionCoach(e2);}catch(e){} });
-        }else{
-          coachReposition(step);
-        }
-      }catch(e){}
-    },420);
-  }
 }
 /* 只更新几何：光圈、提示卡、四块挡板 */
 let _coachTipW=0,_coachTipH=0;
@@ -6647,21 +6753,6 @@ function positionCoach(el){
   /* 隐藏面板里的节点也有 rect（只是全 0 或跑偏），offsetParent 为 null 才是「真的没显示 */
   try{if(el.offsetParent===null&&el!==document.body)return false;}catch(e){}
   const pad=6,vw=window.innerWidth||390,vh=window.innerHeight||700;
-  /* 只露一半（比如筛选区最下面那个「核显」小标签被面板底边切掉）时，画框会和内容错位：
-     先把窗口滚到能整块看见，再重新量一次。 */
-  {
-    /* 安全区要扣掉底部引导卡片的实际高度；#tutGal 是全屏层，不能拿它的 offsetHeight。 */
-    const topSafe=88,botSafe=coachSafeBottom();
-    const _nowS=Date.now();
-    const _off=(r.top<topSafe-24)||(r.bottom>botSafe+24);
-    if(_off&&!_coachAutoScrolling&&!positionCoach._fixing&&(_nowS-(positionCoach._scrT||0)>1000)){
-      positionCoach._scrT=_nowS;positionCoach._fixing=1;
-      try{scrollElIntoView(el,{instant:true,bottom:botSafe});}catch(e){}
-      try{r=el.getBoundingClientRect();}catch(e){}
-      positionCoach._fixing=0;
-      if(!r||!r.width)return false;
-    }
-  }
   if(r.bottom<0||r.top>vh)return false;
   const hole=document.getElementById('coachHole'),tip=document.getElementById('coachTip');
   if(!hole||!tip)return false;
@@ -6935,30 +7026,30 @@ function _coachSyncPage(step){
   return true;
 }
 function coachRefresh(){
+  /* 引导结束后（换天 / 跳过）永远把新手布局收掉：这个类只影响商店筛选和新手任务条 */
+  try{if(!tutOn())document.body.classList.remove('tut-run');}catch(e){}
   if(document.getElementById('introCard')){ try{coachHide();}catch(e){} return; }
-  /* 一次点击会从好几个地方排队调用（40/80/150ms…），而且每调一次就要重排遮罩。
-     这里做一次合并：70ms 内的重复调用只留最后一次。 */
+  /* 一次点击会从好几个地方排队调用（40/80/150ms…），每调一次都要重排遮罩。
+     这里做一次合并：180ms 内的重复调用只留最后一次。 */
   const _now=performance.now();
   if(_now-_crAt<180){
     if(!_crTrail)_crTrail=setTimeout(()=>{_crTrail=null;try{coachRefresh();}catch(e){}},80);
     return;
   }
   _crAt=_now;
-  /* 刚完成某一步（比如把滑块拖到 3000）时先停一拍，别立刻把提示换成下一步 */
   if(Date.now()<_coachHoldUntil)return;
   const scr=document.getElementById('titleScr');
   if(scr&&!scr.classList.contains('hide')){coachHide();return;}
-  /* 剧情/微信/弹窗开着时一律不出引导（连台词框一起收），避免两个框叠在一起 */
+  /* 剧情/微信/弹窗/交付过场开着时一律不出引导，避免两个框叠在一起 */
   try{
     if(Scene.playing||document.getElementById('chatPop')||document.getElementById('plotEvent')||
        document.getElementById('storyPop')||document.getElementById('dayOpen')||
-       document.getElementById('dayOverlay')||
+       document.getElementById('dayOverlay')||document.getElementById('hoOverlay')||
        (document.getElementById('mask')&&document.getElementById('mask').classList.contains('on'))){
       coachHide();return;
     }
   }catch(e){}
-  /* 装机实拍层还盖着时不要画下一步：玩家看到的会是全屏主板照片，
-     而高亮/点击锁已经跑到下一件货上。等实拍层收起后再 refresh。 */
+  /* 装机实拍层还盖着时不要画下一步：等实拍层收起后再 refresh */
   try{
     const bf=document.getElementById('buildFlash');
     if((typeof _benchDemoOn!=='undefined'&&_benchDemoOn)||(bf&&bf.classList.contains('on'))){
@@ -6967,15 +7058,11 @@ function coachRefresh(){
       return;
     }
   }catch(e){}
-  /* 剧情弹窗 / 通用弹窗（新手说明、读取确认…）开着时不要抢焦点，
-     等它们关掉再来；否则玩家会看到「接一单」的教练卡压在剧情上面。 */
+  /* 开场说明/剧情卡还没关：等它关掉再来，别抢焦点，也别把引导收掉再弹一遍 */
   {
     const mask=document.getElementById('mask');
     const busy=(_openingSeq&&Date.now()<_openingUntil)||!!document.getElementById('plotEvent')||!!document.getElementById('storyPop')||!!(mask&&mask.classList.contains('on'));
     if(busy){
-      /* 弹窗开着时不重画引导，但也别把引导收掉：
-         收掉再重新出现，玩家看到的就是「这张卡弹了两遍」。
-         弹窗层级本来就比引导高，留着不会盖住确认框。 */
       if(_coachWaitCount===undefined)_coachWaitCount=0;
       if(_coachWaitCount<40){
         _coachWaitCount++;
@@ -6986,112 +7073,29 @@ function coachRefresh(){
     _coachWaitCount=0;
   }
   const step=coachStep();
+  /* 引导期把「新手任务 / 筛选区」收起来（CSS 只认这一个类） */
+  try{document.body.classList.toggle('tut-run',!!step);}catch(e){}
   if(!step){coachHide();return;}
   if(_coachDismissed===step.k)return;
-  /* （已移除 240ms 步间节拍：它要求 _coachKey 必须及时写入，
-       手机端走 tutGal 分支时写入滞后，会把引导框一直挡掉。
-       节奏改为「剧情之间 260ms + 语音 380ms」两处，够用且不挡绘制。） */
-  /* 先切页、再画框：这一轮负责切，切完重新进 refresh 才画 */
-  if(_coachSyncPage(step)){
-    /* 切页时不收卡片（收了再画 = 肉眼看到两次弹出） */
-    if(!_coachPageSyncT)_coachPageSyncT=setTimeout(()=>{
-      _coachPageSyncT=null;
-      try{coachRefresh();}catch(e){}
-    },260);
+  /* 换步：先把视口/面板/分类/搜索词一次摆好（tutEnter 只做一次），
+     这一轮到此为止，renderAll 会排下一次刷新来画框。 */
+  if(tutEnter(step))return;
+  /* 同一步、卡已经亮着：只跟着目标挪光圈，绝不重画、不收起 */
+  const c=document.getElementById('coach');
+  if(_coachKey===step.k&&c&&c.classList.contains('on')){
+    /* 同一步：重走一遍 drawCoach——不换文案，但会补一次「要不要居中」的检查，
+       剧情/弹窗关掉后位置被重置也能自己纠回来。 */
+    let el=null;try{el=step.sel();}catch(e){}
+    if(el&&typeof el.getBoundingClientRect==='function')drawCoach(el,step);
     return;
   }
-  if(_coachKey===step.k){
-    /* 步骤没变，但面板被后续操作切走了（刚装完件回到仓库、刚买完切到仓库就是这样）。
-       以前这里直接 return，教练卡就指着一个看不见的元素，玩家得自己点回商店。 */
-    if((step.k||'').indexOf('buy:')===0&&state.panel!=='shop'&&_coachForcedStep!==step.k){_coachForcedStep=step.k;coachGo(step);}
-    return;
-  }
-  /* 引导只在「步骤变了」的那一次把玩家送到对应页；
-     之后玩家自己点去别处（比如点仓库），不能被引导反复拽回来 */
-  if(_coachForcedStep!==step.k){
-    _coachForcedStep=step.k;
-    if(coachGo(step)){
-      /* 只切页、不补画一次的话，光圈会停在上一页的目标上（文字是新的、框是旧的）。
-         这里固定补一拍，切完页重新走完整的定位流程。 */
-      if(!_coachPageSyncT)_coachPageSyncT=setTimeout(()=>{_coachPageSyncT=null;try{coachRefresh();}catch(e){}},300);
-      return;
-    }
-  }
-  const el=step.sel();
+  let el=null;try{el=step.sel();}catch(e){}
   if(!el||typeof el.getBoundingClientRect!=='function'){
-    /* DOM 可能刚被重画（刚切页签 / 刚买完件），别急着判定「没得指」，稍等再看一眼 */
-    if(!_coachRetry){_coachRetry=setTimeout(()=>{_coachRetry=null;try{coachRefresh();}catch(e){}},90);return;}
-    coachHide();
-    /* 收掉卡片之后挂一个慢重试：面板/列表稳下来就能自己回来。
-       以前这里收掉就再也不画了，而步骤还在，点击锁把玩家死死锁住。 */
-    clearTimeout(coachRefresh._slow);
-    coachRefresh._slow=setTimeout(()=>{try{coachRefresh();}catch(e){}},700);
+    /* DOM 可能刚被重画：等一拍再看，别急着判定「没得指」 */
+    if(!_coachRetry)_coachRetry=setTimeout(()=>{_coachRetry=null;try{coachRefresh();}catch(e){}},90);
     return;
   }
-  /* 换步的瞬间就让旧光圈让位：
-     能直接定位（目标已经在屏幕上）就把框和文案一起挪过去；
-     定位不了（目标还在屏幕外）就先把框藏起来，等滚动结束再画。
-     以前这里什么都不做，上一件货的框会一直亮到 0.9 秒滚动跑完 —— 就是「消失晚了」。 */
-  if(_coachKey!==step.k){
-    let _moved=false;
-    try{_moved=positionCoach(el);}catch(e){}
-    if(_moved){
-      try{
-        const _tt=document.getElementById('coachTitle'),_tx=document.getElementById('coachText');
-        if(_tt)_tt.textContent=step.title;
-        if(_tx)_tx.textContent=step.text;
-      }catch(e){}
-    }else{
-      try{const _h=document.getElementById('coachHole');if(_h)_h.style.opacity='0';}catch(e){}
-    }
-    try{document.querySelectorAll('.tut-glow').forEach(e=>e.classList.remove('tut-glow'));}catch(e){}
-  }
-  /* 先把目标滚到位，滚稳了再画引导框：
-     滚动期间不收框的话，每帧重定位会拖慢滚动，还会有「框在追目标」的廉价感 */
-  if(!coachNeedsScroll(el)){
-    /* 目标本来就在可视区（引导把货架筛成一件时就是这样）：直接画，不做滚动、不等节拍。
-       以前这里固定等 340ms，玩家会觉得「引导慢半拍才出来」。 */
-    try{resetCardScrolls();}catch(e){}
-    drawCoach(el,step);
-    return;
-  }
-  /* 滚动期间把引导「冻结」在原地：不重算、不收框、不改亮度。
-     以前收框会让高亮那块从亮变暗，就是那一下闪。 */
-  /* 阶段化执行，任何一帧只有一个东西在动：
-       P1 等切页淡入结束（不滚动）
-       P2 一帧内瞬移到位（没有“滚动过程”可被抽帧）
-       P3 画框、解锁
-     期间遮罩保持原样，亮度全程不变。 */
-  /* P1 等切页淡入结束 → P2 平滑滑到位（光圈跟着走，限帧 20fps）→ P3 收尾 */
-  _coachFrozen=false;
-  scrollLockOn();
-  /* 不慌不忙的节奏：切页淡入完 → 再停 0.35 秒 → 0.9 秒滑到位 → 停 0.3 秒再画框 */
-  /* 文案统一交给 drawCoach 在「定位成功之后」写。
-     这里以前是提前写文案（想跟着切页淡入一起出现），结果定位失败、
-     或者切页把这一轮打断时，文字已经是下一步、光圈还停在上一件货上——
-     也就是玩家看到的「装上机箱 / 框着二手 ¥51」。 */
-  const since=performance.now()-(_lastViewSwitchAt||0);
-  const wait=Math.max(350,760-since);
-  setTimeout(()=>{
-    try{resetCardScrolls();}catch(e){}
-    let moved=false;
-    /* 这一步是否还是「当前步」：装完/买完之后 step 已经翻篇，
-       延迟的 drawCoach 不能把旧框再画回来，否则引导层会整块留在屏幕上 */
-    const still=()=>{try{const s=(typeof coachStep==='function')?coachStep():null;return !!(s&&s.k===step.k);}catch(e){return false;}};
-    try{
-      moved=coachScrollTo(el,coachSingleItem(el)?1:900,()=>{
-        setTimeout(()=>{
-          scrollLockOff();
-          try{resetCardScrolls();}catch(e){}
-          if(!still())return;
-          drawCoach(el,step);
-        },120);
-      });
-    }catch(e){}
-    if(!moved){
-      setTimeout(()=>{scrollLockOff();if(!still())return;drawCoach(el,step);},140);
-    }
-  },wait);
+  drawCoach(el,step);
 }
 function tutCardHTML(){
   if(state.day===1&&state.tut&&!state.tut.guideOff)return '';
@@ -7112,6 +7116,8 @@ function tutCardHTML(){
   </div>`;
 }
 function tutStripHTML(){
+  /* 第 1 天由旺财逐句带：列表顶上再顶一条「新手任务」会挤掉第一张货卡 */
+  if(state.day===1&&state.tut&&!state.tut.guideOff)return '';
   const {n,total,cur}=tutProgress();
   if(n>=total||!state.tut||state.tut.hidden)return '';
   return `<div class="tutStrip" data-tut-strip="1">
@@ -7132,7 +7138,7 @@ function renderLeft(){
   }
   bindTut();
   maybeTutTip();
-  try{tutAutoNav();}catch(e){}
+  /* 页面切换统一由 tutEnter（写死的步骤表）负责；旧的 tutAutoNav 不再抢方向。 */
   /* 换了面板 / 换了分类 / 换了排序结果：让内容像剧情卡那样浮上来，而不是硬替换 */
   const _k=state.panel+'|'+curCat+'|'+(filt.q||'')+'|'+(state.activeId||'');
   if(_k!==_lastLeftKey){
@@ -7302,7 +7308,8 @@ function acceptJob(jid){
   const r=document.getElementById('result');if(r){r.className='';r.innerHTML='';}
   saveBench();
   state.activeId=jid;jj.status='taken';
-  if(isMobile())mViewSet('bench',true);
+  /* 新手引导期下一步是「买主板」，别先把人甩到工作台再切回来 */
+  if(isMobile()&&!(state.day===1&&state.tut&&!state.tut.guideOff))mViewSet('bench',true);
   state.tut=state.tut||{done:{},hidden:false};state.tut.done.accept=true;
   state.benches=state.benches||{};
   let firstTime=false;
@@ -7446,6 +7453,7 @@ function bindTut(){
        <span style="font-size:11.5px;color:#8b93a1">左侧「新手任务」清单还在，照着做也能过。以后不能恢复，只能重开新游戏。</span>`,
       ()=>{
         state.tut=state.tut||{done:{},hidden:false};state.tut.guideOff=true;save();
+        try{document.body.classList.remove('tut-run');}catch(e){}
         coachHide();toast('已跳过引导，左侧任务清单还在');
       });
     const no=document.getElementById('mNo'),yes=document.getElementById('mYes');
@@ -7706,6 +7714,15 @@ function currentList(){
     if(pb==null)return -1;
     return /Desc$/.test(filt.sort)?pb-pa:pa-pb;
   });
+  /* 第 1 天引导：刚买的那一件永远排在仓库最前。
+     开局仓库存货很多，按价格排它可能排到十几行外，光圈就指到屏幕外了；
+     置顶之后「装上」必然在页眉下面第一张卡上，不需要任何滚动。 */
+  if(isInv&&typeof tutOn==='function'&&tutOn()){
+    try{
+      const t=state.tut;const uid=t&&t.buyUid&&t.buyUid[curCat];
+      if(uid!=null){const i=arr.findIndex(x=>String(x.uid)===String(uid));if(i>0)arr.unshift(arr.splice(i,1)[0]);}
+    }catch(e){}
+  }
   return arr;
 }
 function specOf(k,x){
@@ -7830,7 +7847,11 @@ function bindShopList(){
         if(used&&curCat!=='case'&&!tutOn&&Math.random()<0.12)_bad=true;
       }catch(e){}
       addInv({cat:curCat,part:_bad?Object.assign({},p,{faulty:true}):p,paid:price,shop:used?'xianyu':'taobao',faulty:_bad});
-      if(state.tut){state.tut.done.buy=true;state.tut.bought=state.tut.bought||{};state.tut.bought[curCat]=true;}
+      if(state.tut){
+        state.tut.done.buy=true;state.tut.bought=state.tut.bought||{};state.tut.bought[curCat]=true;
+        /* 记住刚入库这一件的 uid：开局仓库里有 90 件存货，装件步必须指对刚买的这件 */
+        try{const _ni=state.inv[state.inv.length-1];state.tut.buyUid=state.tut.buyUid||{};if(_ni)state.tut.buyUid[curCat]=_ni.uid;}catch(e){}
+      }
       /* 买完件后如果引导下一步就是「装上」，直接把面板切到仓库再渲染，
          只重绘一次；否则会有「商店重绘 → 立刻切仓库重绘」的连续两次，中间那下就是闪 */
       try{
@@ -9567,6 +9588,8 @@ document.getElementById('btnClose').onclick=()=>{
      那个按钮本身会被新手点击锁拦住，形成死局。 */
   try{state.tut=state.tut||{done:{},hidden:false};state.tut.done.close=true;save();}catch(e){}
   try{if(typeof coachHide==='function')coachHide();}catch(e){}
+  /* 第 1 天的新手布局（藏任务条、藏筛选）到此为止：第 2 天恢复商店正常样子 */
+  try{document.body.classList.remove('tut-run');}catch(e){}
   playDaySummary(st,()=>{
   dayCurtainOn();   /* 一进结算就盖住，避免闪出游戏页面 */
   const d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+1);
@@ -9872,14 +9895,12 @@ function maybeOnboard(after){
   try{seen=!!(state.tut&&state.tut.onboarded);}catch(e){}
   if(seen){_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},80);if(after)after();return;}
   setTimeout(()=>{
-    const _mobileWhere=(typeof isMobile==='function'&&isMobile());
     modal('欢迎来到旺财装机店',
       `<div style="line-height:1.85">
-        ${_mobileWhere?'当前「单据」页上方有一条':'左边最上面有一张'}<b>「新手任务」</b>${_mobileWhere?'清单':'卡片'}，共六步，做到了会自动打勾：<br>
-        <b>① 接一单 → ② 进一个件 → ③ 装上工作台 → ④ 检查变绿 → ⑤ 交付 → ⑥ 打烊</b>
+        旺财会在屏幕下方一步一步带你：<b>接单 → 买件 → 装上 → 涂硅脂 → 检查 → 交付 → 打烊</b>。
       </div>
       <div style="margin-top:10px;font-size:11.5px;color:#8b93a1;line-height:1.75">
-        不用记流程：清单会告诉你现在该做什么。<br>
+        照着卡片框住的地方点就行，点别处会被拦下来。<br>
         客户给的部件费是预算，花得越少赚得越多——但别省到跑不动客户的软件。
       </div>`,
       ()=>{try{state.tut=state.tut||{};state.tut.onboarded=1;save();}catch(e){}try{localStorage.setItem('pcbs2_onboard','1');}catch(e){}_openingSeq=false;setTimeout(()=>{try{coachRefresh();}catch(e){}},140);
@@ -10168,6 +10189,8 @@ renderAll();
         COACH.holdUntil = performance.now() + 340;
         COACH.miss = 0;
       }
+      /* 换步：先按写死的步骤表把视口/面板/分类/搜索词一次摆好，摆完再画 */
+      try{ if(tutEnter(step)){ schedule(160); return; } }catch(e){}
       if(step.k==='cpu_ig' || step.k==='cpu_slider'){
         let open=false; try{ open = shopFilterState(); }catch(e){}
         if(!open){ try{ shopFilterOpen[_filterKey()]=true; }catch(e){} ; renderAll(); schedule(200); return; }
@@ -10788,6 +10811,11 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01385':['新手引导改成一张写死的线性步骤表：按表一步步走，不再每步探测 DOM / 猜滚动',
+             '买件一律列表回顶、装件只在需要时居中一次；去掉自己算滚动容器的逻辑，「滚反」从根上没了',
+             '引导期收起新手任务条和商店筛选，第一件货必然落在页眉下面，不会被底部卡片压住',
+             '散热器固定型号先验兼容性：65W 下压不再钉给要 71W 的 i5-4590',
+             '仓库里刚买的那件置顶，不会指到开局存货里的另一件'],
     '01384':['引导定位改成交给浏览器 scrollIntoView：不再自己猜滚动容器，方向不会再反'],
     '01383':['引导定位改成按目标当前位置算差值：该往上滚就往上，方向不会再反'],
     '01382':['只有一件货时目标仍然会被定位到（瞬移，不做滑动动画）'],
