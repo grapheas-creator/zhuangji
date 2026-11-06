@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01369';
+const APP_BUILD='01370';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3166,6 +3166,44 @@ function scoreOf(cpu,gpu){let ts=gpu?gpu.ts+Math.round((cpu?cpu.cs:0)*0.03):igSc
 /* 这一单的「最低可装成本」：按客户真正的门槛（3DMark / Cinebench / 内存）
    挑一套最便宜的件。只在「参考机根本跑不动这单软件」时调用，
    用来给预算兜底，避免出现「装得出来但一定亏」的陷阱单。 */
+/* 凑够内存容量：套条 mult=2 占两个槽、容量按 cap×mult 算。
+   以前这里是「最便宜的先插」，128G 工作站永远凑不满直接返回 null，
+   结果 128G 的单既给不出预算、玩家也配不出机器（死单）。 */
+const _ramPlanCache={};
+function ramPlanCost(mem,dimm,need,px,nw){
+  const key=mem+'|'+dimm+'|'+need+'|'+(nw?1:0);
+  if(_ramPlanCache[key]!==undefined)return _ramPlanCache[key];
+  const seen={};
+  for(const x of M){
+    if(x.m!==mem)continue;
+    const pr=px(x);if(pr==null||!(pr>0))continue;
+    const units=x.mult||1,tot=x.cap*units;
+    const k=x.cap+'|'+units;
+    if(seen[k]==null||pr<seen[k])seen[k]=pr;
+  }
+  const items=Object.keys(seen).map(function(k){
+    const a=k.split('|'),u=+a[1];
+    return {c:+a[0]*u,sl:u,p:seen[k]};
+  });
+  let best=null;
+  if(items.length&&dimm>0){
+    const INF=1e18,W=need+1,dp=[];
+    for(let s=0;s<=dimm;s++)dp.push(new Array(W).fill(INF));
+    dp[0][0]=0;
+    for(let s=0;s<=dimm;s++)for(let c=0;c<W;c++){
+      const cur=dp[s][c];if(cur>=INF)continue;
+      for(const it of items){
+        const ns=s+it.sl;if(ns>dimm)continue;
+        const nc=c+it.c;const nc2=nc>=need?need:nc;
+        const v=cur+it.p;
+        if(v<dp[ns][nc2])dp[ns][nc2]=v;
+      }
+    }
+    for(let s=0;s<=dimm;s++)if(dp[s][need]<INF&&(best==null||dp[s][need]<best))best=dp[s][need];
+  }
+  _ramPlanCache[key]=best;
+  return best;
+}
 function minBuildCost(need,opt){
   opt=opt||{};const t=need||{};const nw=!!opt.newOnly;
   const px=x=>x?(nw?(x.p!=null?x.p:null):(x.u!=null?x.u:(x.p!=null?x.p:null))):null;
@@ -3188,12 +3226,8 @@ function minBuildCost(need,opt){
     }
     const mbs=byP(B.filter(b=>px(b)!=null&&b.s===cpu.s&&(!dual||b.pcie>=2))).slice(0,3);
     for(const mb of mbs){
-      let cap=0,rc=0,slots=0;
-      for(const r of byP(M.filter(x=>px(x)!=null&&x.m===mb.m))){
-        if(slots>=mb.dimm)break;rc+=px(r);cap+=r.cap;slots++;
-        if(cap>=ramNeed)break;
-      }
-      if(cap<ramNeed)continue;
+      const rc=ramPlanCost(mb.m,mb.dimm||4,ramNeed||8,px,nw);   /* 没写要求也至少插一条，空机箱开不了机 */
+      if(rc==null)continue;
       const needW=100+cpu.t+(gpu?gpu.tbp*(dual?2:1):0);
       const psu=byP(P.filter(p=>px(p)!=null&&p.w>=needW))[0];if(!psu)continue;
       const cool=byP(H.filter(h=>px(h)!=null&&h.s.includes(cpu.s)&&h.cap>=coolNeed(cpu)&&(!water||h.rad>0)))[0];if(!cool)continue;
@@ -10448,6 +10482,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01370':['工作站的 128G 内存配得出来了：套条按两槽、容量×2 算',
+             '128G 工作站以前是无解单（既给不出预算，也装不出来）'],
     '01369':['顶配单和工作机的预算改成按「最低可行成本」算',
              '以前 4K 顶配单保底 66000、双卡工作站按参考机报价，一张白赚两三万'],
     '01368':['某菇那单件费 900→350：维修单只换一颗 CPU，不是整机','整机单件费余量 45%→20%，跟普通单对齐'],
