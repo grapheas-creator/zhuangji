@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01359';
+const APP_BUILD='01360';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4187,6 +4187,29 @@ function giftStarterStock(){
         };
       }
     },30);
+  };
+
+  /* 插卡检测：按当前维修单的故障给代码 */
+  A.diagCard=function(){
+    if(!state.hasDiagCard){ try{toast('还没有检测卡，去店铺发展里买一张');}catch(e){} return; }
+    let code='A0', meaning='自检通过——问题在系统或硬盘';
+    try{
+      const j=(state.jobs||[]).find(x=>x.id===state.activeId&&x.repair);
+      if(j){
+        const f=j.repair.fault;
+        if(f==='cpu'){ code='00'; meaning='不跑码：CPU 或主板没起来'; }
+        else if(f==='os'){ code='9C'; meaning='自检过，卡在引导——系统盘'; }
+        else if(f==='dust'){ code='A0'; meaning='自检过，掉电——温度保护'; }
+        else { code='C1'; meaning='内存不过：2A/C1 区段'; }
+      }
+    }catch(e){}
+    modal('故障检测卡',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'数码管显示：<b style="font-family:monospace;font-size:22px;color:#b8546a">'+code+'</b><br>'
+      +meaning+'<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">'
+      +'代码表：00/-- 不跑码 · C1/2A 内存 · 25 显卡 · A0/9C 自检通过</span></div>',null);
+    setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='拔下来'; },30);
   };
 
   window.__ARC=A;
@@ -10401,6 +10424,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01360':['新增故障检测卡：店铺发展买（80），维修单可看跑码'],
     '01359':['某菇改为男性'],
     '01358':['某菇改成台式机、CPU坏'],
     '01357':['7co 追的年头改为五六年'],
@@ -10912,6 +10936,12 @@ renderAll();
         +'<span style="color:#9b8088;font-size:12px">每人 ¥30,000，之后每天自动装一台（按 70% 利润结算）。</span><br>'
         +'<span style="color:#9b8088;font-size:12px">已雇：'+(state.hireN||0)+' 人</span> '
         +'<button class="mini" id="pdHireLong" style="margin-left:6px">雇一个</button><br><br>'
+        +'<b style="color:#b8546a">故障检测卡</b><br>'
+        + (state.hasDiagCard
+            ? '<span style="color:#7a9a5a;font-size:12px">已在工具箱里。维修单可以插卡检测。</span>'
+            : '<span style="color:#9b8088;font-size:12px">一块 POST 卡，¥80。插上能看到跑码到哪一步。</span>'
+              +'<button class="mini" id="pdBuyDiag" style="margin-left:6px;'+(state.cash>=80?'':'opacity:.5')+'">买一张</button>')
+        +'<br><br>'
         +'<b style="color:#b8546a">盘下这家店</b><br>'
         + (state.ownShop
             ? '<span style="color:#7a9a5a;font-size:12px">这家店是你的了，不用再交房租。</span>'
@@ -10921,6 +10951,14 @@ renderAll();
               +((state.cash||0)>=1000000?'盘下来':'钱不够')+'</button>')
         +'</div>';
       box.querySelector('.pd-x').onclick=function(){ box.style.display='none'; };
+      const dg=box.querySelector('#pdBuyDiag');
+      if(dg) dg.onclick=function(){
+        if((state.cash||0)<80){ try{toast('钱不够');}catch(e){} return; }
+        state.cash-=80; state.hasDiagCard=1;
+        try{save();renderAll();}catch(e){}
+        try{toast('检测卡到手，维修单里可以用');}catch(e){}
+        try{devWin();}catch(e){}
+      };
       const hl=box.querySelector('#pdHireLong');
       if(hl) hl.onclick=function(){
         if((state.cash||0)<30000){ try{toast('钱不够');}catch(e){} return; }
