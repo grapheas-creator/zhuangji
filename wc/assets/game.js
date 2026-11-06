@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01379';
+const APP_BUILD='01380';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9080,28 +9080,20 @@ async function runBootIntro(){
     const ok=await _playScene(cb=>playChatScene('chat_chenmo_d1',cb));
     if(ok){S['chat_chat_chenmo_d1']=1;try{save();}catch(e){}}
   }
-  /* 3.5 开场（招牌/留声机/微信）全部结束：这时才撤加载页、露出游戏页面 */
-  try{ hideBootLoad(); }catch(e){}
+  /* 3.5 开场（招牌/留声机/微信）全部结束。
+     这里**先不撤加载页**：把「欢迎」说明卡在加载页底下先摆好，
+     撤页那一刻看到的就是「店铺 + 说明卡」一整屏，
+     而不是先露店铺、过一会儿卡才弹出来。 */
   try{document.body.classList.remove('story-mode');}catch(e){}
-  await wait(80);
-
-  /* 4 接单卡 */
-  try{
-    const j=state.jobs&&state.jobs.find(x=>x.story&&x.status==='open');
-    if(j&&!S[j.storyId]){const sd=storyDef(j.storyId);if(sd)await _playScene(cb=>playStory(sd,j,cb));}
-  }catch(e){}
-  /* 5 撤加载页 → 底页 + 开工说明（页面锁生效） */
-  await wait(420);
-
   try{Scene.end();}catch(e){}
-  /* 新手说明前不要把引导画出来：maybeOnboard 会先等 600ms 再弹窗，
-     这一下足够引导卡先露一帧，看起来就像「说明卡在引导后面」。 */
   try{if(typeof _openingSeq!=='undefined'){_openingSeq=true;_openingUntil=Date.now()+6000;}}catch(e){}
   try{if(typeof coachHide==='function')coachHide();}catch(e){}
   /* 等说明卡，但最多等 9 秒：这张卡如果被「点空白 / 被剧情顶掉 / 旧存档缺字段」
      之类的方式关掉，回调就不会跑，纯 await 会把整个开局流程挂在半路，
      开场锁永远不解 —— 引导框也就再也不出现。 */
-  await Promise.race([
+  /* 把「欢迎」卡先挂到加载页底下（#mask 临时降一层），这样撤页时它已经在那了 */
+  try{const m=document.getElementById('mask');if(m)m.classList.add('underLoad');}catch(e){}
+  const _onboardP=Promise.race([
     new Promise(resolve=>{
       try{
         if(state.tut&&state.tut.onboarded){resolve();return;}
@@ -9110,13 +9102,25 @@ async function runBootIntro(){
     }),
     new Promise(r=>setTimeout(r,9000))
   ]);
+  await wait(140);                      /* 让说明卡先画进 DOM，再揭幕 */
+  try{ hideBootLoad(); }catch(e){}
+  /* 加载页淡出（0.5s）之后把弹窗层级恢复，后面的弹窗照旧在最上层 */
+  setTimeout(function(){try{const m=document.getElementById('mask');if(m)m.classList.remove('underLoad');}catch(e){}},760);
+  await _onboardP;
+  await wait(120);                      /* 和下面「接单卡」隔开，别两张卡叠一起 */
+
+  /* 4 接单卡（说明卡关掉之后才出） */
+  try{
+    const j=state.jobs&&state.jobs.find(x=>x.story&&x.status==='open');
+    if(j&&!S[j.storyId]){const sd=storyDef(j.storyId);if(sd)await _playScene(cb=>playStory(sd,j,cb));}
+  }catch(e){}
   /* 说明卡这一环结束就把开场锁解掉。
      以前解锁只靠「开始干活」按钮的回调：说明卡要是被空白处点掉、被剧情顶掉，
      或者旧存档没有 onboarded 字段，锁就一直挂着 —— 玩家看到的是
      引导框整段消失、只剩目标上的高亮框，直到 30 秒兜底才回来。 */
   try{if(typeof _openingSeq!=='undefined')_openingSeq=false;}catch(e){}
   /* 6 引导 + Live2D */
-  await wait(320);
+  await wait(160);
   try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}
 }
 async function playStoryForToday(onDone){
@@ -10737,6 +10741,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01380':['开局：欢迎卡在加载页底下就摆好，揭幕时和店铺一起出现，不再晚一步弹出来'],
     '01379':['货架只剩一件时不做滚动动画，引导直接扣框'],
     '01378':['引导用的配件固定成具体型号（i5-4590 / H81M-K / DDR3 8G…），货架只显示这一件，不会再点错'],
     '01377':['引导卡弹出后重新量一次目标位置：被卡片压住的「装上」会自动滚上来'],
