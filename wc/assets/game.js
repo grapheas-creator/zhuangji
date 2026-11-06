@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01368';
+const APP_BUILD='01369';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3409,21 +3409,17 @@ function makeJobs(dateStr,day){
     /* 兜底：如果这单的软件门槛参考机根本达不到，预算按「最低可装成本 ×1.15」抬起来。
        否则玩家按门槛配机必然倒贴（审计里 16/269 单属于这种）。 */
     try{
-      /* 工作机（128G / 双卡 / 4 块 HDD）和 4K 游戏机（水冷）有额外硬性要求，
-         参考机不一定覆盖，这些单一律算一次最低成本。 */
       const _ramNeed=Math.max(need.ram||0,(cat==='工作机'&&tier===0)?128:0);
-      const _special=(cat==='工作机')||(cat==='游戏机'&&tier===2);
-      /* 128G 工作机的最低成本函数偶尔凑不出容量，直接给个硬下限兜住 */
-      if(cat==='工作机'&&tier===0)partBudget=Math.max(partBudget,21000);
-      /* 顶配单写明要 5090 级别，预算必须覆盖一张 5090 再加整机 */
-      if(ultra)partBudget=Math.max(partBudget,66000);
-      if(_grade==='high'){
-        const _ff=flagshipFloor();
-        if(_ff)partBudget=Math.max(partBudget,Math.ceil(_ff*1.22/50)*50);
+      /* 预算一律按「最低可行成本 × 利润余量」定，不再叠硬保底。
+         以前顶配单保底 66000、128G 工作机保底 21000、双卡工作机取「参考机成本」的较大值，
+         结果一张 4K 顶配单能白赚 2.6 万、一张双卡工作站白赚 2.6 万——利润全从这些口子漏走。 */
+      let _floor=minBuildCost(Object.assign({},need,{ram:_ramNeed}),{newOnly,cat,tier,gpuPref:pref,ultra});
+      /* buildRef 可能把品牌要求改得更严（这单最终要的就是 ref.pref），
+         预算得按最终要求再算一遍，否则会给出「照要求配就亏本」的单。 */
+      if(ref&&ref.pref!==pref){
+        const _f2=minBuildCost(Object.assign({},need,{ram:_ramNeed}),{newOnly,cat,tier,gpuPref:ref.pref,ultra});
+        if(_f2&&(!_floor||_f2>_floor))_floor=_f2;
       }
-      /* 预算按「最低可行成本」定，而不是按参考机成本 ——
-         否则玩家永远能用最便宜的件把差价全赚走（一单白赚一两千）。 */
-      const _floor=minBuildCost(Object.assign({},need,{ram:_ramNeed}),{newOnly,cat,tier,gpuPref:pref,ultra});
       if(_floor){
         /* 预算越高，利润率越低：小单好赚，大单只是流水 */
         const _mk=(function(f){
@@ -3433,9 +3429,7 @@ function makeJobs(dateStr,day){
           if(f<=50000) return 1.08+rand()*0.06;   /* 更大：8~14% */
           return 1.06+rand()*0.04;                /* 旗舰：6~10% */
         })(_floor);
-        const _want=Math.ceil(_floor*_mk/50)*50;
-        if(_special) partBudget=Math.max(partBudget,_want);
-        else partBudget=_want;                     /* 普通单：预算就是最低成本 + 小余量 */
+        partBudget=Math.ceil(_floor*_mk/50)*50;
       }
     }catch(e){}
     /* 软件本身不需要显卡分（need.ts=0，比如 Office / ERP）就别再按参考机核显分算门槛，
@@ -10454,6 +10448,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01369':['顶配单和工作机的预算改成按「最低可行成本」算',
+             '以前 4K 顶配单保底 66000、双卡工作站按参考机报价，一张白赚两三万'],
     '01368':['某菇那单件费 900→350：维修单只换一颗 CPU，不是整机','整机单件费余量 45%→20%，跟普通单对齐'],
     '01367':['某菇那单人工费降到 300（原来 600，比别的维修单高一倍）'],
     '01366':['检测卡接进维修单：买过卡就能在单子上插卡看跑码',
