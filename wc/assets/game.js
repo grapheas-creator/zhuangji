@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01354';
+const APP_BUILD='01355';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10120,10 +10120,17 @@ renderAll();
 
   function offerLegend(){
     modal('神秘人',
-      '<div style="font-size:12.5px;line-height:1.9;color:#6b5b60">'
-      + '一个裹着围巾的人推门进来，没看货架，直接把一张碟拍在柜台上。<br>'
-      + '「这张，你听一次就知道值。一千五，不还价。」<br><br>'
-      + '<span style="color:#9b8088;font-size:11.5px">碟面上一片空白，没有名字。</span></div>', null);
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      + '<b>旁白</b>：快打烊的时候，门口探进来一个脑袋。灰外套，帽檐压得很低，围巾裹到鼻子。<br>'
+      + '<b>神秘人</b>：老板，收碟不？<br>'
+      + '<b>旺财</b>：什么碟？<br>'
+      + '<b>神秘人</b>：老的。正经货。你听一次就知道值。<br>'
+      + '<b>旺财</b>：多少钱？<br>'
+      + '<b>神秘人</b>：一千五。<br>'
+      + '<b>旺财</b>：……一张碟？<br>'
+      + '<b>神秘人</b>：一口价。你看我像讲价的吗？<br>'
+      + '<b>旺财</b>：（像。太像了。但是柜台底下那台留声机，还空着。）<br><br>'
+      + '<span style="color:#9b8088;font-size:12.5px">碟面上一片空白，连个名字都没有。</span></div>', null);
     setTimeout(function(){
       var yes=document.getElementById('mYes'), no=document.getElementById('mNo');
       if(yes){
@@ -10393,6 +10400,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01355':['卖碟剧情改成幽默对话'],
     '01354':['神秘人卖碟改第18天，买/不买都留名片'],
     '01353':['衔接剧情改成打游戏卡顿'],
     '01352':['爸爸的电脑→旺财升级显卡之间加了衔接剧情'],
