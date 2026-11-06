@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01374';
+const APP_BUILD='01375';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6361,7 +6361,7 @@ function coachVoiceToggle(){
   else{const t=document.getElementById('coachText');if(t)coachSay(t.textContent);}
 }
 try{document.addEventListener('click',e=>{if(e.target&&e.target.id==='coachVoice')coachVoiceToggle();});}catch(e){}
-function coachHide(){_coachHiddenAt=performance.now();try{if(typeof tutGalHide==='function')tutGalHide();}catch(e){}coachFaceHide();try{if(_coachAudio)_coachAudio.pause();}catch(e){}const c=document.getElementById('coach');if(c)c.classList.remove('on');_coachKey=null;_coachDrawnKey='';_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
+function coachHide(){_coachHiddenAt=performance.now();try{if(typeof tutGalHide==='function')tutGalHide();}catch(e){}coachFaceHide();try{if(_coachAudio)_coachAudio.pause();}catch(e){}const c=document.getElementById('coach');if(c)c.classList.remove('on');try{document.body.classList.remove('coachOn');}catch(e){}_coachKey=null;_coachDrawnKey='';_coachEl=null;/* 收起引导时把滚动锁和压暗一起撤掉，否则会留下一层点不动的遮罩 */try{scrollLockOff();}catch(e){}try{scrollDimOff();}catch(e){}}
 let _coachGlowEl=null;
 function coachGlow(el){
   if(_coachGlowEl===el)return;
@@ -6449,7 +6449,7 @@ function drawCoach(el,step){
     if(_tt&&_tt.textContent!==step.title)_tt.textContent=step.title;
     if(_tx&&_tx.textContent!==step.text)_tx.textContent=step.text;
   }
-  c.classList.add('on');_coachKey=step.k;_coachDrawnKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
+  c.classList.add('on');try{document.body.classList.add('coachOn');}catch(e){}_coachKey=step.k;_coachDrawnKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
   coachScrollGuard();
   coachWatchScroll();
   if(stepChanged){
@@ -10670,6 +10670,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01375':['引导卡不再挡住列表末尾：被高亮的「装上/买下」能滚到卡片上面来'],
     '01374':['修「检查更新」把自己往旧版本退的 bug：只认比现在新，不再回退'],
     '01373':['重开张当作第 1 天：墨桀、章节、还债、卖碟、某菇、刘警官全按「重开第 N 天」算',
              '页眉、每日开场、提示条统一显示「重开第 N 天」，不再出现两个天数'],
