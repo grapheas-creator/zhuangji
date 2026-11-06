@@ -4,21 +4,102 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>旺财装机店</title>
+<meta name="description" content="旺财装机店 —— 网页版直接开玩，也可以下载 APK 装到手机上，离线也能玩。">
 <link rel="canonical" href="wc/index.html">
-<meta http-equiv="refresh" content="0;url=wc/index.html">
 <style>
-  html,body{margin:0;height:100%;background:#1b1416}
-  body{display:flex;align-items:center;justify-content:center;
-    color:#f2e9da;font:14px/1.8 system-ui,-apple-system,'PingFang SC',sans-serif}
-  a{color:#ff9ac7;text-decoration:none}
+  :root{
+    --ink:#7a3f4c; --ink2:#9b8088; --pink:#f286a6; --pink-d:#e0658a;
+    --cream1:#fffdfa; --cream2:#fdf0e6; --line:#f3d4dc;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:radial-gradient(120% 80% at 50% 0%,#fff8f4 0%,#fbe9ee 55%,#f6dfe7 100%);
+    color:var(--ink);font:15px/1.7 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    display:flex;align-items:center;justify-content:center;padding:24px 18px;
+  }
+  .card{
+    width:100%;max-width:420px;background:linear-gradient(170deg,var(--cream1),var(--cream2));
+    border:1px solid var(--line);border-radius:24px;padding:30px 24px 26px;
+    box-shadow:0 26px 60px -30px rgba(160,90,110,.55),inset 0 1px 0 rgba(255,255,255,.9);
+    text-align:center;position:relative;overflow:hidden;
+  }
+  .card::before{
+    content:"";position:absolute;left:-40px;top:-60px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle,rgba(242,134,166,.22),transparent 70%);pointer-events:none;
+  }
+  .logo{font-size:13px;letter-spacing:6px;color:var(--pink-d);margin-bottom:6px}
+  h1{margin:0 0 6px;font-size:27px;letter-spacing:2px;font-weight:900}
+  .sub{margin:0 0 22px;font-size:12.5px;color:var(--ink2);line-height:1.9}
+  .btn{display:block;width:100%;padding:15px 16px;border-radius:15px;border:0;
+    font:inherit;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;
+    text-decoration:none;transition:transform .12s ease,box-shadow .12s ease;
+    -webkit-tap-highlight-color:transparent}
+  .btn:active{transform:scale(.985)}
+  .btn.main{color:#fff;background:linear-gradient(180deg,var(--pink),var(--pink-d));
+    box-shadow:0 12px 24px -12px rgba(224,101,138,.9)}
+  .btn.ghost{color:var(--ink);background:#fff;border:1.5px solid var(--line);
+    box-shadow:0 8px 18px -14px rgba(160,90,110,.7)}
+  .btn+.btn{margin-top:11px}
+  .btn small{display:block;font-size:11.5px;font-weight:600;opacity:.75;margin-top:3px;letter-spacing:0}
+  .meta{margin-top:18px;font-size:11.5px;color:var(--ink2);line-height:1.9;
+    border-top:1px dashed var(--line);padding-top:14px}
+  .meta b{color:var(--ink)}
+  .hint{margin-top:8px;font-size:11px;color:#b39aa2}
+  @media (max-width:360px){ h1{font-size:23px} .card{padding:24px 18px} }
 </style>
-<script>
-  /* 根目录原来放着一份 35MB 的老整包，线上一直在用 wc/ 那份。
-     这里只留一个跳转，老链接 /zhuangji/ 还能进游戏。 */
-  location.replace('wc/index.html' + location.search + location.hash);
-</script>
 </head>
 <body>
-  <p>正在进入 <a href="wc/index.html">旺财装机店</a>…</p>
+  <main class="card">
+    <div class="logo">WANGCAI · PC SHOP</div>
+    <h1>旺财装机店</h1>
+    <p class="sub">街边一间小装机店。<br>接单、配机、修机、攒口碑，一单一单把店撑起来。</p>
+
+    <a class="btn main" id="btnPlay" href="wc/index.html">
+      直接开玩<small>浏览器版 · 不用安装 · 建议 WiFi</small>
+    </a>
+    <a class="btn ghost" id="btnApk" href="apk/wangcai-01238.apk" download>
+      下载 APK<small id="apkSub">装到手机 · 带离线包，没网也能玩</small>
+    </a>
+
+    <div class="meta">
+      版本 <b id="verTxt">0.12.28-01238</b>　·　<span id="sizeTxt">37.4 MB</span>
+      <div class="hint" id="hintTxt">安卓 6.0 以上；首次打开会自动比对版本</div>
+    </div>
+  </main>
+
+<script>
+(function(){
+  /* 版本号/大小/下载地址都读 apk/version.json，换 APK 时这里不用改 */
+  var ver=document.getElementById('verTxt'),
+      size=document.getElementById('sizeTxt'),
+      apk=document.getElementById('btnApk'),
+      sub=document.getElementById('apkSub');
+  function mb(n){ return (n/1048576).toFixed(1)+' MB'; }
+  fetch('apk/version.json?ts='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(d){
+      if(!d) return;
+      if(d.name) ver.textContent=d.name;
+      if(d.size) size.textContent=mb(d.size);
+      if(d.url) apk.href=d.url;
+      if(d.name) sub.textContent='装到手机 · v'+d.name+' · 带离线包，没网也能玩';
+    })
+    .catch(function(){ /* 读不到就用默认值，不影响下载 */ });
+
+  /* 手机上直接把 APK 放主按钮：网页版在小屏幕上体验一般 */
+  try{
+    var mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if(mobile){
+      var play=document.getElementById('btnPlay');
+      apk.className='btn main';
+      play.className='btn ghost';
+      var box=apk.parentNode;
+      box.insertBefore(apk,play);
+      document.getElementById('hintTxt').textContent='安卓 6.0 以上；APK 里自带离线副本，断网也能玩';
+    }
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
