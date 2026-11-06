@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01337';
+const APP_BUILD='01338';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3748,6 +3748,33 @@ function giftStarterStock(){
 
   A.onNewDay=function(){
     const f=g();
+
+    /* ---- 被动收入 ---- */
+    try{
+      const lines=[];
+      /* B 站：粉丝过 5000 才有广告/打赏，按粉丝 2% 折算 */
+      const fans=state.fans||0;
+      if(fans>=5000){
+        const ad=Math.round(fans*0.02);
+        state.cash=(state.cash||0)+ad;
+        lines.push('B 站广告/打赏 +'+ad);
+      }
+      /* 雇的师傅：每天自动装 state.hireN 台，按 70% 单均利润结算 */
+      const hn=state.hireN||0;
+      if(hn>0){
+        const per=Math.round((state.hirePerDay||420)*0.7);
+        const inc=per*hn;
+        state.cash=(state.cash||0)+inc;
+        lines.push('师傅装机 '+hn+' 台 +'+inc);
+      }
+      if(lines.length){
+        state.todayIn=(state.todayIn||0)+0;
+        try{ save(); }catch(e){}
+        setTimeout(function(){
+          try{ toast('被动收入：'+lines.join('，')); }catch(e){}
+        },900);
+      }
+    }catch(e){}
     /* 486 难度：每月房租水电 + 重建贷款分期 */
     try{
       if(state.debt2||state.rent){
@@ -10225,6 +10252,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01338':['新增被动收入：B站广告（粉丝≥5000）、长期雇师傅（每人3万，每天自动装一台）'],
     '01337':['盘下店铺价格改为100万'],
     '01336':['店铺发展里可以50万盘下这家店（之后不用交房租）'],
     '01335':['月支出按难度：水电全交，房租只有中/困难，困难房租15000+税2000'],
@@ -10710,8 +10738,10 @@ renderAll();
         +'今天接不完的单可以交给师傅做：拿 <b>四成</b> 人工费，不用自己装。<br>'
         +'<span style="color:#9b8088;font-size:12px">外包单数：'+(state.overflowJobs||0)+' 单</span><br><br>'
         +'<button class="mini" id="pdHire" style="'+(state.overflowJobs?'':'opacity:.5')+'">交一单给师傅</button><br><br>'
-        +'<b style="color:#b8546a">扩产能</b><br>'
-        +'<span style="color:#9b8088;font-size:12px">以后可以雇人长期装机，现在还没开。</span><br><br>'
+        +'<b style="color:#b8546a">雇师傅（长期）</b><br>'
+        +'<span style="color:#9b8088;font-size:12px">每人 ¥30,000，之后每天自动装一台（按 70% 利润结算）。</span><br>'
+        +'<span style="color:#9b8088;font-size:12px">已雇：'+(state.hireN||0)+' 人</span> '
+        +'<button class="mini" id="pdHireLong" style="margin-left:6px">雇一个</button><br><br>'
         +'<b style="color:#b8546a">盘下这家店</b><br>'
         + (state.ownShop
             ? '<span style="color:#7a9a5a;font-size:12px">这家店是你的了，不用再交房租。</span>'
@@ -10721,6 +10751,15 @@ renderAll();
               +((state.cash||0)>=1000000?'盘下来':'钱不够')+'</button>')
         +'</div>';
       box.querySelector('.pd-x').onclick=function(){ box.style.display='none'; };
+      const hl=box.querySelector('#pdHireLong');
+      if(hl) hl.onclick=function(){
+        if((state.cash||0)<30000){ try{toast('钱不够');}catch(e){} return; }
+        state.cash-=30000;
+        state.hireN=(state.hireN||0)+1;
+        try{ save(); renderAll(); }catch(e){}
+        try{ toast('师傅来了，明天开始上工'); }catch(e){}
+        try{ devWin(); }catch(e){}
+      };
       const bs=box.querySelector('#pdBuyShop');
       if(bs) bs.onclick=function(){
         if(state.ownShop) return;
