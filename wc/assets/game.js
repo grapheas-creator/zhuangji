@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01345';
+const APP_BUILD='01346';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6827,7 +6827,7 @@ function giftDadPC(){
     const b=partsToBuild(parts);
     if(b.cpu&&b.mb) b.paste=true;      /* 爸爸早装过了，硅脂不用再涂 */
     const md=addMachine(null,null,b,{name:'爸爸的旧整机',
-      note:'箱盖内侧写着：这台你留着店里办公用。账记明白，店才开得久。'});
+      note:'箱盖内侧写着：这台你留着店里用。拆坏了别哭——反正我也不会修。'});
     md.dadGift=true;
     save();
     return md;
@@ -9983,7 +9983,8 @@ renderAll();
          html:'<div class="ic-text">'
            +'早上一拉开卷帘门，门口摞着两个纸箱，边上还有一截胶带没撕干净。<br>'
            +'寄件人一栏是同一个名字，写着「爸」。<br><br>'
-           +'<span class="ic-note">他这人从来不打电话——寄到了就是寄到了。</span></div>',
+           +'<span class="ic-note">他这人从来不打电话——寄到了就是寄到了。<br>'
+           +'上回倒是半夜发来一张猫的照片，配文：这猫像你。</span></div>',
          ok:'拆第一个'},
         {t:'爸爸寄来的留声机',
          html:'<img src="assets/gramo.webp?v=01230" alt="" class="ic-img">'
@@ -10322,6 +10323,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01346':['爸爸改成老顽童口吻'],
     '01345':['爸爸字条改为「留着店里办公用，账记明白」'],
     '01344':['批量单不设交期'],
     '01343':['批量单：变成多天进度（每天3~5台，显示进度），出现概率随口碑最高10%'],
