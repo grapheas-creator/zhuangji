@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01362';
+const APP_BUILD='01363';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4206,7 +4206,8 @@ function giftStarterStock(){
       }
     }catch(e){}
     modal('故障检测卡',
-      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      '<img src="assets/diagcard.webp" style="width:100%;display:block;border-radius:12px;margin-bottom:10px">'
+      +'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
       +'数码管显示：<b style="font-family:monospace;font-size:22px;color:#b8546a">'+code+'</b><br>'
       +meaning+'<br><br>'
       +'<span style="color:#9b8088;font-size:12.5px">'
@@ -10426,6 +10427,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01363':['检测卡改成真实照片显示'],
     '01362':['散热故障不靠检测卡（听风扇/看温度）'],
     '01361':['电源故障=检测卡不亮'],
     '01360':['新增故障检测卡：店铺发展买（80），维修单可看跑码'],
