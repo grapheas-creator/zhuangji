@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01339';
+const APP_BUILD='01340';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3752,13 +3752,7 @@ function giftStarterStock(){
     /* ---- 被动收入 ---- */
     try{
       const lines=[];
-      /* B 站：粉丝过 5000 才有广告/打赏，按粉丝 2% 折算 */
-      const fans=state.fans||0;
-      if(fans>=5000){
-        const ad=Math.round(fans*0.03);
-        state.cash=(state.cash||0)+ad;
-        lines.push('B 站广告/打赏 +'+ad);
-      }
+      /* B 站不产生现金收入：它的作用是涨粉 → 单量变多（在 makeJobs 里体现） */
       /* 雇的师傅：每天自动装 state.hireN 台，按 70% 单均利润结算 */
       const hn=state.hireN||0;
       if(hn>0){
@@ -10252,6 +10246,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01340':['B站只增加单量，不产生现金收入'],
     '01339':['被动收入上调：师傅每天900/人，B站按粉丝3%结算'],
     '01338':['新增被动收入：B站广告（粉丝≥5000）、长期雇师傅（每人3万，每天自动装一台）'],
     '01337':['盘下店铺价格改为100万'],
