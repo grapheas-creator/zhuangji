@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01367';
+const APP_BUILD='01368';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3276,7 +3276,8 @@ function makeJobs(dateStr,day){
       try{
         const _base=minBuildCost({ts:0,cs:0,ram:8},{});
         if(_base){
-          const _b=Math.ceil(_base*1.45/50)*50;
+          /* 件费余量跟普通单对齐（普通单 1.10~1.26）；原来 1.45 比别的单高一截 */
+          const _b=Math.ceil(_base*1.20/50)*50;
           const _nm=['整机 · 街坊的办公机','整机 · 小店的收银机','整机 · 给学生配一台','整机 · 前台用的电脑'][Math.floor(rand()*4)];
           const _dl=2+Math.floor(rand()*3);
           jobs.push({id:'J'+day+'-'+i,cat:'办公机',tier:0,baseCost:_base,name:_nm,
@@ -10243,7 +10244,9 @@ renderAll();
       job:{cat:'办公机',tier:0,name:'维修单 · 某菇的老台式（不开机）',
         sw:'能开机就行',level:'m',
         target:{ts:0,cs:2000,ram:8},newOnly:false,tight:false,
-        partBudget:900,labor:300,
+        /* 维修单只换一颗 CPU（二手 i5-8400T ≈ 280），件费按换件价给，
+           不是原来整机单的 900 —— 那 900 会整个变成白赚 */
+        partBudget:350,labor:300,
         extra:['他把整台机器抱了过来','他说资料比机器重要'],
         /* 七八年前的客户件：8 代 i5 + B365 + DDR4 + SATA 盘，只坏 CPU */
         repair:{fault:'cpu',
@@ -10451,6 +10454,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01368':['某菇那单件费 900→350：维修单只换一颗 CPU，不是整机','整机单件费余量 45%→20%，跟普通单对齐'],
     '01367':['某菇那单人工费降到 300（原来 600，比别的维修单高一倍）'],
     '01366':['检测卡接进维修单：买过卡就能在单子上插卡看跑码',
              '电脑桌面加了「故障码纸条」：完整的 POST 代码表',
