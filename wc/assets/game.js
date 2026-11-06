@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01378';
+const APP_BUILD='01379';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6538,6 +6538,13 @@ function coachSafeBottom(){
 }
 function coachNeedsScroll(el){
   try{
+    /* 货架被筛成一件（引导固定型号之后就只剩这一件）：根本没有别的东西可找，
+       不做滚动动画，直接扣框。 */
+    const box=el.closest?el.closest('#leftBody,.list,#storeList'):null;
+    if(box){
+      const rows=box.querySelectorAll('.item,.job');
+      if(rows.length<=1)return false;
+    }
     const top=96,bottom=coachSafeBottom();
     const r=el.getBoundingClientRect();
     return !(r.top>=top&&r.bottom<=bottom);
@@ -6995,7 +7002,10 @@ function coachRefresh(){
   /* 先把目标滚到位，滚稳了再画引导框：
      滚动期间不收框的话，每帧重定位会拖慢滚动，还会有「框在追目标」的廉价感 */
   if(!coachNeedsScroll(el)){
-    setTimeout(()=>{try{resetCardScrolls();}catch(e){}drawCoach(el,step);},340);
+    /* 目标本来就在可视区（引导把货架筛成一件时就是这样）：直接画，不做滚动、不等节拍。
+       以前这里固定等 340ms，玩家会觉得「引导慢半拍才出来」。 */
+    try{resetCardScrolls();}catch(e){}
+    drawCoach(el,step);
     return;
   }
   /* 滚动期间把引导「冻结」在原地：不重算、不收框、不改亮度。
@@ -10727,6 +10737,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01379':['货架只剩一件时不做滚动动画，引导直接扣框'],
     '01378':['引导用的配件固定成具体型号（i5-4590 / H81M-K / DDR3 8G…），货架只显示这一件，不会再点错'],
     '01377':['引导卡弹出后重新量一次目标位置：被卡片压住的「装上」会自动滚上来'],
     '01376':['引导卡被收掉时点击锁跟着松开：不会再出现「屏幕上没提示、点什么都弹先跟着旺财走」',
