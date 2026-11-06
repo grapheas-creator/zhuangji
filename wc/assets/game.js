@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01333';
+const APP_BUILD='01334';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3867,6 +3867,7 @@ function giftStarterStock(){
 
     function apply(diff){
       window.__DIFF=diff;
+      try{ state.diff=diff; }catch(e){}
       let backTxt='一件没追回来。';
       try{
         const stolen=JSON.parse(f.stolenInv||'[]');
@@ -3978,11 +3979,30 @@ function giftStarterStock(){
   A.playReopen=function(){
     const f=g(); f.reopen=1; try{save();}catch(e){}
     state.cash=Math.max(state.cash||0,0);
+    const diff=state.diff||window.__DIFF||'mogu';
+    const TEXT={
+      wangcai:['半个月。卷帘门修好了，货架重新钉了一遍，门口重新挂上红布。',
+               '货架上的货，是警官一件不少追回来的。卡里还剩墨桀借的八千。',
+               '（货回来了，债还在。一单一单，慢慢还。）'],
+      mojie:  ['半个月。卷帘门修好了，货架重新钉了一遍，门口重新挂上红布。',
+               '追回来的几件摆上货架，空了一大半。卡里还剩墨桀借的八千。',
+               '（货架空着的地方，得靠一单一单填回来。）'],
+      mogu:   ['半个月。卷帘门修好了，货架重新钉了一遍，门口重新挂上红布。',
+               '货架是空的。卡里还剩墨桀借的八千，一件配件都没有。',
+               '（那就先接小单。定金够了再进货，一单一单，把货架重新填满。）'],
+      '486':  ['半个月。卷帘门修好了，货架重新钉了一遍，门口重新挂上红布。',
+               '货架是空的。卡里只剩墨桀借的八千，一件配件都没有。',
+               '重建贷了三万：年化五个点，十二期，每月还两千六百二十五。',
+               '房租五千，水电一千，月月要交。',
+               '（三万块的账，月月在等。这店，得跑起来。）']
+    };
+    const lines=TEXT[diff]||TEXT.mogu;
+    const body=lines.map(function(l){
+      const dim=(l.charAt(0)==='（');
+      return dim?'<span style="color:#9b8088;font-size:13px">'+l+'</span>':l;
+    }).join('<br>');
     modal('半个月后',
-      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'半个月，把卷帘门修好，货架重新钉了一遍。<br>'
-      +'门口重新挂上红布的时候，微信响了。<br><br>'
-      +'<span style="color:#9b8088;font-size:12.5px">陈默：「你那台剪辑机……能不能再给我加张显卡？」</span></div>',null);
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+body+'</div>',null);
     setTimeout(function(){
       const y=document.getElementById('mYes');
       if(y){
@@ -3999,7 +4019,6 @@ function giftStarterStock(){
                 }else{ A.gpuGuide(); }
               }catch(e){ A.gpuGuide(); }
             };
-            /* 重开张之后：爸爸寄来的包裹（留声机 + 旧整机）先来 */
             try{
               if(window.__GRAMO&&window.__GRAMO.introForce){
                 window.__GRAMO.introForce().then(function(){ setTimeout(gotoChat,420); });
@@ -4008,6 +4027,36 @@ function giftStarterStock(){
             }catch(e){}
             gotoChat();
           },380);
+        };
+      }
+    },30);
+  };
+
+  /* 加显卡：二手 vs 全新 的引导（陈默剧情之后） */
+  A.gpuGuide=function(){
+    modal('加显卡：二手还是全新',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'陈默要加一张卡，预算一千以内。摆在面前两条路：<br><br>'
+      +'<b style="color:#b8546a">① 闲鱼淘二手</b><br>'
+      +'便宜，一千以内能拿到不错的型号；但矿卡、拆机卡、改过 BIOS 的混在一起，跑分不一定过。<br><br>'
+      +'<b style="color:#b8546a">② 商店买全新</b><br>'
+      +'贵一截，但保修、跑分、稳定性都稳。<br><br>'
+      +'<span style="color:#9b8088;font-size:12.5px">这单是客户机器，返工的成本，比省下的钱高。</span></div>',null);
+    setTimeout(function(){
+      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
+      if(y){
+        y.textContent='去商店买全新';
+        y.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          try{ state.panel='shop'; curCat='gpu'; if(typeof isMobile==='function'&&isMobile()) mViewSet('docs',true); renderAll(); }catch(e){}
+          try{ toast('去「商店 · 显卡」挑一张全新的'); }catch(e){}
+        };
+      }
+      if(n){
+        n.textContent='先淘二手看看';
+        n.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          try{ toast('闲鱼那边风险自负，跑分不过就得自己填'); }catch(e){}
         };
       }
     },30);
@@ -10164,6 +10213,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01334':['重开张按难度分四段文案；房租水电回到5000/1000'],
     '01333':['刘警官台词删掉「一年总得有这么几回」'],
     '01332':['报警后警察第2天到场，不再是当场来'],
     '01331':['不是阿妈台词精简到一句「你打算怎么着」'],
