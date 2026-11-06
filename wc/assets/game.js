@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01376';
+const APP_BUILD='01377';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6459,7 +6459,22 @@ function drawCoach(el,step){
   coachScrollGuard();
   coachWatchScroll();
   if(stepChanged){
-    setTimeout(()=>{try{coachReposition(step);}catch(e){}},420);
+    setTimeout(()=>{
+      try{
+        /* 卡片刚弹出时高度还没量准（height=0），安全底边会算到屏幕最底下，
+           于是「目标被卡片压着」也不触发滚动，玩家只能自己瞎滑。
+           等布局稳一下，重新量底边：需要就滚，不需要就只重画光圈。 */
+        const st=(typeof coachStep==='function')?coachStep():null;
+        if(!st||st.k!==step.k)return;
+        let e2=null;try{e2=st.sel();}catch(e){}
+        if(!e2)return;
+        if(typeof coachNeedsScroll==='function'&&coachNeedsScroll(e2)){
+          coachScrollTo(e2,520,function(){ try{positionCoach(e2);}catch(e){} });
+        }else{
+          coachReposition(step);
+        }
+      }catch(e){}
+    },420);
   }
 }
 /* 只更新几何：光圈、提示卡、四块挡板 */
@@ -6481,14 +6496,18 @@ function scrollLockOn(){
 function scrollLockOff(){if(_scrollLockEl)_scrollLockEl.classList.remove('on');}
 
 function coachSafeBottom(){
+  let bottom=(window.innerHeight||700)-120;
   try{
-    const card=document.querySelector('#tutGal .gal-box');
-    if(card&&card.offsetParent!==null){
+    /* 两张卡都可能出现：tutGal（旺财立绘卡）和 coach 自己的气泡卡。
+       只认「真的画出来了、而且高度量得到」的那张，取最靠上的那条边。 */
+    ['#tutGal .gal-box','#coach .coachTip'].forEach(function(sel){
+      const card=document.querySelector(sel);
+      if(!card||card.offsetParent===null)return;
       const r=card.getBoundingClientRect();
-      if(r&&r.height&&r.top>140)return Math.max(160,r.top-14);
-    }
+      if(r&&r.height>40&&r.top>140)bottom=Math.min(bottom,Math.max(160,r.top-14));
+    });
   }catch(e){}
-  return (window.innerHeight||700)-120;
+  return bottom;
 }
 function coachNeedsScroll(el){
   try{
@@ -10681,6 +10700,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01377':['引导卡弹出后重新量一次目标位置：被卡片压住的「装上」会自动滚上来'],
     '01376':['引导卡被收掉时点击锁跟着松开：不会再出现「屏幕上没提示、点什么都弹先跟着旺财走」',
              '引导目标一时量不到时不再永久消失，会自己回来；引导出现得更快'],
     '01375':['引导卡不再挡住列表末尾：被高亮的「装上/买下」能滚到卡片上面来'],
