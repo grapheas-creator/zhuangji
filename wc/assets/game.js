@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01355';
+const APP_BUILD='01356';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -10201,10 +10201,11 @@ renderAll();
   function makeSevenJob(day){
     var s={day:day,id:'g5',who:'某菇',role:'7co 的粉丝',av:'菇',col:'#ff9ac7',
       lines:[
-        '我是某菇。听说你这儿能把死机的机器救活？',
-        '里面有我追了七年的东西，比这台机器值钱多了。今天能修好吗？'
+        '老板，我这笔记本开不了机了，还能救吗？',
+        '里面全是我攒的 7co——演唱会录像、签售的合影，十好几年了。',
+        '要是能把里面的东西弄出来，钱你说多少就多少。'
       ],
-      job:{cat:'办公机',tier:0,name:'救命单 · 某菇的资料机',
+      job:{cat:'办公机',tier:0,name:'救命单 · 某菇的笔记本（数据抢救）',
         sw:'资料救援（不重装也行）',level:'m',
         target:{ts:0,cs:2000,ram:8},newOnly:false,tight:false,
         partBudget:900,labor:600,
@@ -10291,7 +10292,7 @@ renderAll();
     makeJobs=function(dateStr,day){
       var jobs=_makeJobs.apply(this,arguments)||[];
       var g=G();
-      if(g.orderDay&&day>=g.orderDay&&!g.order5&&!jobs.some(function(x){return x&&x.id==='GR5';})){
+      if(day>=21&&!g.order5&&!jobs.some(function(x){return x&&x.id==='GR5';})){
         try{ jobs.push(makeSevenJob(day)); }catch(e){}
       }
       setTimeout(function(){onDay(day);},600);
@@ -10400,6 +10401,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01356':['7co剧情改到第21天：某菇的笔记本数据抢救'],
     '01355':['卖碟剧情改成幽默对话'],
     '01354':['神秘人卖碟改第18天，买/不买都留名片'],
     '01353':['衔接剧情改成打游戏卡顿'],
