@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01343';
+const APP_BUILD='01344';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3257,7 +3257,7 @@ function makeJobs(dateStr,day){
         labor:qty*220,
         extra:['一次性 '+qty+' 台，件你负责采买','按台数结算件费，价差归你',
                '交期紧，别拖'],
-        status:'open',deadline:5,dueDay:day+4,bornDay:day,
+        status:'open',deadline:null,dueDay:null,bornDay:day,   /* 批量单不设交期 */
         hideScore:true,minMhz:0,assembly:true,grade:'low',
         bulkQty:qty,bulkDone:0,bulkUnitBudget:unitBudget,bulkUnitCost:unitCost});
     }
@@ -10322,6 +10322,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01344':['批量单不设交期'],
     '01343':['批量单：变成多天进度（每天3~5台，显示进度），出现概率随口碑最高10%'],
     '01342':['批量单改为单位出件费，赚采买差价+人工'],
     '01341':['新增批量单（6~10台，客户供件，只赚人工），需要口碑≥4.2且粉丝≥3000'],
