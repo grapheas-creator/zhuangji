@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01315';
+const APP_BUILD='01316';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3281,7 +3281,7 @@ function makeJobs(dateStr,day){
     const newOnly=(ultra?canAllNew:(rand()<[0.25,0.45,0.70][tier]))&&canAllNew;
     const ref=buildRef(cat,tier,!newOnly,pref,ultra);
     const cost=newOnly?costOf(ref.list,true):costOf(ref.list,false);
-    const pad=newOnly?(1.20+rand()*0.20):(1.24+rand()*0.28);
+    const pad=newOnly?(1.10+rand()*0.10):(1.12+rand()*0.14);
     const tight=!newOnly&&pad<1.4;
     const _budgetBase=cost*pad*bonus;
     const _laborRate=((state.day||1)>=10?0.045:0.05)+rand()*((state.day||1)>=10?0.04:0.05);
@@ -3388,9 +3388,14 @@ function makeJobs(dateStr,day){
         const _ff=flagshipFloor();
         if(_ff)partBudget=Math.max(partBudget,Math.ceil(_ff*1.22/50)*50);
       }
-      if(_special||!(best.ts>=(need.ts||0)&&best.cs>=(need.cs||0)&&ramCap>=_ramNeed)){
-        const _floor=minBuildCost(Object.assign({},need,{ram:_ramNeed}),{newOnly,cat,tier,gpuPref:pref,ultra});
-        if(_floor)partBudget=Math.max(partBudget,Math.ceil(_floor*1.15/50)*50);
+      /* 预算按「最低可行成本」定，而不是按参考机成本 ——
+         否则玩家永远能用最便宜的件把差价全赚走（一单白赚一两千）。 */
+      const _floor=minBuildCost(Object.assign({},need,{ram:_ramNeed}),{newOnly,cat,tier,gpuPref:pref,ultra});
+      if(_floor){
+        const _mk=1.06+rand()*0.10;               /* 只给 6%~16% 的余量 */
+        const _want=Math.ceil(_floor*_mk/50)*50;
+        if(_special) partBudget=Math.max(partBudget,_want);
+        else partBudget=_want;                     /* 普通单：预算就是最低成本 + 小余量 */
       }
     }catch(e){}
     /* 软件本身不需要显卡分（need.ts=0，比如 Office / ERP）就别再按参考机核显分算门槛，
@@ -3827,7 +3832,7 @@ function giftStarterStock(){
     if(diff==='486'){
       /* 困难：重建又借了三万，12 期、单利 5 个点；每月房租 5000 + 水电 1000 */
       state.debt2={principal:30000, remain:30000, periods:12, paid:0, rate:0.05, monthly:30000/12};
-      state.rent={month:5000, util:1000, lastDay:0};
+      state.rent={month:15000, util:3000, lastDay:0};
     }
     try{save();}catch(e){}
     modal('人抓到了',
@@ -7252,7 +7257,7 @@ function bindShopList(){
       let _bad=false;
       try{
         const tutOn=!!(state.tut&&!state.tut.guideOff);
-        if(used&&curCat!=='case'&&!tutOn&&Math.random()<0.10)_bad=true;
+        if(used&&curCat!=='case'&&!tutOn&&Math.random()<0.18)_bad=true;
       }catch(e){}
       addInv({cat:curCat,part:_bad?Object.assign({},p,{faulty:true}):p,paid:price,shop:used?'xianyu':'taobao',faulty:_bad});
       if(state.tut){state.tut.done.buy=true;state.tut.bought=state.tut.bought||{};state.tut.bought[curCat]=true;}
@@ -8245,6 +8250,11 @@ function deliver(){
         const before=repScore();
         repApply(false);
         const after=repScore();
+        try{
+          const _comp=Math.round((j.partBudget||0)*0.3);
+          state.cash=(state.cash||0)-_comp;
+          setTimeout(()=>toast('返工赔偿 −'+_comp),900);
+        }catch(e){}
         _repNote='客户评价：「'+reviewFor('fail')+'」'
           +'（不合格单：'+_missList[0]+'，口碑 '+before.toFixed(1)+' → '+after.toFixed(1)+'）';
       }else{
@@ -8995,7 +9005,13 @@ document.getElementById('btnClose').onclick=()=>{
   state.benches=_nb;state.diag={};state.panel='jobs';build=newBuild();
   if(_expired>0){
     try{repApply(false);}catch(e){}
-    setTimeout(()=>toast(_expired+' 单过了交期，客户退单了'),1200);
+    /* 逾期退单：按人工费 50% 赔偿客户 */
+    try{
+      const _pen=Math.round(_expired*288*0.5);
+      state.cash=(state.cash||0)-_pen;
+      setTimeout(()=>toast(_expired+' 单过了交期，客户退单，赔了 '+_pen),1200);
+    }catch(e){}
+    setTimeout(()=>toast(_expired+' 单过了交期，客户退单了'),1400);
     try{if(repUnlocked()&&repScore()<REP_BUST){setTimeout(()=>{try{gameOver();}catch(e){}},1500);}}catch(e){}
   }
   /* 昨天的机器跟着昨天的工单一起清掉，别一直堆在仓库里 */
@@ -10065,6 +10081,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01316':['经济收紧：预算按最低成本定（6~16%余量）、房租15000+水电3000、二手坏件18%、退单/返工要赔钱'],
     '01315':['修复旗舰单生成时崩溃（pref 常量赋值）'],
     '01314':['重开张后天数显示为「重开第 N 天」'],
     '01313':['电脑页改成显示器画面（外壳+屏幕+扫描线）'],
