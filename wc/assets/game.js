@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01320';
+const APP_BUILD='01321';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4228,14 +4228,13 @@ function makeTbOffer(){
       const g=boxPool[Math.floor(rand()*boxPool.length)];
       parts.push({cat:g[0],part:g[1][Math.floor(rand()*g[1].length)]});
     }
-    /* 坏件 4~14 件；越少越常见（权重递减） */
-    let badN=4;
+    /* 坏件数量：正态分布，均值 7，标准差 2.2，截断在 4~14 件 */
+    let badN=7;
     try{
-      const w=[];let sum=0;
-      for(let k=4;k<=14;k++){ const ww=(15-(k-4)); w.push(ww); sum+=ww; }
-      let r=rand()*sum;
-      for(let k=4;k<=14;k++){ r-=w[k-4]; if(r<=0){ badN=k; break; } badN=k; }
-    }catch(e){ badN=4; }
+      const u1=Math.max(1e-6,rand()), u2=rand();
+      const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);   /* 标准正态 */
+      badN=Math.max(4,Math.min(14,Math.round(7+z*2.2)));
+    }catch(e){ badN=7; }
     for(let j=0;j<badN;j++){
       const x=makeBroken(rand,boxPool);
       if(x)parts.push(x);
@@ -10121,6 +10120,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01321':['每箱坏件改为正态分布（均值7，标差2.2，4~14件）'],
     '01320':['货源人定名「不是阿妈」，他只给联系方式不参与买卖'],
     '01319':['周货改为隔壁猫咖老板的渠道；每箱坏件 4~14 件（少则常见）'],
     '01318':['利润率回调到温和区间（小单18~30%，旗舰6~10%）；坏件率12%'],
