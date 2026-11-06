@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01349';
+const APP_BUILD='01350';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -4067,7 +4067,7 @@ function giftStarterStock(){
         y.onclick=function(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
           setTimeout(function(){
-            /* 同一天，但要一件一件来：爸爸包裹 → 陈默微信 → 二手/全新 */
+            /* 同一天，一件一件来：爸爸包裹 → 旺财自己淘显卡 → 陈默微信 */
             var gotoChat=function(){
               try{
                 if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
@@ -4079,7 +4079,7 @@ function giftStarterStock(){
             };
             try{
               if(window.__GRAMO&&window.__GRAMO.introForce){
-                window.__GRAMO.introForce().then(function(){ setTimeout(gotoChat,2000); });
+                window.__GRAMO.introForce().then(function(){ setTimeout(function(){ A.ownGpuStory(gotoChat); },2000); });
                 return;
               }
             }catch(e){}
@@ -4087,6 +4087,43 @@ function giftStarterStock(){
           },380);
         };
       }
+    },30);
+  };
+
+  /* 旺财自己那张 750Ti 想换 1060 3G —— 二手水深的第一课 */
+  A.ownGpuStory=function(after){
+    const won=Math.random()<0.8;      /* 仲裁成功率八成 */
+    const price=620;
+    modal('把 750Ti 换掉',
+      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+      +'<b>旁白</b>：店里那台旧机，750Ti 跑现在的东西有点吃力了。<br>'
+      +'<b>旺财</b>：（自己店的机器，先将就着用。先淘张 1060 3G 试试。）<br>'
+      +'<b>旁白</b>：闲鱼上刷到一张，卖<u>六二零</u>，写着「自用、没拆没修」，照片拍得干干净净。<br>'
+      +'<b>旁白</b>：（到手插上，风扇转，屏幕是黑的。换台机器再试，花了半屏，然后就重启。）<br>'
+      +'<b>旁白</b>：找卖家。<br>'
+      +'<b>卖家</b>：你电源不行吧？你主板插槽坏了吧？<br>'
+      +'<b>旺财</b>：那退了吧。<br>'
+      +'<b>旁白</b>：（他就不回消息了。）<br>'
+      +'<b>旁白</b>：开箱视频、聊天记录、快递面单全翻出来，走平台介入，折腾到半夜。<br>'
+      +(won
+        ? '<b>旁白</b>：钱退回来了。显卡还在桌上，当个教训。<br><br>'
+          +'<span style="color:#9b8088;font-size:12.5px">（二手这行，十件里保不齐有一件是坏的。能要回来的，大概八成。）</span>'
+        : '<b>旁白</b>：平台让举证，举不出来。钱没要回来，卡也废了。<br><br>'
+          +'<span style="color:#9b8088;font-size:12.5px">（六百二，当学费。这亏吃一次就够了。）</span>')
+      +'</div>',null);
+    try{
+      if(!won){ state.cash=(state.cash||0)-price; try{save();renderAll();}catch(e){} }
+    }catch(e){}
+    setTimeout(function(){
+      const y=document.getElementById('mYes');
+      if(y){
+        y.textContent='记住了';
+        y.onclick=function(){
+          try{closeMask(document.getElementById('mask'));}catch(e){}
+          setTimeout(function(){ if(after) after(); },600);
+        };
+      }
+      const n=document.getElementById('mNo'); if(n) n.style.display='none';
     },30);
   };
 
@@ -10351,6 +10388,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01350':['新增旺财自己淘1060 3G踩坑剧情（爸爸包裹之后、陈默之前）'],
     '01349':['收下爸爸包裹后等2秒再弹陈默微信'],
     '01348':['加显卡时间回到第16天，与重开张/爸爸包裹串联播放'],
     '01347':['陈默加显卡改到重开张第二天；买全新/二手踩坑两条剧情落实'],
