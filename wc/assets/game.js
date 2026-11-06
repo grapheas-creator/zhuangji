@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01372';
+const APP_BUILD='01373';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -673,7 +673,17 @@ const ST=[];
 const REP_UNLOCK_DAY=15;
 const REP_MIN=1.0, REP_MAX=5.0, REP_BUST=1.2;
 const REP_NAMES=['','1 星','2 星','3 星','4 星','5 星'];
-function repUnlocked(){return (state.day||1)>=REP_UNLOCK_DAY;}
+function repUnlocked(){return gday()>=REP_UNLOCK_DAY;}
+/* 剧情口径的「今天」：重开张那天算第 1 天，前面抢店、报警、重开只是开场剧情。
+   所有讲故事的东西（墨桀、章节、欠债、卖碟、某菇、刘警官）都按这个走；
+   房租水电这类真实开销仍用 state.day（绝对天数），不然跳半个月就白省了。 */
+function gday(){
+  try{
+    const f=(state.story&&state.story.flags)||{};
+    if(f.reopen&&f.reopenDay)return Math.max(1,(state.day||1)-(f.reopenDay-1));
+  }catch(e){}
+  return (state&&state.day)||1;
+}
 function repScore(){return (state.rep&&typeof state.rep.score==='number')?state.rep.score:3;}
 function repStars(){return Math.max(1,Math.min(5,Math.round(repScore())));}
 function repLabel(){
@@ -2980,7 +2990,7 @@ PLOT_EVENTS.mojie2.artAt=[[0,'list'],[6,'chat'],[11,'cg']];
 const MOJIE_PLOTS={2:'mojie2',6:'mojie6',9:'mojie9',12:'mojie12',17:'mojie17',21:'mojie21',24:'mojie24',27:'mojie27',30:'mojie30'};
 function maybeMojiePlot(){
   if(!state||!state.story||!state.story.flags)return false;
-  const evId=MOJIE_PLOTS[state.day];
+  const evId=MOJIE_PLOTS[gday()];
   if(!evId)return false;
   const flag='plot_'+evId;
   if(state.story.flags[flag])return false;
@@ -3014,7 +3024,7 @@ function repayDebt(){
 }
 function debtDue(){
   if(!state||state.over)return false;
-  if(state.day<DEBT_DUE_DAY||debtPaid())return false;
+  if(gday()<DEBT_DUE_DAY||debtPaid())return false;
   if(state.story.flags.debtDone)return false;
   if((state.cash||0)>=DEBT_AMOUNT){
     state.story.flags.debtDone=true;
@@ -3028,7 +3038,7 @@ function debtDue(){
 }
 function maybeDay3Plot(){
   if(!state||!state.story||!state.story.flags)return false;
-  if(state.day!==4||state.story.flags.day3end)return false;
+  if(gday()!==5||state.story.flags.day3end)return false;
   state.story.flags.day3end=true;save();
   return playPlotEvent('day3end',()=>{setTimeout(()=>{try{maybeStoryPopup();}catch(e){}},180);});
 }
@@ -3041,7 +3051,7 @@ const CHAPTERS=[
 function chapterBanner(){
   for(const c of CHAPTERS){
     const flag='ch'+c.id+'end';
-    if(state.day>c.end&&!state.story.flags[flag]){
+    if(gday()>c.end&&!state.story.flags[flag]){
       state.story.flags[flag]=true;save();
       const next=CHAPTERS.find(x=>x.id===c.id+1);
       const sub=next?`第二章 · ${next.name}　开始了`:'后面的故事还在写，先自由接单';
@@ -9179,7 +9189,7 @@ function playDayOpen(info,onDone){
     ov.className='dayopen static';ov.id='dayOpen';
     const md=(info.date||'').slice(5).replace('-',' / ');
     ov.innerHTML=`<div class="do-inner">
-        <div class="do-k">第 ${info.day} 天</div>
+        <div class="do-k">${info.label||("第 "+info.day+" 天")}</div>
         <div class="do-date">${md}</div>
         <div class="do-y">${(info.date||'').slice(0,4)}　${weekdayCn(info.date)}</div>
         <div class="do-line"></div>
@@ -9195,7 +9205,7 @@ function playDayOpen(info,onDone){
   ov.className='dayopen';ov.id='dayOpen';
   const md=(info.date||'').slice(5).replace('-',' / ');
   ov.innerHTML=`<div class="do-inner">
-      <div class="do-k">第 ${info.day} 天</div>
+      <div class="do-k">${info.label||("第 "+info.day+" 天")}</div>
       <div class="do-date">${md}</div>
       <div class="do-y">${(info.date||'').slice(0,4)}　${weekdayCn(info.date)}</div>
       <div class="do-line"></div>
@@ -9502,7 +9512,7 @@ document.getElementById('btnClose').onclick=()=>{
   try{debtDue();}catch(e){}   /* 第 15 天墨桀来收钱（之前是死代码） */
   /* 结算卡关掉之后再来一张「新的一天」：大字日期压上来，比底部一条 toast 更有翻篇感 */
   _daySwitching=true;
-  playDayOpen({day:state.day,date:next,jobs:state.jobs.length},()=>{
+  playDayOpen({day:state.day,label:dayLabel().full,date:next,jobs:state.jobs.length},()=>{
     _daySwitching=false;
     /* 过场收掉之后，让页眉的日期再闪一次，玩家才看得见「换天了」 */
     try{animPulse(document.getElementById('dateTxt'),'dateFlip',760);
@@ -9517,7 +9527,7 @@ document.getElementById('btnClose').onclick=()=>{
         if(!document.querySelector('#plotEvent,#storyPop')){try{window.__dayCurtainOff&&window.__dayCurtainOff();}catch(e){}}
       },420);
     },260);
-    toast('第 '+state.day+' 天 · 今日 '+state.jobs.length+' 单，挑一单开工');
+    toast(dayLabel().full+' · 今日 '+state.jobs.length+' 单，挑一单开工');
   });
   });
 };
@@ -10472,7 +10482,7 @@ renderAll();
     var g=G();
     /* 刘警官的私单：重开张之后四五天，傍晚上门 */
     try{
-      if(g.policeDone&&!g.policeJob&&day>=((g.reopenDay||16)+3)){
+      if(g.policeDone&&g.reopen&&!g.policeJob&&gday()>=4){
         setTimeout(function(){
           try{
             if(policeJobStory()){ g.policeJob=1; save(); }
@@ -10488,7 +10498,7 @@ renderAll();
     }catch(e){}
     /* 开场的留声机包褒不在按天触发，改成加载页撤掉那一刻（见 hideBootLoad 挂钩） */
     /* 神秘人卖碟：挪到重开张之后（第 20 天起才有） */
-    if(day>=18&&!g.day3){
+    if(g.reopen&&gday()>=3&&!g.day3){
       g.day3=1; setTimeout(offerLegend,1200);
     }
     sync();
@@ -10539,7 +10549,7 @@ renderAll();
     makeJobs=function(dateStr,day){
       var jobs=_makeJobs.apply(this,arguments)||[];
       var g=G();
-      if(day>=21&&!g.order5&&!jobs.some(function(x){return x&&x.id==='GR5';})){
+      if(g.reopen&&gday()>=6&&!g.order5&&!jobs.some(function(x){return x&&x.id==='GR5';})){
         try{ jobs.push(makeSevenJob(day)); }catch(e){}
       }
       setTimeout(function(){onDay(day);},600);
@@ -10659,6 +10669,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01373':['重开张当作第 1 天：墨桀、章节、还债、卖碟、某菇、刘警官全按「重开第 N 天」算',
+             '页眉、每日开场、提示条统一显示「重开第 N 天」，不再出现两个天数'],
     '01372':['被抢之后不再空转半个月：案子一结，日历直接跳到重开张那天',
              '跳过的第 5~16 天剧情单不会丢，重开张之后按原顺序一天一场补上',
              '陈默加显卡挪到重开张当天（原来第 13 天，店还没开就先来了）'],
