@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01373';
+const APP_BUILD='01374';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9358,8 +9358,10 @@ function openSettings(){
           setTimeout(()=>{ if(typeof window.__WC_SHOW_UPDATE==='function') window.__WC_SHOW_UPDATE(o); },300);
           return;
         }
-        if(remoteC&&remoteC!==contentNow){
-          /* 不是最新就自己更新，不给按钮 */
+        /* 只认「比现在新」。version.json 的 content 是线上最新内容版本，
+           页面自己有可能是更新的构建（本地/缓存），绝不能把它往回退到旧版本。 */
+        const _vn=function(v){const n=parseInt(String(v||'').replace(/\D/g,''),10);return isNaN(n)?0:n;};
+        if(remoteC&&_vn(remoteC)>_vn(contentNow)){
           if(msg)msg.textContent='正在更新到 '+remoteC+'…';
           setTimeout(function(){
             const u=new URL(location.href);
@@ -9368,9 +9370,8 @@ function openSettings(){
             location.replace(u.toString());
           },400);
           return;
-        }else{
-          text='已是最新'+(remoteC?'（'+remoteC+'）':'');
         }
+        text='已是最新'+(contentNow?'（'+contentNow+'）':'');
         if(msg)msg.textContent=text;
       })
       .catch(()=>{ if(msg)msg.textContent='检查失败，请检查网络'; });
@@ -10669,6 +10670,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01374':['修「检查更新」把自己往旧版本退的 bug：只认比现在新，不再回退'],
     '01373':['重开张当作第 1 天：墨桀、章节、还债、卖碟、某菇、刘警官全按「重开第 N 天」算',
              '页眉、每日开场、提示条统一显示「重开第 N 天」，不再出现两个天数'],
     '01372':['被抢之后不再空转半个月：案子一结，日历直接跳到重开张那天',
