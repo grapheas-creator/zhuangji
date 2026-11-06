@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01380';
+const APP_BUILD='01381';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6830,6 +6830,17 @@ function coachGo(step){
     /* 引导要滚动的时候别播条目浮现：两套动画叠在一起，滚动就一卡一卡 */
     _suppressStagger=true;
     try{save();renderAll();}finally{_suppressStagger=false;}
+    /* 换页之后把列表拉回顶部。以前换页会继承上一页的滚动位置，
+       于是「筛到只剩一件」时页面还是半截滚下去的，引导再补一次滚动——
+       玩家看到的就是「一直在滑」。 */
+    try{
+      const lb=document.getElementById('leftBody');
+      if(lb)lb.scrollTop=0;
+      const pn=lb&&lb.parentElement;
+      if(pn&&pn.classList&&pn.classList.contains('panel'))pn.scrollTop=0;
+      const mn=document.querySelector('main');if(mn)mn.scrollTop=0;
+      if(state.panel==='shop'||state.panel==='inv'){try{window.scrollTo(0,0);}catch(e){}}
+    }catch(e){}
   }
   return changed;
 }
@@ -10741,6 +10752,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01381':['引导换页时把列表拉回顶部：筛到只剩一件时不会再继承上一页的滚动位置'],
     '01380':['开局：欢迎卡在加载页底下就摆好，揭幕时和店铺一起出现，不再晚一步弹出来'],
     '01379':['货架只剩一件时不做滚动动画，引导直接扣框'],
     '01378':['引导用的配件固定成具体型号（i5-4590 / H81M-K / DDR3 8G…），货架只显示这一件，不会再点错'],
