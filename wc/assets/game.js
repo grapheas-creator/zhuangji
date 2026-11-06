@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01340';
+const APP_BUILD='01341';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3239,6 +3239,27 @@ function makeJobs(dateStr,day){
   try{
     state.overflowJobs=Math.max(0,(state.dayTotalExtra||0));
   }catch(e){}
+  /* 批量单：口碑起来了 + B站有人看，才会有公司/学校成批下单 */
+  try{
+    const _repNow=(state.rep&&state.rep.score)||3;
+    const _fanNow=state.fans||0;
+    if(_repNow>=4.2&&_fanNow>=3000&&rand()<0.35){
+      const qty=6+Math.floor(rand()*5);          /* 6~10 台 */
+      const unitBase=Math.max(1200,Math.round(900+rand()*900));
+      jobs.push({id:'B'+day+'-'+qty,cat:'办公机',tier:0,baseCost:unitBase,
+        name:'批量单 · '+(qty)+' 台办公机',
+        client:['城东的物流公司','街口的会计事务所','一所职高','社区活动中心'][Math.floor(rand()*4)],
+        clientRole:'单位采购',sw:'Office',swList:'Office',level:'m',
+        target:{ts:0,cs:0,ram:8},newOnly:false,tight:false,ultra:false,gpuPref:null,
+        partBudget:0,                          /* 客户自己供件 */
+        labor:qty*220,
+        extra:['客户把 '+qty+' 台机器的件全搬来了','你只负责组装、涂硅脂、点亮','件是客户的，不能拿去卖'],
+        status:'open',deadline:5,dueDay:day+4,bornDay:day,
+        hideScore:true,minMhz:0,assembly:true,grade:'low',
+        bulkQty:qty,bulkOwner:true});
+    }
+  }catch(e){}
+
   const _realN=Math.min(n,_playerCap);
   try{ state.overflowJobs=Math.max(0,n-_realN); }catch(e){}
   for(let i=0;i<_realN;i++){
@@ -6938,6 +6959,33 @@ function acceptJob(jid){
     if(jj.repair){
       state.benches[jid]=repairMachine(jj);
       state.diag=state.diag||{};state.diag[jid]={};
+    }else if(jj.bulkOwner){
+      /* 批量单：客户自带件，全部自动铺好，玩家只装机 */
+      const b=newBuild();
+      const cheap=[];
+      try{
+        const pick=(arr,f)=>arr.filter(f).sort((a,b)=>((a.p||0)-(b.p||0)))[0];
+        cheap.push({cat:'cpu',part:pick(C,x=>/i3-10100|i3-9100|i5-9400/.test(x.n))});
+        cheap.push({cat:'mb',part:pick(B,x=>/H410|B460|H310/.test(x.n))});
+        cheap.push({cat:'cooler',part:pick(H,x=>(x.s||[]).includes('LGA1200'))});
+        cheap.push({cat:'ram',part:pick(M,x=>/DDR4/.test(x.n)&&/8G/.test(x.n))});
+        cheap.push({cat:'ram',part:pick(M,x=>/DDR4/.test(x.n)&&/8G/.test(x.n))});
+        cheap.push({cat:'disk',part:pick(ST,x=>x.kind==='m2'&&/256G|512G/.test(x.n))});
+        cheap.push({cat:'psu',part:pick(P,x=>/400W|500W/.test(x.n))});
+        cheap.push({cat:'case',part:pick(K,x=>true)});
+      }catch(e){}
+      const bb=partsToBuild(cheap.filter(x=>x.part));
+      Object.keys(bb).forEach(function(k){
+        if(k==='rams'||k==='m2'||k==='sata'){
+          (bb[k]||[]).forEach(function(cell,i){
+            if(cell&&cell.part){ b[k][i]={part:cell.part,paid:0,shop:'own',owner:jid}; }
+          });
+        }else if(bb[k]&&bb[k].part){
+          b[k]={part:bb[k].part,paid:0,shop:'own',owner:jid};
+        }
+      });
+      if(b.cpu&&b.mb)b.paste=true;
+      state.benches[jid]=b; build=b;
     }else{
       state.benches[jid]=newBuild();
       if(state.day===1)curCat='mb';
@@ -10246,6 +10294,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01341':['新增批量单（6~10台，客户供件，只赚人工），需要口碑≥4.2且粉丝≥3000'],
     '01340':['B站只增加单量，不产生现金收入'],
     '01339':['被动收入上调：师傅每天900/人，B站按粉丝3%结算'],
     '01338':['新增被动收入：B站广告（粉丝≥5000）、长期雇师傅（每人3万，每天自动装一台）'],
