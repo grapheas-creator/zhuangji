@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01383';
+const APP_BUILD='01384';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6587,22 +6587,30 @@ function coachScrollTo(el,dur,done){
   /* dur<=16 表示「不要动画，直接跳到位」：货架只剩一件时就用这个，
      不然玩家会看到列表自己滑一下，而他其实没别的地方可去。 */
   if((dur||0)<=16){
-    /* 不用动画：把目标（连同它所在的卡片）顶到页眉下沿 96px 处。
-       直接按「目标当前在屏幕上的 top」算差值 —— 不猜方向，
-       目标在下面就是往下滚、在上面就是往上滚。 */
+    /* 不自己算容器、不自己算方向：交给浏览器把目标滚到可视区中间。
+       （之前自己算 scrollHeight/clientHeight，一旦找错滚动容器，max 是 0，
+        dest 被夹到 0 → 直接跳回顶部，看着就是「滚反了」。）
+       居中落点大约在屏幕 50%，而引导卡只占底部三分之一，不会被压住。 */
     try{
       const anchor=(el.closest&&el.closest('.item,.job'))||el;
-      const sc=box||document.querySelector('main > .panel');
-      const ar=anchor.getBoundingClientRect();
-      if(sc){
-        const max=Math.max(0,sc.scrollHeight-sc.clientHeight);
-        let dest=sc.scrollTop+(ar.top-96);
-        dest=Math.max(0,Math.min(max,Math.round(dest)));
-        sc.scrollTop=dest;
-        /* 目标比可视带还高时，滚到它所在的卡片顶部就停，别把按钮顶出屏幕 */
-        if(ar.height>(bottom-96)&&ar.top<96)sc.scrollTop=Math.max(0,Math.min(max,Math.round(sc.scrollTop+(el.getBoundingClientRect().top-96))));
-      }else{
-        window.scrollTo(0,Math.max(0,Math.round((window.scrollY||0)+ar.top-96)));
+      if(anchor.scrollIntoView)anchor.scrollIntoView({block:'center',inline:'nearest'});
+      else el.scrollIntoView();
+    }catch(e){ try{el.scrollIntoView();}catch(e2){} }
+    /* 目标比整个可视带还高时，再把「它的顶部」对齐到页眉下沿，保证按钮看得见 */
+    try{
+      const r2=el.getBoundingClientRect();
+      if(r2.top<96||r2.bottom>bottom){
+        const d=r2.top-96;
+        let node=el.parentElement,scrolled=false;
+        while(node&&node!==document.documentElement){
+          if(node.scrollTop>0||node.scrollHeight>node.clientHeight+2){
+            const before=node.scrollTop;
+            node.scrollTop=before+d;
+            if(node.scrollTop!==before){scrolled=true;break;}
+          }
+          node=node.parentElement;
+        }
+        if(!scrolled)window.scrollTo(0,Math.max(0,(window.scrollY||0)+d));
       }
     }catch(e){}
     _coachAutoScrolling=false;
@@ -10780,6 +10788,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01384':['引导定位改成交给浏览器 scrollIntoView：不再自己猜滚动容器，方向不会再反'],
     '01383':['引导定位改成按目标当前位置算差值：该往上滚就往上，方向不会再反'],
     '01382':['只有一件货时目标仍然会被定位到（瞬移，不做滑动动画）'],
     '01381':['引导换页时把列表拉回顶部：筛到只剩一件时不会再继承上一页的滚动位置'],
