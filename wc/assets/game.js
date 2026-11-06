@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01371';
+const APP_BUILD='01372';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3260,10 +3260,35 @@ function minBuildCost(need,opt){
   }
   return best;
 }
+/* 今天该出哪张剧情单：
+   重开张之前按天数走；重开张之后按「还没上过的剧情，最小天数优先」一天一场补。
+   被抢那半个月现在整段跳过，不这样做第 5~16 天的剧情单就永远轮不到了。 */
+function storyPick(day){
+  const st=(state&&state.story)||null;
+  const f=(st&&st.flags)||{};
+  if(!f.reopen)return STORY[day]||null;
+  const done=(st&&st.done)||{};
+  const busy={};
+  (state.jobs||[]).forEach(function(x){ if(x&&x.storyId)busy[x.storyId]=1; });
+  const list=[];
+  Object.keys(STORY).forEach(function(k){ if(STORY[k])list.push(STORY[k]); });
+  list.sort(function(a,b){ return a.day-b.day; });
+  for(let i=0;i<list.length;i++){
+    const s=list[i];
+    if(done[s.id]||busy[s.id])continue;
+    return s;
+  }
+  return null;
+}
 function makeJobs(dateStr,day){
   const rand=rngFrom(hash(dateStr+'#'+day+'#'+((state&&state.seed)||0))),jobs=[];
-  const s=STORY[day];
-  if(s&&!(state.story&&state.story.done[s.id]))jobs.push(buildStoryJob(s));
+  const s=storyPick(day);
+  if(s&&!(state.story&&state.story.done[s.id])){
+    const jb=buildStoryJob(s);
+    /* 补发的剧情单（原来的天数已经跳过了）交期要从今天算，否则一出生就过期 */
+    jb.bornDay=day;jb.dueDay=day+2;
+    jobs.push(jb);
+  }
   /* 第 1 天只有老同学这一单：店刚开张，街坊还不知道这儿有家装机店 */
   if(day===1)return jobs;
   const fl=(state.story&&state.story.flags)||{};
@@ -4017,7 +4042,17 @@ function giftStarterStock(){
                 '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+pl
                 +'<br><br><span style="color:#9b8088;font-size:12.5px">'
                 +'她留了张名片：店里有活儿，可以找她。名片压在柜台玻璃下面。</span></div>',null);
-              setTimeout(function(){ const y2=document.getElementById('mYes'); if(y2)y2.textContent='收下名片'; },30);
+              setTimeout(function(){
+                const y2=document.getElementById('mYes');
+                if(y2){
+                  y2.textContent='收下名片';
+                  /* 名片一收，案子这段就完了：直接跳到半个月后重开张 */
+                  y2.onclick=function(){
+                    try{closeMask(document.getElementById('mask'));}catch(e){}
+                    setTimeout(function(){ try{A.skipToReopen();}catch(e){} },260);
+                  };
+                }
+              },30);
             },260);
           };
         }
@@ -4079,6 +4114,52 @@ function giftStarterStock(){
     },30);
   };
 
+  /* 陈默加显卡：台词放在重开张那天的微信里，工单紧跟着出。
+     以前这张单挂在第 13 天，那时候店还没重开，等于提前了半个月。 */
+  function pushChenmoGpuJob(){
+    try{
+      const s=(typeof STORY!=='undefined')&&STORY[13];
+      if(!s)return;
+      const j=buildStoryJob(s);
+      j.id='CG1';j.storyId='c3d1';
+      j.bornDay=state.day||17;j.dueDay=(state.day||17)+3;
+      state.jobs=state.jobs||[];
+      if(state.jobs.some(function(x){return x&&(x.id==='CG1'||x.storyId==='c3d1');}))return;
+      state.jobs.push(j);
+      state.dayTotal=state.jobs.length;
+      try{save();}catch(e){}
+      try{renderAll();}catch(e){}
+      try{toast('陈默的机器已经抱来了：升级单在工单列表里');}catch(e){}
+    }catch(e){}
+  }
+
+  /* ---- 被抢之后不再空转半个月：案子一结，日历直接跳到重开张那天 ----
+     之前是玩家要自己「打烊」十几次才等到重开张，中间十几天空得没内容。
+     跳过去以后，第 5~16 天没上过的剧情单由 storyPick() 从重开张次日起一天一场补。 */
+  A.skipToReopen=function(){
+    try{
+      const f=g();
+      let target=f.reopenDay||(state.day+15);
+      if(!(target>state.day))target=state.day+1;
+      const gap=target-state.day;
+      const d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+gap);
+      const nd=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      state.date=nd;state.day=target;
+      /* 先标上「已重开」：日期显示、以及没上过的剧情怎么补，都按重开之后算 */
+      f.reopen=1;
+      /* 停业期间的工单一起作废，重开张这天重新派单。
+         重开张当天不出剧情单——那天留给爸爸包裹和「陈默加显卡」这场戏。 */
+      state.jobs=[];state.activeId=null;state.benches={};state.diag={};state.benchMachines={};
+      try{ state.jobs=(makeJobs(nd,target)||[]).filter(function(x){return !x.story;}); }catch(e){ state.jobs=[]; }
+      state.dayTotal=state.jobs.length;
+      state.dayStartCash=state.cash;state.todayIn=0;state.todayOut=0;state.todayStory=0;
+      build=newBuild();
+      try{save();}catch(e){}
+      try{renderAll();}catch(e){}
+    }catch(e){}
+    try{ A.playReopen(); }catch(e){}
+  };
+
   A.playReopen=function(){
     const f=g(); f.reopen=1; try{save();}catch(e){}
     state.cash=Math.max(state.cash||0,0);
@@ -4120,6 +4201,7 @@ function giftStarterStock(){
                   playChatScene('chat_chenmo_gpu',function(){
                     /* 不再给二手/全新二选一：放开了，玩家自己决定怎么配 */
                     try{ toast('陈默这单：自己看着配，客户机器别糊弄'); }catch(e){}
+                    pushChenmoGpuJob();
                   });
                 }else{ /* 没有微信场景就到此为止 */ }
               }catch(e){}
@@ -10577,6 +10659,9 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01372':['被抢之后不再空转半个月：案子一结，日历直接跳到重开张那天',
+             '跳过的第 5~16 天剧情单不会丢，重开张之后按原顺序一天一场补上',
+             '陈默加显卡挪到重开张当天（原来第 13 天，店还没开就先来了）'],
     '01371':['刘警官的私单：重开张后第 20 天傍晚上门，修她家那台旧电脑（只收五十）',
              '修好两天后，派出所三台办公机的批量单会来电话'],
     '01370':['工作站的 128G 内存配得出来了：套条按两槽、容量×2 算',
