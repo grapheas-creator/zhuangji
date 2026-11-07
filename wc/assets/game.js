@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01430';
+const APP_BUILD='01431';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2853,7 +2853,7 @@ const Scene={
   busy(){return !!this.playing||this.chain;}
 };
 /* 剧情链幕布：整段剧情播放期间盖住游戏底页，场与场之间也不露出来 */
-let _curtainWatch=0;
+let _curtainWatch=0,_storyChain=false;
 function storyCurtain(on){
   try{
     let el=document.getElementById('storyCurtain');
@@ -2932,6 +2932,7 @@ function playPlotEvent(evId,onDone){
       '<div class="gal-hint" id="galHint">轻触继续 <b>▸</b></div>'+
     '</div></div>';
   document.body.appendChild(ov);Scene.enter('plot');
+  try{ if(!_storyChain)storyCurtain(true); }catch(e){}
   requestAnimationFrame(()=>requestAnimationFrame(()=>{try{ov.classList.add('on');
     const c=ov.querySelector('#galCg');if(c)c.classList.add('on');
     const sp=ov.querySelector('#galSprite');if(sp)setTimeout(()=>{try{sp.classList.add('on');}catch(e){}},380);}catch(e){}}));
@@ -2943,6 +2944,10 @@ function playPlotEvent(evId,onDone){
     if(vidPlayer){try{vidPlayer.destroy();}catch(e){}vidPlayer=null;}
     ov.style.opacity='0';setTimeout(()=>{try{ov.remove();}catch(e){}
       if(typeof onDone==='function')onDone();
+      /* 单场剧情（不在零元购链里）：收完看一下，没有下一场就把幕布放了 */
+      if(!_storyChain)setTimeout(function(){
+        try{ if(!document.querySelector('#plotEvent,#chatPop,#storyPop,#mask.on'))storyCurtain(false); }catch(e){}
+      },420);
       setTimeout(()=>{try{if(typeof coachRefresh==='function')coachRefresh();}catch(e){}},260);},260);};
   const parse=raw=>{
     if(/^我：/.test(raw))return{who:'我',txt:raw.slice(2)};
@@ -4035,6 +4040,7 @@ function giftStarterStock(){
   A.policeVisit=function(){
     try{
       if(typeof playPlotEvent!=='function')return;
+      storyCurtain(true);
       /* 整屏剧情模式，和开场一样；剧情/微信层还开着就等一下再进 */
       if(!playPlotEvent('policeCaseVisit',function(){
         /* 刘警官这场播完，不回到游戏页：直接把日历跳到破案那天再接剧情 */
@@ -4063,6 +4069,7 @@ function giftStarterStock(){
     if(typeof playPlotEvent!=='function') return;
     /* 重试/重复触发时别把已经抢过的剧情再放一遍 */
     try{if(g().robbery)return;}catch(e){}
+    _storyChain=true;
     storyCurtain(true);
     if(!playPlotEvent('robberyCase',function(){
       try{
@@ -4082,6 +4089,7 @@ function giftStarterStock(){
 
   A.playPolice=function(){
     const f=g(); f.policeDone=1; try{save();}catch(e){}
+    try{ storyCurtain(true); }catch(e){}
 
     /* 第 4 天一早：不是阿妈过来串门，顺口把「怎么处理」聊出来。
        难度不在菜单里选，而是在对话里选。 */
@@ -4226,7 +4234,7 @@ function giftStarterStock(){
       state.jobs.push(j);
       state.dayTotal=state.jobs.length;
       /* 剧情链到头：收幕布，回到游戏页 */
-      try{ storyCurtain(false); }catch(e){}
+      try{ _storyChain=false; storyCurtain(false); }catch(e){}
       /* 这张就是陈默的加显卡单（英雄联盟）；原来的 c1d2 不再重复补 */
       try{ state.story=state.story||{}; state.story.done=state.story.done||{}; state.story.done['c1d2']=1; }catch(e){}
       try{save();}catch(e){}
@@ -4421,7 +4429,14 @@ function giftStarterStock(){
   };
 
   window.__ARC=A;
-  window.addEventListener('load',function(){ setTimeout(function(){ try{A.onNewDay();}catch(e){} },1200); });
+  window.addEventListener('load',function(){
+    /* 第 2 天还没抢：先把游戏底页盖住，等零元购剧情开场 */
+    try{
+      const _f=(state&&state.story&&state.story.flags)||{};
+      if(state&&state.day===2&&!_f.robbery&&!_f.reopen)storyCurtain(true);
+    }catch(e){}
+    setTimeout(function(){ try{A.onNewDay();}catch(e){} },1200);
+  });
 })();
 function part(k){return build[k]?build[k].part:null;}
 function ramPart(i){return build.rams[i]?build.rams[i].part:null;}
@@ -9875,6 +9890,10 @@ document.getElementById('btnClose').onclick=()=>{
   try{debtDue();}catch(e){}   /* 第 15 天墨桀来收钱（之前是死代码） */
   /* 结算卡关掉之后再来一张「新的一天」：大字日期压上来，比底部一条 toast 更有翻篇感 */
   _daySwitching=true;
+  try{
+    const _f=(state.story&&state.story.flags)||{};
+    if(state.day===2&&!_f.robbery&&!_f.reopen)storyCurtain(true);
+  }catch(e){}
   playDayOpen({day:state.day,label:dayLabel().full,date:next,jobs:state.jobs.length},()=>{
     _daySwitching=false;
     /* 过场收掉之后，让页眉的日期再闪一次，玩家才看得见「换天了」 */
@@ -11040,6 +11059,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01431':['剧情开场前先盖幕布：第2天换天/加载、单场破案/刘警官/重开张都不再先闪一帧游戏底页'],
     '01430':['剧情/幕布期间藏掉右下角「在线 01425」运行角标，不再漏出游戏底页'],
     '01429':['调试面板加「完成新手引导（测试）」按钮：跳过教程、拼好陈默旧机、跳到第2天'],
     '01428':['剧情之间补衔接旁白：报警后、三天后破案、当天下午敲门、关店半个月、重开张后收拾旧机'],
