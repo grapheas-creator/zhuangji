@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01400';
+const APP_BUILD='01401';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3276,7 +3276,12 @@ function minBuildCost(need,opt){
 function storyPick(day){
   const st=(state&&state.story)||null;
   const f=(st&&st.flags)||{};
-  if(!f.reopen)return STORY[day]||null;
+  if(!f.reopen){
+    /* 被抢之后、重开张之前店是关着的：第 2 天不能再冒出陈默加显卡的剧情单，
+       这些没上过的剧情单留到重开张之后由下面的补发逻辑一场一场补。 */
+    if(f.robbery)return null;
+    return STORY[day]||null;
+  }
   const done=(st&&st.done)||{};
   const busy={};
   (state.jobs||[]).forEach(function(x){ if(x&&x.storyId)busy[x.storyId]=1; });
@@ -3291,6 +3296,9 @@ function storyPick(day){
   return null;
 }
 function makeJobs(dateStr,day){
+  /* 被抢之后、重开张之前店是关着的：不派单，玩家只等案子和重开张 */
+  const _f=(state&&state.story&&state.story.flags)||{};
+  if(_f.robbery&&!_f.reopen)return [];
   const rand=rngFrom(hash(dateStr+'#'+day+'#'+((state&&state.seed)||0))),jobs=[];
   const s=storyPick(day);
   if(s&&!(state.story&&state.story.done[s.id])){
@@ -3843,6 +3851,8 @@ function giftStarterStock(){
       try{ g().stolenInv=JSON.stringify(state.inv||[]); }catch(e){}
       state.inv=[]; state.machines=[];
       state.benchMachines={};
+      /* 店被搬空了，当天的单（包括已接的陈默加显卡）全部作废 */
+      state.jobs=[]; state.activeId=null; state.dayTotal=0; state.todayStory=0;
       build=newBuild();
       g().robbery=1; g().robberyDay=state.day;
       g().policeDay=(state.day||2)-1;   /* 被抓那夜算第 1 天 → 第 4 天破案 */
@@ -3853,6 +3863,12 @@ function giftStarterStock(){
 
   A.onNewDay=function(){
     const f=g();
+
+    /* 旧存档清理：被抢之后、重开张之前，工单里不该还留着「陈默加显卡」那张剧情单 */
+    if(f.robbery&&!f.reopen&&(state.jobs||[]).length){
+      state.jobs=[];state.activeId=null;state.dayTotal=0;
+      try{save();}catch(e){}
+    }
 
     /* ---- 被动收入 ---- */
     try{
@@ -3920,23 +3936,26 @@ function giftStarterStock(){
     /* 第 2 天：刘警官到店里看现场 */
     if(f.robbery&&f.robberyReported&&!f.policeVisit&&state.day>=2){
       f.policeVisit=1; try{save();}catch(e){}
-      setTimeout(function(){
-        try{
-          modal('刘警官',
-            '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-            +'「昨儿夜里的事吧？」她翻了翻本子。<br>'
-            +'「监控我调了，跑不掉。三天，我给你把人找着。」<br><br>'
-            +'<span style="color:#9b8088;font-size:12.5px">'
-            +'「货追不追得回来，我不敢打包票。」<br>她说话不绕弯子，是个干活的警察。</span></div>',null);
-          setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='等消息'; },30);
-        }catch(e){}
-      },1400);
+      setTimeout(function(){ try{A.policeVisit();}catch(e){} },1400);
       return;
     }
     /* 3 天后：刘警官破案 */
     if(f.robbery && !f.policeDone && state.day>=(f.policeDay||1)+3){ setTimeout(function(){ A.playPolice(); },700); return; }
     /* 半月后：重开张 */
     if(f.robbery && !f.reopen && state.day>=(f.reopenDay||16)){ setTimeout(function(){ A.playReopen(); },700); }
+  };
+
+  /* 刘警官到店里看现场（原第 2 天那段，抽出来给「报警当天」和 onNewDay 共用） */
+  A.policeVisit=function(){
+    try{
+      modal('刘警官',
+        '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
+        +'「昨儿夜里的事吧？」她翻了翻本子。<br>'
+        +'「监控我调了，跑不掉。三天，我给你把人找着。」<br><br>'
+        +'<span style="color:#9b8088;font-size:12.5px">'
+        +'「货追不追得回来，我不敢打包票。」<br>她说话不绕弯子，是个干活的警察。</span></div>',null);
+      setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='等消息'; },30);
+    }catch(e){}
   };
 
   A.playRobbery=function(){
@@ -3955,7 +3974,11 @@ function giftStarterStock(){
           try{closeMask(document.getElementById('mask'));}catch(e){}
           A.doRobbery();
           try{ const ff=g(); ff.robberyReported=1; save(); }catch(e){}
-          try{ toast('报了警，说最迟明天过来看看'); }catch(e){}
+          try{ toast('报了警，说一会儿过来看看'); }catch(e){}
+          /* 报警当班就来，别等下一次 onNewDay 才想起这茬 */
+          setTimeout(function(){
+            try{const ff=g();if(ff.robberyReported&&!ff.policeVisit){ff.policeVisit=1;save();A.policeVisit();}}catch(e){}
+          },900);
         };
       }
       if(n) n.style.display='none';
@@ -10897,6 +10920,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01401':['被抢之后到重开张之前不再派单：陈默加显卡的第 2 天剧情单不会再顶掉刘警官看现场',
+             '报警当天刘警官就来；旧存档里遗留的剧情单在进店时清掉'],
     '01400':['打烊步骤真正解锁：除了点击锁，滚动守卫里还有第二道拦截，这次一起放行'],
     '01399':['超频三 青鸟四高度改成真实的 57mm（下压），不再写 125mm',
              '工作台槽位改 minmax(0,1fr)：长型号名不会把右边那列顶出屏幕',
