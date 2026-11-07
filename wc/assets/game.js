@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01402';
+const APP_BUILD='01403';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5878,24 +5878,16 @@ function tutInBuild(cat,want){
     return !!(build[cat]&&build[cat].part&&build[cat].part.n===want);
   }catch(e){return false;}
 }
+/* 步骤完成用「按过的记录」判断，不看台面现况：
+   交付后 build 会清空，拿 build 判断会让引导从头再走一遍。
+   买错/装错的拦截放在记录写入的那一刻（见购买确认与安装处理）。 */
 function tutHas(cat){
   const t=state.tut||{};
-  const want=tutWanted(cat);
-  if(want){
-    try{
-      if((state.inv||[]).some(x=>x.cat===cat&&x.part&&x.part.n===want))return true;
-      if(tutInBuild(cat,want))return true;
-    }catch(e){}
-    return false;
-  }
   return !!((t.bought&&t.bought[cat])||(t.parts&&t.parts[cat]));
 }
 function tutHasPart(cat){
   const t=state.tut||{};
-  if(!(t.parts&&t.parts[cat]))return false;
-  const want=tutWanted(cat);
-  if(!want)return true;
-  return tutInBuild(cat,want);
+  return !!(t.parts&&t.parts[cat]);
 }
 function tutBuyEl(cat){
   const q=tutPick(cat);
@@ -7984,9 +7976,13 @@ function bindShopList(){
       }catch(e){}
       addInv({cat:curCat,part:_bad?Object.assign({},p,{faulty:true}):p,paid:price,shop:used?'xianyu':'taobao',faulty:_bad});
       if(state.tut){
-        state.tut.done.buy=true;state.tut.bought=state.tut.bought||{};state.tut.bought[curCat]=true;
-        /* 记住刚入库这一件的 uid：开局仓库里有 90 件存货，装件步必须指对刚买的这件 */
-        try{const _ni=state.inv[state.inv.length-1];state.tut.buyUid=state.tut.buyUid||{};if(_ni)state.tut.buyUid[curCat]=_ni.uid;}catch(e){}
+        /* 只有买到引导点名的那件才记；买别的（锁被绕过/提前买的）不算这步 */
+        let _ok=true;try{const _w=tutWanted(curCat);_ok=!_w||p.n===_w;}catch(e){}
+        if(_ok){
+          state.tut.done.buy=true;state.tut.bought=state.tut.bought||{};state.tut.bought[curCat]=true;
+          /* 记住刚入库这一件的 uid：开局仓库里有 90 件存货，装件步必须指对刚买的这件 */
+          try{const _ni=state.inv[state.inv.length-1];state.tut.buyUid=state.tut.buyUid||{};if(_ni)state.tut.buyUid[curCat]=_ni.uid;}catch(e){}
+        }
       }
       /* 买完件后如果引导下一步就是「装上」，直接把面板切到仓库再渲染，
          只重绘一次；否则会有「商店重绘 → 立刻切仓库重绘」的连续两次，中间那下就是闪 */
@@ -8063,7 +8059,11 @@ function bindShopList(){
         clearTimeout(_stageViewT);
       }catch(e){}
       state.inv.splice(i,1);
-      if(state.tut){state.tut.done.install=true;state.tut.parts=state.tut.parts||{};state.tut.parts[it.cat]=true;}
+      if(state.tut){
+        /* 装错同类件不算这步：只有引导点名的那件压上台面才记 */
+        let _ok=true;try{const _w=tutWanted(it.cat);_ok=!_w||(it.part&&it.part.n===_w);}catch(e){}
+        if(_ok){state.tut.done.install=true;state.tut.parts=state.tut.parts||{};state.tut.parts[it.cat]=true;}
+      }
       save();renderAll();
       try{benchDemoAfterInstall(it.cat);}catch(e){}}
 
@@ -10965,6 +10965,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01403':['交付后引导又从头走一遍：步骤完成改回按「按过的记录」判断（交付后 build 会清空）',
+             '买错/装错的拦截放在记录写入那一刻：不是点名的那件，不记 bought/parts'],
     '01402':['引导买件/装件按型号核对：买错 4G 内存不会再被当成 8G 那步完成',
              '购买确认里再拦一次：引导步骤没点名的那件，不扣钱也不入库',
              '装机检查把工单目标内存也算进去，4G 顶 8G 会亮红叉'],
