@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01415';
+const APP_BUILD='01417';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2848,6 +2848,22 @@ const Scene={
   end(){this.chain=false;if(!this.playing&&document.body.classList.contains('scene-mode'))this.chrome(true);},
   busy(){return !!this.playing||this.chain;}
 };
+/* 临时整屏剧情：破案/重开张/猫咖这些场次也用开场那种剧情，
+   临时拼一个 PLOT_EVENTS 条目，播完就删；忙时重试，别丢场。 */
+let _tmpPlotSeq=0;
+function playTempPlot(lines,onDone,tries){
+  try{
+    if(typeof playPlotEvent!=='function')return false;
+    const key='__tmpStory_'+(_tmpPlotSeq++);
+    PLOT_EVENTS[key]={id:key,who:'',role:'',av:'',col:'#ffcf8f',lines:(lines||[]).slice(),tip:''};
+    if(!playPlotEvent(key,function(){try{delete PLOT_EVENTS[key];}catch(e){} if(typeof onDone==='function')onDone();})){
+      try{delete PLOT_EVENTS[key];}catch(e){}
+      if((tries||0)<20)setTimeout(function(){playTempPlot(lines,onDone,(tries||0)+1);},900);
+      return false;
+    }
+    return true;
+  }catch(e){return false;}
+}
 function playPlotEvent(evId,onDone){
   const ev=PLOT_EVENTS[evId];if(!ev)return false;
   if(document.getElementById('plotEvent'))return false;
@@ -4066,62 +4082,27 @@ function giftStarterStock(){
 
       /* 不是阿妈的一句回应 */
       const reply=(OPTIONS.find(function(x){return x[0]===diff;})||OPTIONS[2])[3];
-      const replyHtml=reply.map(function(x){ return '<b>'+x[0]+'</b>：'+x[1]; }).join('<br>');
+      const caseLines=reply.map(function(x){ return x[0]+'：'+x[1]; });
 
-      /* 当天下午：刘警官带着人过来 */
+      /* 当天下午：刘警官带着人过来；这段也整屏播，播完收名片 → 跳重开张 */
       const policeLines={
         wangcai:['人给你押来了。货，一件不少，你自己点点。'],
         mojie:  ['人给你押来了。货，就追回来这几件。剩下的已经转手了，追不回来了。'],
         mogu:   ['人给你押来了。货，一件没追回来。'],
         '486':  ['人给你押来了。货，一件没追回来。','货没了，店还得开。重建的钱，你打算怎么弄？']
       };
-      const pl=(policeLines[diff]||policeLines.mogu).map(function(t){ return '<b>刘警官</b>：'+t; }).join('<br>');
+      (policeLines[diff]||policeLines.mogu).forEach(function(t){ caseLines.push('刘警官：'+t); });
+      caseLines.push('（她留了张名片：店里有活儿，可以找她。名片压在柜台玻璃下面。）');
 
-      modal('不是阿妈',
-        '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+replyHtml+'</div>',null);
-      setTimeout(function(){
-        const y=document.getElementById('mYes');
-        if(y){
-          y.textContent='下午，刘警官来了';
-          y.onclick=function(){
-            try{closeMask(document.getElementById('mask'));}catch(e){}
-            setTimeout(function(){
-              modal('刘警官',
-                '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+pl
-                +'<br><br><span style="color:#9b8088;font-size:12.5px">'
-                +'她留了张名片：店里有活儿，可以找她。名片压在柜台玻璃下面。</span></div>',null);
-              setTimeout(function(){
-                const y2=document.getElementById('mYes');
-                if(y2){
-                  y2.textContent='收下名片';
-                  /* 名片一收，案子这段就完了：直接跳到半个月后重开张 */
-                  y2.onclick=function(){
-                    try{closeMask(document.getElementById('mask'));}catch(e){}
-                    setTimeout(function(){ try{A.skipToReopen();}catch(e){} },260);
-                  };
-                }
-              },30);
-            },260);
-          };
-        }
-        const n=document.getElementById('mNo'); if(n) n.style.display='none';
-      },30);
+      playTempPlot(caseLines,function(){ try{A.skipToReopen();}catch(e){} });
     }
 
-    modal('不是阿妈',
-      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'<b>不是阿妈</b>：哟，遭了？<br>'
-      +'<b>旺财</b>：一件不剩。<br>'
-      +'<b>不是阿妈</b>：美丽国嘛，一年总得来这么几回。<br>'
-      +'<b>不是阿妈</b>：你打算怎么着。</div>',null);
-    setTimeout(function(){
-      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
-      if(y){
-        y.textContent='说实话';
-        y.onclick=function(){ try{closeMask(document.getElementById('mask'));}catch(e){} setTimeout(choose,240); };
-      }
-      if(n) n.style.display='none';
-    },30);
+    playTempPlot([
+      '不是阿妈：哟，遭了？',
+      '旺财：一件不剩。',
+      '不是阿妈：美丽国嘛，一年总得来这么几回。',
+      '不是阿妈：你打算怎么着。'
+    ],choose);
   };
 
   /* ---- B站：用那台旧电脑拍装机视频，涨粉 → 单量变多 ---- */
@@ -4229,83 +4210,60 @@ function giftStarterStock(){
                '（三万块的账，月月在等。这店，得跑起来。）']
     };
     const lines=TEXT[diff]||TEXT.mogu;
-    const body=lines.map(function(l){
-      const dim=(l.charAt(0)==='（');
-      return dim?'<span style="color:#9b8088;font-size:13px">'+l+'</span>':l;
-    }).join('<br>');
-    modal('半个月后',
-      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'+body+'</div>',null);
-    setTimeout(function(){
-      const y=document.getElementById('mYes');
-      if(y){
-        y.textContent='重新开张';
-        y.onclick=function(){
-          try{closeMask(document.getElementById('mask'));}catch(e){}
-          setTimeout(function(){
-            /* 同一天，一件一件来：爸爸包裹 → 旺财自己淘显卡 → 陈默微信 */
-            var gotoChat=function(){
-              try{
-                if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
-                  playChatScene('chat_chenmo_gpu',function(){
-                    /* 不再给二手/全新二选一：放开了，玩家自己决定怎么配 */
-                    try{ toast('陈默这单：自己看着配，客户机器别糊弄'); }catch(e){}
-                    pushChenmoGpuJob();
-                  });
-                }else{ /* 没有微信场景就到此为止 */ }
-              }catch(e){}
-            };
-            try{
-              if(window.__GRAMO&&window.__GRAMO.introForce){
-                window.__GRAMO.introForce().then(function(){ setTimeout(function(){ A.ownGpuStory(gotoChat); },2000); });
-                return;
-              }
-            }catch(e){}
-            gotoChat();
-          },380);
+    /* 半个月后：整屏剧情，播完直接接「重新开张」那串 */
+    playTempPlot(lines,function(){
+      setTimeout(function(){
+        /* 同一天，一件一件来：爸爸包裹 → 旺财自己淘显卡 → 陈默微信 */
+        var gotoChat=function(){
+          try{
+            if(typeof playChatScene==='function'&&CHAT_SCENES.chat_chenmo_gpu){
+              playChatScene('chat_chenmo_gpu',function(){
+                /* 不再给二手/全新二选一：放开了，玩家自己决定怎么配 */
+                try{ toast('陈默这单：自己看着配，客户机器别糊弄'); }catch(e){}
+                pushChenmoGpuJob();
+              });
+            }else{ /* 没有微信场景就到此为止 */ }
+          }catch(e){}
         };
-      }
-    },30);
+        try{
+          if(window.__GRAMO&&window.__GRAMO.introForce){
+            window.__GRAMO.introForce().then(function(){ setTimeout(function(){ A.ownGpuStory(gotoChat); },2000); });
+            return;
+          }
+        }catch(e){}
+        gotoChat();
+      },380);
+    });
   };
 
   /* 旺财自己那张 750Ti 想换 1060 3G —— 二手水深的第一课 */
   A.ownGpuStory=function(after){
     const won=Math.random()<0.8;      /* 仲裁成功率八成 */
     const price=620;
-    modal('把 750Ti 换掉',
-      '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'<b>旁白</b>：把爸爸那台机子擦干净，摆在柜台后面。开机、装系统、插上网线。<br>'
-      +'<b>旁白</b>：从此它就是这个店的大脑——接单靠它，记账靠它，跟客户吵嘴也靠它。<br>'
-      +'<b>旁白</b>：晚上收了工，装了个游戏，想着试试这台机子什么水平。<br>'
-      +'<b>旁白</b>：画质调到中，帧数还是一跳一跳的。开了两个小时，眼睛发酸。<br>'
-      +'<b>旺财</b>：（这台是爸给的，不是拿来供着的……也不是只能拿来记账的。）<br>'
-      +'<b>旺财</b>：（先淘张便宜卡顶上，别的都能省，这个不行。）<br>'
-      +'<b>旁白</b>：闲鱼上刷到一张，卖<u>六二零</u>，写着「自用、没拆没修」，照片拍得干干净净。<br>'
-      +'<b>旁白</b>：（到手插上，风扇转，屏幕是黑的。换台机器再试，花了半屏，然后就重启。）<br>'
-      +'<b>旁白</b>：找卖家。<br>'
-      +'<b>卖家</b>：你电源不行吧？你主板插槽坏了吧？<br>'
-      +'<b>旺财</b>：那退了吧。<br>'
-      +'<b>旁白</b>：（他就不回消息了。）<br>'
-      +'<b>旁白</b>：开箱视频、聊天记录、快递面单全翻出来，走平台介入，折腾到半夜。<br>'
-      +(won
-        ? '<b>旁白</b>：钱退回来了。显卡还在桌上，当个教训。<br><br>'
-          +'<span style="color:#9b8088;font-size:12.5px">（二手这行，十件里保不齐有一件是坏的。能要回来的，大概八成。）</span>'
-        : '<b>旁白</b>：平台让举证，举不出来。钱没要回来，卡也废了。<br><br>'
-          +'<span style="color:#9b8088;font-size:12.5px">（六百二，当学费。这亏吃一次就够了。）</span>')
-      +'</div>',null);
-    try{
-      if(!won){ state.cash=(state.cash||0)-price; try{save();renderAll();}catch(e){} }
-    }catch(e){}
-    setTimeout(function(){
-      const y=document.getElementById('mYes');
-      if(y){
-        y.textContent='记住了';
-        y.onclick=function(){
-          try{closeMask(document.getElementById('mask'));}catch(e){}
-          setTimeout(function(){ if(after) after(); },600);
-        };
-      }
-      const n=document.getElementById('mNo'); if(n) n.style.display='none';
-    },30);
+    const lines=[
+      '旁白：把爸爸那台机子擦干净，摆在柜台后面。开机、装系统、插上网线。',
+      '旁白：从此它就是这个店的大脑——接单靠它，记账靠它，跟客户吵嘴也靠它。',
+      '旁白：晚上收了工，装了个游戏，想着试试这台机子什么水平。',
+      '旁白：画质调到中，帧数还是一跳一跳的。开了两个小时，眼睛发酸。',
+      '旺财：（这台是爸给的，不是拿来供着的……也不是只能拿来记账的。）',
+      '旺财：（先淘张便宜卡顶上，别的都能省，这个不行。）',
+      '旁白：闲鱼上刷到一张，卖六二零，写着「自用、没拆没修」，照片拍得干干净净。',
+      '旁白：（到手插上，风扇转，屏幕是黑的。换台机器再试，花了半屏，然后就重启。）',
+      '旁白：找卖家。',
+      '卖家：你电源不行吧？你主板插槽坏了吧？',
+      '旺财：那退了吧。',
+      '旁白：（他就不回消息了。）',
+      '旁白：开箱视频、聊天记录、快递面单全翻出来，走平台介入，折腾到半夜。'
+    ];
+    if(won){
+      lines.push('旁白：钱退回来了。显卡还在桌上，当个教训。');
+      lines.push('（二手这行，十件里保不齐有一件是坏的。能要回来的，大概八成。）');
+    }else{
+      lines.push('旁白：平台让举证，举不出来。钱没要回来，卡也废了。');
+      lines.push('（六百二，当学费。这亏吃一次就够了。）');
+      try{ state.cash=(state.cash||0)-price; save(); renderAll(); }catch(e){}
+    }
+    playTempPlot(lines,function(){ setTimeout(function(){ if(after) after(); },600); });
   };
 
   /* 加显卡：二手 vs 全新 的引导（陈默剧情之后） */
@@ -4681,15 +4639,11 @@ function tbOffer(){
       fl.catCafeIntro=1; try{save();}catch(e){}
       setTimeout(function(){
         try{
-          modal('猫咖老板 · 不是阿妈',
-            '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-            +'「我店里那群猫天天晒太阳，我人走不开。」<br>'
-            +'他往柜台上一靠，「不过城里有批清货的，我认识人。'
-            +'我把联系方式给你，你自己去谈，我不掺和。」<br><br>'
-            +'<span style="color:#9b8088;font-size:12.5px">'
-            +'「丑话说前头：整机整箱，不拆不挑。坏件人家会标出来，剩下的看你眼力。」</span></div>',null);
-          setTimeout(function(){ const y=document.getElementById('mYes'), n=document.getElementById('mNo');
-            if(y) y.textContent='那就谢谢了'; if(n) n.style.display='none'; },30);
+          playTempPlot([
+            '不是阿妈：我店里那群猫天天晒太阳，我人走不开。',
+            '不是阿妈：他往柜台上一靠，不过城里有批清货的，我认识人。我把联系方式给你，你自己去谈，我不掺和。',
+            '（丑话说前头：整机整箱，不拆不挑。坏件人家会标出来，剩下的看你眼力。）'
+          ]);
         }catch(e){}
       },900);
     }
@@ -11006,6 +10960,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01417':['猫咖老板（淘宝货源）第一场也改成整屏剧情；临时剧情用唯一 key，避免和别的场次互相覆盖'],
+    '01416':['破案（不是阿妈/刘警官/收名片）和半个月后重开张也改成整屏剧情，一直连到重开张接加显卡'],
     '01415':['零元购/刘警官改成开场那种整屏剧情（有 CG、对白、轻触继续），不再弹在游戏底图上'],
     '01414':['先马 趣造2 商店略缩图补上（用户图，256×256 webp）——7 个缺图的机箱全部补齐'],
     '01413':['爱国者 星璨 岚商店略缩图补上（用户紫色背景图，裁掉免责声明，256×256）'],
