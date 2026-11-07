@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01425';
+const APP_BUILD='01426';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2851,13 +2851,27 @@ const Scene={
   busy(){return !!this.playing||this.chain;}
 };
 /* 剧情链幕布：整段剧情播放期间盖住游戏底页，场与场之间也不露出来 */
+let _curtainWatch=0;
 function storyCurtain(on){
   try{
     let el=document.getElementById('storyCurtain');
     if(on){
       if(!el){el=document.createElement('div');el.id='storyCurtain';el.onclick=function(){el.classList.remove('on');};document.body.appendChild(el);}
       el.classList.add('on');
-    }else if(el){el.classList.remove('on');}
+      clearInterval(_curtainWatch);
+      let idle=0;
+      _curtainWatch=setInterval(function(){
+        try{
+          const active=document.querySelector('#plotEvent,#chatPop,#storyPop,#mask.on,#diffPick');
+          idle=active?0:idle+2000;
+          /* 8 秒都没有任何剧情层：链断了，收幕布回游戏，别把玩家困在空白页 */
+          if(idle>=8000){el.classList.remove('on');clearInterval(_curtainWatch);_curtainWatch=0;}
+        }catch(e){}
+      },2000);
+    }else{
+      if(el)el.classList.remove('on');
+      clearInterval(_curtainWatch);_curtainWatch=0;
+    }
   }catch(e){}
 }
 
@@ -4051,7 +4065,6 @@ function giftStarterStock(){
       try{
         A.doRobbery();
         const ff=g(); ff.robberyReported=1; save();
-        try{ toast('报了警，说一会儿过来看看'); }catch(e){}
         setTimeout(function(){
           try{if(!g().policeVisit){g().policeVisit=1;save();A.policeVisit();}}catch(e){}
         },700);
@@ -9868,7 +9881,15 @@ document.getElementById('btnClose').onclick=()=>{
         if(!document.querySelector('#plotEvent,#storyPop')){try{window.__dayCurtainOff&&window.__dayCurtainOff();}catch(e){}}
       },420);
     },260);
-    toast(dayLabel().full+' · 今日 '+state.jobs.length+' 单，挑一单开工');
+    /* 零元购这条线不弹「第 X 天 · 今日 N 单」的小框：剧情链里只留剧情 */
+    try{
+      const _f=(state.story&&state.story.flags)||{};
+      const _curt=document.getElementById('storyCurtain');
+      const _quiet=(state.day===2&&!_f.robbery)||(_f.robbery&&!_f.reopen)||
+        !!document.querySelector('#plotEvent,#storyPop,#chatPop')||
+        !!(_curt&&_curt.classList.contains('on'));
+      if(!_quiet)toast(dayLabel().full+' · 今日 '+state.jobs.length+' 单，挑一单开工');
+    }catch(e){ try{toast(dayLabel().full+' · 今日 '+state.jobs.length+' 单，挑一单开工');}catch(e2){} }
   });
   });
 };
@@ -11010,6 +11031,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01426':['零元购剧情链里不再弹「第 X 天 · 今日 N 单，挑一单开工」那个小框'],
     '01425':['被抢到重开张之前的剧情背景换成「被洗劫过的店」；旺财有头像了（与主角共用）'],
     '01424':['刘警官头像接进剧情（用户确认的生成图，256×256 webp，方形裁切不压扁）'],
     '01423':['工单页剧情卡用上特殊 NPC 头像（陈默/周芹/墨桀/我），没图的才退回文字色块'],
