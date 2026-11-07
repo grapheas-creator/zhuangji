@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01393';
+const APP_BUILD='01394';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5072,7 +5072,7 @@ function benchPhoto(){
       /* 只有「纯 ITX」机箱才用 ITX 那张；像九尾狐 U1 这种 MATX/ITX 兼用的便宜箱子，
          应该显示便宜档的机箱内景，不是迷你 ITX 箱。 */
       const _itx=!!(cs&&cs.ff&&cs.ff.length===1&&cs.ff[0]==='ITX');
-      /* ITX 机箱：装没装独显用两张不同的整机图——核显那张没有显卡，别让核显单顶着独显照片 */
+      /* ITX 整机图按「有没有装独显」切换（b.gpu1），不是看 CPU 有没有核显 */
       const _itxSrc=(b.gpu1&&window.CASE_ITX_GPU)?window.CASE_ITX_GPU:window.CASE_ITX;
       const src=(_itx&&_itxSrc)?_itxSrc:((window.CASE_FRONT||{})[tier]||set.front);
       return src?{src,tag:''}:null;   /* 不再打档位标签 */
@@ -8136,6 +8136,12 @@ let _benchDemoT=null,_benchDemoOn=false;
 function benchDemoAfterInstall(cat){
   try{
     if(!(state.tut&&!state.tut.guideOff&&state.day===1))return;
+    /* 电源 / SATA 硬盘是装进机箱的：这两步直接停在机箱视图，
+       不要再用主板照片盖一层（M.2 仍走主板照片）。 */
+    if(_stageView==='case'){
+      try{if(typeof renderCaseArt==='function')renderCaseArt();}catch(e){}
+      return;
+    }
     const ph=benchPhoto();
     const el=document.getElementById('buildFlash');
     if(!el)return;
@@ -10876,6 +10882,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01394':['装电源 / SATA 硬盘时不再盖主板照片，工作台停在机箱视图（M.2 还是主板图）',
+             'ITX 整机图明确按「有没有装独显」切换，不看 CPU 有没有核显'],
     '01393':['ITX 整机图分两张：核显单（没装显卡）用无显卡实拍，装了独显用带显卡那张'],
     '01392':['ITX 机箱图换成用户给的核显实拍（切掉左上角水印），纯 ITX 机箱的工作台图更新'],
     '01391':['修工作台机箱图：只有纯 ITX 机箱才用 ITX 套图；九尾狐 U1 这类 MATX/ITX 兼用的便宜箱子，',
