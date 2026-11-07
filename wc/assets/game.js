@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01390';
+const APP_BUILD='01391';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5067,7 +5067,9 @@ function benchPhoto(){
       const cs=b.case.part,cool=b.cooler&&b.cooler.part;
       const price=(cs&&cs.p)||0,liq=!!(cool&&cool.rad>0);
       const tier=(liq||price>=700)?'high':(price<=250?'cheap':'mid');
-      const _itx=!!(cs&&cs.ff&&cs.ff.indexOf('ITX')>=0);
+      /* 只有「纯 ITX」机箱才用 ITX 那张；像九尾狐 U1 这种 MATX/ITX 兼用的便宜箱子，
+         应该显示便宜档的机箱内景，不是迷你 ITX 箱。 */
+      const _itx=!!(cs&&cs.ff&&cs.ff.length===1&&cs.ff[0]==='ITX');
       const src=(_itx&&window.CASE_ITX)?window.CASE_ITX:((window.CASE_FRONT||{})[tier]||set.front);
       return src?{src,tag:''}:null;   /* 不再打档位标签 */
     }
@@ -10870,6 +10872,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01391':['修工作台机箱图：只有纯 ITX 机箱才用 ITX 套图；九尾狐 U1 这类 MATX/ITX 兼用的便宜箱子，',
+             '显示的是便宜档机箱内景，不再是那个迷你 ITX 箱'],
     '01390':['青鸟四缩略图四周补 15% 白边（内容占 70%）：和其他配件缩略图一样大，不再顶满格子'],
     '01389':['超频三 青鸟四的商店缩略图换成用户给的官方渲染图（蓝灯下吹，PCCOOLER 标）'],
     '01388':['超频三 青鸟四换回真实产品图（蓝灯下吹 127mm），之前误配成利民的黑色单塔',
