@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01395';
+const APP_BUILD='01396';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7994,7 +7994,7 @@ function bindShopList(){
       state.inv.splice(i,1);
       if(state.tut){state.tut.done.install=true;state.tut.parts=state.tut.parts||{};state.tut.parts[it.cat]=true;}
       save();renderAll();
-      /* 引导期间不弹全屏装机照片：装完直接回工作台，由 coachRefresh 接下一步 */}
+      try{benchDemoAfterInstall(it.cat);}catch(e){}}
 
     else toast(ok);
   });
@@ -8103,8 +8103,9 @@ function applyPaste(){
   toast('硅脂涂好了，可以压散热器了');
   try{state.tut=state.tut||{};state.tut.done.paste=true;save();}catch(e){}
   renderAll();
-  /* 引导期间不弹全屏实拍（用户要求）：涂完直接继续下一步；自由装机仍保留展示 */
-  try{const _tutOn=(state.tut&&!state.tut.guideOff&&state.day===1);if(!_tutOn)benchDemoAfterPaste();}catch(e){}
+  /* 涂完必须把「带硅脂的主板实拍」弹出来，不能只在台面小图里悄悄换一张。
+     展示层收起后再让引导切到下一步（买内存）。 */
+  try{benchDemoAfterPaste();}catch(e){}
 }
 /* 涂硅脂后的全屏实拍：复用装机展示层，但入口和装机完成分开。 */
 function benchDemoAfterPaste(){
@@ -8132,16 +8133,22 @@ let _benchDemoT=null,_benchDemoOn=false;
 /* ===== 装机展示层（重做版）=====
    装上一件后：盖一层全屏实拍图 → 1.6s 后收起 → 回商店下一个分类。
    不依赖 panel 重渲染，不会被引导/滚动锁抢回去。 */
+/* 电源/SATA 盘那一步的展示图：已经有机箱就用机箱照片；引导早段还没装机箱，
+   就用便宜档的机箱内景示意，总之不能拿主板照片顶替。 */
+function tutCasePhoto(){
+  try{
+    const b=(typeof build!=='undefined')?build:null;
+    if(b&&b.case&&b.case.part)return benchPhoto();
+    const cf=window.CASE_FRONT||{};
+    const src=cf.cheap||cf.mid||cf.high;
+    return src?{src:src,tag:'机箱内景'}:benchPhoto();
+  }catch(e){return benchPhoto();}
+}
 function benchDemoAfterInstall(cat){
   try{
     if(!(state.tut&&!state.tut.guideOff&&state.day===1))return;
-    /* 电源 / SATA 硬盘是装进机箱的：这两步直接停在机箱视图，
-       不要再用主板照片盖一层（M.2 仍走主板照片）。 */
-    if(_stageView==='case'){
-      try{if(typeof renderCaseArt==='function')renderCaseArt();}catch(e){}
-      return;
-    }
-    const ph=benchPhoto();
+    /* 电源 / SATA 硬盘是装进机箱的：这一步弹机箱内景，不弹主板照片（M.2 仍走主板照片） */
+    const ph=(_stageView==='case')?tutCasePhoto():benchPhoto();
     const el=document.getElementById('buildFlash');
     if(!el)return;
     /* 没有照片就别掀这层：以前照样加 on，屏幕上就是一整块「破图」占位 */
@@ -10881,6 +10888,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01396':['修回来：引导装件/涂硅脂的全屏展示恢复；装电源和 SATA 盘时弹的是机箱内景，不再是主板照片'],
     '01395':['新手引导期间不再弹全屏装机照片（装件、涂硅脂都不弹），装完直接回工作台继续下一步'],
     '01394':['装电源 / SATA 硬盘时不再盖主板照片，工作台停在机箱视图（M.2 还是主板图）',
              'ITX 整机图明确按「有没有装独显」切换，不看 CPU 有没有核显'],
