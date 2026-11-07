@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01429';
+const APP_BUILD='01430';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2858,8 +2858,8 @@ function storyCurtain(on){
   try{
     let el=document.getElementById('storyCurtain');
     if(on){
-      if(!el){el=document.createElement('div');el.id='storyCurtain';el.onclick=function(){el.classList.remove('on');};document.body.appendChild(el);}
-      el.classList.add('on');
+      if(!el){el=document.createElement('div');el.id='storyCurtain';el.onclick=function(){el.classList.remove('on');document.body.classList.remove('story-curtain');};document.body.appendChild(el);}
+      el.classList.add('on');document.body.classList.add('story-curtain');
       clearInterval(_curtainWatch);
       let idle=0;
       _curtainWatch=setInterval(function(){
@@ -2867,11 +2867,12 @@ function storyCurtain(on){
           const active=document.querySelector('#plotEvent,#chatPop,#storyPop,#mask.on,#diffPick');
           idle=active?0:idle+2000;
           /* 8 秒都没有任何剧情层：链断了，收幕布回游戏，别把玩家困在空白页 */
-          if(idle>=8000){el.classList.remove('on');clearInterval(_curtainWatch);_curtainWatch=0;}
+          if(idle>=8000){el.classList.remove('on');document.body.classList.remove('story-curtain');clearInterval(_curtainWatch);_curtainWatch=0;}
         }catch(e){}
       },2000);
     }else{
       if(el)el.classList.remove('on');
+      document.body.classList.remove('story-curtain');
       clearInterval(_curtainWatch);_curtainWatch=0;
     }
   }catch(e){}
@@ -11039,6 +11040,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01430':['剧情/幕布期间藏掉右下角「在线 01425」运行角标，不再漏出游戏底页'],
     '01429':['调试面板加「完成新手引导（测试）」按钮：跳过教程、拼好陈默旧机、跳到第2天'],
     '01428':['剧情之间补衔接旁白：报警后、三天后破案、当天下午敲门、关店半个月、重开张后收拾旧机'],
     '01427':['破案后续加旁白润色：敲门、刘警官押人上门、案子有说法'],
