@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01403';
+const APP_BUILD='01404';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6166,6 +6166,7 @@ function tutInstallEl(it){
   return box||document.querySelector('#benchBox');
 }
 function tutParts(){const t=state.tut||(state.tut={done:{},hidden:false});t.bought=t.bought||{};t.parts=t.parts||{};return t;}
+let _tutCloseT=0;
 let _coachKey=null,_coachDrawnKey='',_coachDismissed=null,_coachRetry=null,_coachForcedStep=null,_coachFirstStep=null,_coachEl=null,_coachPageSyncT=null,_coachPageSig='';
 /* 线性节拍用（必须声明：脚本是严格模式，未声明赋值会抛错，导致引导画不出来） */
 let _coachSettleUntil=0,_coachSettleT=0;
@@ -6717,6 +6718,22 @@ function drawCoach(el,step){
   c.classList.add('on');try{document.body.classList.add('coachOn');}catch(e){}_coachKey=step.k;_coachDrawnKey=step.k;_coachEl=el;_coachPageSig=_coachSig();
   coachScrollGuard();
   coachWatchScroll();
+  /* 最后一步「打烊」：弹一下给玩家看一眼，2.6 秒后连同锁一起收掉，进自由模式。
+     打烊按钮本身不锁（见 tutFree），玩家想什么时候打烊都行。 */
+  if(step.k==='close'&&!_tutCloseT){
+    _tutCloseT=setTimeout(function(){
+      _tutCloseT=0;
+      try{
+        if(!state.tut)return;
+        state.tut.done=state.tut.done||{};
+        state.tut.done.close=true;
+        state.tut.guideOff=true;
+        save();
+        coachHide();
+        renderAll();
+      }catch(e){}
+    },2600);
+  }
 }
 /* 只更新几何：光圈、提示卡、四块挡板 */
 let _coachTipW=0,_coachTipH=0;
@@ -10965,6 +10982,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01404':['引导最后一步「打烊」弹 2.6 秒就收：连点击锁一起消失，直接进自由模式'],
     '01403':['交付后引导又从头走一遍：步骤完成改回按「按过的记录」判断（交付后 build 会清空）',
              '买错/装错的拦截放在记录写入那一刻：不是点名的那件，不记 bought/parts'],
     '01402':['引导买件/装件按型号核对：买错 4G 内存不会再被当成 8G 那步完成',
