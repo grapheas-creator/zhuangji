@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01401';
+const APP_BUILD='01402';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5863,13 +5863,39 @@ function tutBuyText(cat){
 function tutOn(){
   return !!(state&&state.day===1&&state.tut&&!state.tut.guideOff);
 }
+/* 引导点名要买的那件在不在（仓库或台面上）——按型号核对，
+   不是「买过这个分类」就算，避免买错一件 4G 内存也把 8G 的步骤跳过。 */
+function tutWanted(cat){
+  try{const p=tutPick(cat);return p?p.n:'';}catch(e){return '';}
+}
+function tutInBuild(cat,want){
+  try{
+    if(!want)return false;
+    if(cat==='ram')return build.rams.some(r=>r&&r.part&&r.part.n===want);
+    if(cat==='m2')return build.m2.some(r=>r&&r.part&&r.part.n===want);
+    if(cat==='sata')return build.sata.some(r=>r&&r.part&&r.part.n===want);
+    if(cat==='disk')return build.m2.concat(build.sata).some(r=>r&&r.part&&r.part.n===want);
+    return !!(build[cat]&&build[cat].part&&build[cat].part.n===want);
+  }catch(e){return false;}
+}
 function tutHas(cat){
   const t=state.tut||{};
+  const want=tutWanted(cat);
+  if(want){
+    try{
+      if((state.inv||[]).some(x=>x.cat===cat&&x.part&&x.part.n===want))return true;
+      if(tutInBuild(cat,want))return true;
+    }catch(e){}
+    return false;
+  }
   return !!((t.bought&&t.bought[cat])||(t.parts&&t.parts[cat]));
 }
 function tutHasPart(cat){
   const t=state.tut||{};
-  return !!(t.parts&&t.parts[cat]);
+  if(!(t.parts&&t.parts[cat]))return false;
+  const want=tutWanted(cat);
+  if(!want)return true;
+  return tutInBuild(cat,want);
 }
 function tutBuyEl(cat){
   const q=tutPick(cat);
@@ -7934,6 +7960,19 @@ function bindShopList(){
     if(state.cash<price){toast('现金不够，还差 '+money(price-state.cash));return;}
     modal('确认购买',`<b>${p.n}</b><br>${used?'二手':'全新'}　单价 <b>${money(price)}</b><br>
       现金 ${money(state.cash)} → ${money(state.cash-price)}`,()=>{
+      /* 引导买件：只认当前步骤点名的那一件。锁可能被绕过、确认框也可能提前开着，
+         所以在真正扣钱之前再核一次，买错了不扣钱也不入库。 */
+      try{
+        const st=(typeof coachStep==='function')?coachStep():null;
+        if(st&&state.tut&&!state.tut.guideOff&&state.day===1&&st.k.indexOf('buy:')===0){
+          const stepCat=st.k.slice(4);
+          const want=tutPick(stepCat);
+          if(curCat!==stepCat||!want||p.n!==want.n){
+            toast('引导里先买「'+(want?want.n:'点名的那件')+'」');
+            return;
+          }
+        }
+      }catch(e){}
       if(state.cash<price){toast('现金不够');return;}
       try{SFX.coin();}catch(e){}
       state.cash-=price;state.todayOut=(state.todayOut||0)+price;
@@ -8443,6 +8482,12 @@ function checks(){
     add(!bad.length,!bad.length?'内存代际匹配':'有内存条与主板代际不符');
     add(build.rams.filter(Boolean).length<=b.mb.dimm,'内存条数 '+build.rams.filter(Boolean).length+' / 槽位 '+b.mb.dimm);
     add(ramTotal()<=b.mb.max,'内存 '+ramTotal()+'G / 上限 '+b.mb.max+'G');
+    /* 工单的目标内存也要算进来：4G 顶着 8G 的目标，不能再显示「全部通过」 */
+    try{
+      const j=state.activeId?job():null;
+      const t=j&&j.target;
+      if(t&&t.ram&&ramTotal()<t.ram)add(false,'内存 '+ramTotal()+'G / 目标 '+t.ram+'G');
+    }catch(e){}
     const usedM2=build.m2.filter(Boolean).length,usedSata=build.sata.filter(Boolean).length;
     add(usedM2<=b.mb.m2,'M.2 已用 '+usedM2+' / '+b.mb.m2);
     add(usedSata<=b.mb.sata,'SATA 已用 '+usedSata+' / '+b.mb.sata);
@@ -10920,6 +10965,9 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01402':['引导买件/装件按型号核对：买错 4G 内存不会再被当成 8G 那步完成',
+             '购买确认里再拦一次：引导步骤没点名的那件，不扣钱也不入库',
+             '装机检查把工单目标内存也算进去，4G 顶 8G 会亮红叉'],
     '01401':['被抢之后到重开张之前不再派单：陈默加显卡的第 2 天剧情单不会再顶掉刘警官看现场',
              '报警当天刘警官就来；旧存档里遗留的剧情单在进店时清掉'],
     '01400':['打烊步骤真正解锁：除了点击锁，滚动守卫里还有第二道拦截，这次一起放行'],
