@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01410';
+const APP_BUILD='01411';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -597,7 +597,7 @@ try{(G||[]).forEach(function(x){if(x&&(x.ts||0)>=30445&&x.tier==='budget')x.tier
   const _mob=(typeof isMobile==='function')?isMobile():(window.innerWidth<=1159);
   /* 电脑端：不裁任何东西，直接收工 */
   if(!_mob){try{if(typeof assignTiers==='function')assignTiers();}catch(e){}return;}
-  try{const keep=new Set(["九尾狐 U1", "九尾狐 T13 海景房", "积至 家悦X1", "积至 坦克 侧透", "先马 趣造2", "先马 平头哥M2", "鑫谷 拉克斯", "酷冷至尊 MB400L", "先马 鲁班1", "爱国者 星璨 岚", "迅钛 玄武 MINI 海景房", "航嘉 S980 海景房", "乔思伯 D300 海景房", "爱国者 YOGO T21 ATX", "联力 L216 中塔", "酷冷至尊 TD500 Mesh", "NZXT H5 Flow", "巧美 mini ITX 17×17", "乔思伯 C6", "乔思伯 A4", "大水牛 商悦 ATX", "硕一 鲲鹏 CH9L", "动力火车 御浪 EATX", "NAS 8 盘位机箱", "联力 O11 Dynamic", "分形工艺 North", "乔思伯 D31", "酷冷至尊 Q300L", "爱国者 YOGO M2", "金河田 预见 FM01", "鱼巢 S5MAX", "微星 碉堡 海景房"]);for(let i=K.length-1;i>=0;i--){if(!keep.has(K[i].n))K.splice(i,1);}}catch(e){}
+  try{const keep=new Set(["九尾狐 U1", "九尾狐 T13 海景房", "积至 家悦X1", "积至 坦克 侧透", "先马 趣造2", "先马 平头哥M2", "鑫谷 拉克斯", "酷冷至尊 MB400L", "先马 鲁班1", "爱国者 星璨 岚", "迅钛 玄武 MINI 海景房", "航嘉 S980 海景房", "乔思伯 D300 海景房", "爱国者 YOGO T21 ATX", "联力 L216 中塔", "酷冷至尊 TD500 Mesh", "NZXT H5 Flow", "巧美 mini ITX 17×17", "乔思伯 C6", "乔思伯 A4", "大水牛 商悦 ATX", "硕一 鲲鹏 CH9L", "利民 A70", "动力火车 御浪 EATX", "NAS 8 盘位机箱", "联力 O11 Dynamic", "分形工艺 North", "乔思伯 D31", "酷冷至尊 Q300L", "爱国者 YOGO M2", "金河田 预见 FM01", "鱼巢 S5MAX", "微星 碉堡 海景房"]);for(let i=K.length-1;i>=0;i--){if(!keep.has(K[i].n))K.splice(i,1);}}catch(e){}
   /* 电源 / 内存 / 硬盘：只留有代表性的 6~7 个品牌，砍掉同质化长尾。
      规则按品牌名前缀匹配（型号名以品牌开头）。 */
   try{
@@ -11001,6 +11001,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01411':['利民 A70 商店略缩图补上（用户图裁掉 logo/型号字，256×256 webp）'],
     '01410':['全部部件略缩图从 96×96 提到 256×256（webp），商店/工作台/图鉴都更清楚',
              '用户提供的机箱源图统一按 70% 内容留白重做'],
     '01409':['九尾狐 T13 海景房商店略缩图补上（用户白底图裁机箱，96×96 webp）'],
