@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01387';
+const APP_BUILD='01388';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5876,6 +5876,9 @@ function tutDeliverEl(){
   const a=document.getElementById('abDeliver'),b=document.getElementById('btnDeliver');
   return vis(a)?a:(vis(b)?b:(a||b));
 }
+/* ===== 固定程序（2026-11-07 用户确认）=====
+   这张表、每步的滚动策略和文案就此固定：以后除非用户明确要求改引导，
+   不要再调步骤顺序、时长、滚动或文字。 */
 const TUT_SCRIPT=[
   {k:'accept', view:'docs', panel:'jobs',
    title:'先接一单',
@@ -10867,6 +10870,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01388':['超频三 青鸟四换回真实产品图（蓝灯下吹 127mm），之前误配成利民的黑色单塔',
+             '新手引导那张线性步骤表就此固定，除用户明确要求外不再改动'],
     '01387':['引导「滚到屏幕中间」从瞬移改成逐帧平滑滚动：easeInOutCubic，420~760ms，',
              '光圈每帧贴着目标走；时间曲线驱动，120Hz 屏就是 120 帧，60Hz 屏自动 60 帧'],
     '01386':['买件/装件步也改成「目标出安全区才居中」：真机商品卡比无头浏览器高，',
