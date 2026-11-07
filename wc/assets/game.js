@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01394';
+const APP_BUILD='01395';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -7994,7 +7994,7 @@ function bindShopList(){
       state.inv.splice(i,1);
       if(state.tut){state.tut.done.install=true;state.tut.parts=state.tut.parts||{};state.tut.parts[it.cat]=true;}
       save();renderAll();
-      try{benchDemoAfterInstall(it.cat);}catch(e){}}
+      /* 引导期间不弹全屏装机照片：装完直接回工作台，由 coachRefresh 接下一步 */}
 
     else toast(ok);
   });
@@ -8103,9 +8103,8 @@ function applyPaste(){
   toast('硅脂涂好了，可以压散热器了');
   try{state.tut=state.tut||{};state.tut.done.paste=true;save();}catch(e){}
   renderAll();
-  /* 涂完必须把「带硅脂的主板实拍」弹出来，不能只在台面小图里悄悄换一张。
-     展示层收起后再让引导切到下一步（买内存）。 */
-  try{benchDemoAfterPaste();}catch(e){}
+  /* 引导期间不弹全屏实拍（用户要求）：涂完直接继续下一步；自由装机仍保留展示 */
+  try{const _tutOn=(state.tut&&!state.tut.guideOff&&state.day===1);if(!_tutOn)benchDemoAfterPaste();}catch(e){}
 }
 /* 涂硅脂后的全屏实拍：复用装机展示层，但入口和装机完成分开。 */
 function benchDemoAfterPaste(){
@@ -10882,6 +10881,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01395':['新手引导期间不再弹全屏装机照片（装件、涂硅脂都不弹），装完直接回工作台继续下一步'],
     '01394':['装电源 / SATA 硬盘时不再盖主板照片，工作台停在机箱视图（M.2 还是主板图）',
              'ITX 整机图明确按「有没有装独显」切换，不看 CPU 有没有核显'],
     '01393':['ITX 整机图分两张：核显单（没装显卡）用无显卡实拍，装了独显用带显卡那张'],
