@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01419';
+const APP_BUILD='01420';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -9371,9 +9371,10 @@ async function playStoryForToday(onDone){
     /* 3. 现实相遇：第 2 天陈默到店 / 第 6 天表姐上门 */
     var plotByDay={2:'meet_chenmo',6:'meet_zhouqin'};
     var pid=plotByDay[state.day];
-    /* 被抢停业期间不播第 2 天「陈默到店」：店还关着，人也进不来；
-       直接记 seen，等重开张后由剧情单把这场戏补回来，别和刘警官撞在一起。 */
-    if(pid&&S.flags.robbery&&!S.flags.reopen){
+    /* 第 2 天先走零元购：抢之前别播「陈默到店」，抢完停业期间也不播。
+       直接记 seen，等重开张后由剧情单补，别和零元购/刘警官撞在一起。 */
+    var _robberyArc=(S.flags.robbery&&!S.flags.reopen)||(state.day===2&&!S.flags.robbery);
+    if(pid&&_robberyArc){
       S.seen['plot_'+pid]=1;try{save();}catch(e){}
     }else if(pid&&!S.seen['plot_'+pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[pid]){
       S.seen['plot_'+pid]=1;try{save();}catch(e){}
@@ -10966,6 +10967,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01420':['第 2 天未抢之前也不播「陈默到店」：重进游戏时不会再先放一段 CG 再跳零元购'],
     '01419':['第 2 天先走零元购：墨桀的二手课不抢在前面，工单也不先派（不再一进来就 3 单）'],
     '01418':['陈默的第二单从 4K 剪辑改成《英雄联盟》加显卡：ts 2400 / cs 2000 / 8G，预算 550，旧机加张卡就行'],
     '01417':['猫咖老板（淘宝货源）第一场也改成整屏剧情；临时剧情用唯一 key，避免和别的场次互相覆盖'],
