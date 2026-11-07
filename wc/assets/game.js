@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01396';
+const APP_BUILD='01397';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3942,7 +3942,7 @@ function giftStarterStock(){
   A.playRobbery=function(){
     if(typeof modal!=='function') return;
     modal('半夜，卷帘门被撬了',
-      '<img src="assets/robbery.webp" style="width:100%;display:block;border-radius:12px;margin-bottom:12px">'
+      '<img src="assets/robbery.webp" style="width:100%;height:38vh;object-fit:cover;object-position:50% 34%;display:block;border-radius:12px;margin-bottom:12px">'
       +'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
       +'夜里两点多，卷帘门被人从底下撬开一条缝。<br>'
       +'三个戴帽子的人进来，把货架上能拿的全塞进纸箱，连工作台上拆到一半的机器都抱走了。<br><br>'
@@ -10888,6 +10888,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01397':['卷帘门（零元购）弹窗的配图限高 38vh，按钮不会再被顶到屏幕外'],
     '01396':['修回来：引导装件/涂硅脂的全屏展示恢复；装电源和 SATA 盘时弹的是机箱内景，不再是主板照片'],
     '01395':['新手引导期间不再弹全屏装机照片（装件、涂硅脂都不弹），装完直接回工作台继续下一步'],
     '01394':['装电源 / SATA 硬盘时不再盖主板照片，工作台停在机箱视图（M.2 还是主板图）',
