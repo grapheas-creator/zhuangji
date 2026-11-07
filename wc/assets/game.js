@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01418';
+const APP_BUILD='01419';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3027,6 +3027,8 @@ PLOT_EVENTS.mojie2.artAt=[[0,'list'],[6,'chat'],[11,'cg']];
 const MOJIE_PLOTS={2:'mojie2',6:'mojie6',9:'mojie9',12:'mojie12',17:'mojie17',21:'mojie21',24:'mojie24',27:'mojie27',30:'mojie30'};
 function maybeMojiePlot(){
   if(!state||!state.story||!state.story.flags)return false;
+  /* 第 2 天先走零元购：墨桀的二手课别抢在抢劫前面播 */
+  if(gday()===2)return false;
   const evId=MOJIE_PLOTS[gday()];
   if(!evId)return false;
   const flag='plot_'+evId;
@@ -3336,6 +3338,8 @@ function makeJobs(dateStr,day){
   /* 被抢之后、重开张之前店是关着的：不派单，玩家只等案子和重开张 */
   const _f=(state&&state.story&&state.story.flags)||{};
   if(_f.robbery&&!_f.reopen)return [];
+  /* 第 2 天一开始就是零元购：先别派单，免得工单列表先冒出 3 单 */
+  if(day===2&&!_f.robbery)return [];
   const rand=rngFrom(hash(dateStr+'#'+day+'#'+((state&&state.seed)||0))),jobs=[];
   const s=storyPick(day);
   if(s&&!(state.story&&state.story.done[s.id])){
@@ -10962,6 +10966,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01419':['第 2 天先走零元购：墨桀的二手课不抢在前面，工单也不先派（不再一进来就 3 单）'],
     '01418':['陈默的第二单从 4K 剪辑改成《英雄联盟》加显卡：ts 2400 / cs 2000 / 8G，预算 550，旧机加张卡就行'],
     '01417':['猫咖老板（淘宝货源）第一场也改成整屏剧情；临时剧情用唯一 key，避免和别的场次互相覆盖'],
     '01416':['破案（不是阿妈/刘警官/收名片）和半个月后重开张也改成整屏剧情，一直连到重开张接加显卡'],
