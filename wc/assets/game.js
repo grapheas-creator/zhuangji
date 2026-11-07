@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01399';
+const APP_BUILD='01400';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -6150,9 +6150,13 @@ function tutLocked(){
     const st=coachStep();
     if(!st)return false;
     /* 打烊这一步不锁：单已经做完，玩家可以先翻仓库/商店再打烊 */
-    if(st.k==='close')return false;
+    if(tutFree())return false;
     return true;
   }catch(e){return false;}
+}
+function tutFree(){
+  /* 打烊这一步不锁：单已经做完，玩家可以先翻仓库/商店/设置再打烊 */
+  try{const s=coachStep();return !!(s&&s.k==='close');}catch(e){return false;}
 }
 function tutTargetEl(){
   try{const s=coachStep();if(!s||typeof s.sel!=='function')return null;return s.sel();}catch(e){return null;}
@@ -6873,7 +6877,7 @@ function coachScrollGuard(){
     return !!t.closest('#coachTip');
   };
   const block=e=>{
-    if(!coachOn()||allow(e))return;
+    if(!coachOn()||tutFree()||allow(e))return;
     if(e.cancelable)e.preventDefault();
   };
   document.addEventListener('touchmove',block,{passive:false});
@@ -6895,6 +6899,7 @@ function coachScrollGuard(){
   };
   const trapTap=e=>{
     if(!coachOn())return;
+    if(tutFree())return;      /* 打烊步：整页都放行 */
     /* 任何全屏过场/弹窗开着时都不拦：结算、新一天、剧情、确认框，否则按钮点不动 */
     try{
       /* 结算/剧情这类整屏层打开时，台词卡必须收起来——
@@ -6913,7 +6918,7 @@ function coachScrollGuard(){
     document.addEventListener(ev,trapTap,{capture:true,passive:false});
   });
   document.addEventListener('keydown',e=>{
-    if(!coachOn())return;
+    if(!coachOn()||tutFree())return;
     if(['ArrowDown','ArrowUp','PageDown','PageUp',' ','Spacebar'].indexOf(e.key)>=0)e.preventDefault();
   },{passive:false});
 }
@@ -10892,6 +10897,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01400':['打烊步骤真正解锁：除了点击锁，滚动守卫里还有第二道拦截，这次一起放行'],
     '01399':['超频三 青鸟四高度改成真实的 57mm（下压），不再写 125mm',
              '工作台槽位改 minmax(0,1fr)：长型号名不会把右边那列顶出屏幕',
              '打烊那一步不再锁点击，单做完可以先看别的地方'],
