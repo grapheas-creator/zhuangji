@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01414';
+const APP_BUILD='01415';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2664,6 +2664,26 @@ const PLOT_EVENTS={
       '那就先把这一单做好。店是一单一单攒起来的。'
     ],
     tip:'第一单是提前约好的老同学；街坊还不知道这家店，从明天起才会慢慢有人上门。'},
+  /* 零元购 & 刘警官看现场：这两场也走开场那种整屏剧情，不再用游戏底图上的弹窗 */
+  robberyCase:{id:'robberyCase',who:'我',role:'店老板',av:'我',col:'#ffcf8f',
+    art:'assets/robbery.webp',
+    lines:[
+      '夜里两点多，卷帘门被人从底下撬开一条缝。',
+      '三个戴帽子的人进来，把货架上能拿的全塞进纸箱。',
+      '连工作台上拆到一半的机器都抱走了。',
+      '（第二天早上推开门，货架是空的，只剩地上一层灰。）'
+    ],
+    tip:'店里被搬空了。'},
+  policeCaseVisit:{id:'policeCaseVisit',who:'刘警官',role:'民警 · 街坊',av:'刘',col:'#6b8cff',
+    lines:[
+      '（第二天早上，卷帘门被敲了两下。）',
+      '刘警官：昨儿夜里的事吧？',
+      '刘警官：监控我调了，跑不掉。三天，我给你把人找着。',
+      '（她翻了翻本子，说话不绕弯子，是个干活的警察。）',
+      '刘警官：货追不追得回来，我不敢打包票。',
+      '我：麻烦你了。'
+    ],
+    tip:'等消息。'},
   police1:{id:'police1',who:'刘警官',role:'民警 · 街坊',av:'刘',col:'#6b8cff',
     lines:[
       '快打烊的时候，卷帘门被人从外面敲了两下。',
@@ -2835,7 +2855,8 @@ function playPlotEvent(evId,onDone){
   const lines=(ev.lines||[]).slice();
   if(!lines.length){if(typeof onDone==='function')onDone();return true;}
   const portrait=(typeof window!=='undefined'&&window.innerHeight>window.innerWidth);
-  const baseArt=(portrait?PLOT_CG_PORTRAIT:(ev.art||PLOT_CG));
+  /* 竖屏也要认事件自带的图：零元购那张 CG 不能换成开场的街景 */
+  const baseArt=(ev.art||(portrait?PLOT_CG_PORTRAIT:PLOT_CG));
   const artSeq=ev.artAt||null;
   const artFor=i=>{
     if(!artSeq)return baseArt;
@@ -3948,51 +3969,35 @@ function giftStarterStock(){
   /* 刘警官到店里看现场（原第 2 天那段，抽出来给「报警当天」和 onNewDay 共用） */
   A.policeVisit=function(){
     try{
-      /* 剧情/微信/整屏层还开着就先别叠上去：等它收完再弹，免得按钮文字串台 */
-      if(document.querySelector('#plotEvent,#storyPop,#chatPop,#dayOverlay,#dayOpen,.dayopen')){
+      if(typeof playPlotEvent!=='function')return;
+      /* 整屏剧情模式，和开场一样；剧情/微信层还开着就等一下再进 */
+      if(!playPlotEvent('policeCaseVisit')){
         if(!A._pvT||A._pvT<40){A._pvT=(A._pvT||0)+1;setTimeout(function(){try{A.policeVisit();}catch(e){}},800);}
         return;
       }
       A._pvT=0;
-      modal('刘警官',
-        '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-        +'「昨儿夜里的事吧？」她翻了翻本子。<br>'
-        +'「监控我调了，跑不掉。三天，我给你把人找着。」<br><br>'
-        +'<span style="color:#9b8088;font-size:12.5px">'
-        +'「货追不追得回来，我不敢打包票。」<br>她说话不绕弯子，是个干活的警察。</span></div>',null);
-      setTimeout(function(){
-        const y=document.getElementById('mYes'),n=document.getElementById('mNo');
-        if(y)y.textContent='等消息';
-        if(n)n.style.display='none';   /* 这一场只有一个「等消息」，别留着上一个弹窗的按钮文字 */
-      },30);
     }catch(e){}
   };
 
   A.playRobbery=function(){
-    if(typeof modal!=='function') return;
-    modal('半夜，卷帘门被撬了',
-      '<img src="assets/robbery.webp" style="width:100%;height:38vh;object-fit:cover;object-position:50% 34%;display:block;border-radius:12px;margin-bottom:12px">'
-      +'<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
-      +'夜里两点多，卷帘门被人从底下撬开一条缝。<br>'
-      +'三个戴帽子的人进来，把货架上能拿的全塞进纸箱，连工作台上拆到一半的机器都抱走了。<br><br>'
-      +'<span style="color:#9b8088;font-size:12.5px">第二天早上你推开门，货架是空的，只剩地上一层灰。</span></div>',null);
-    setTimeout(function(){
-      const y=document.getElementById('mYes'), n=document.getElementById('mNo');
-      if(y){
-        y.textContent='打电话报警';
-        y.onclick=function(){
-          try{closeMask(document.getElementById('mask'));}catch(e){}
-          A.doRobbery();
-          try{ const ff=g(); ff.robberyReported=1; save(); }catch(e){}
-          try{ toast('报了警，说一会儿过来看看'); }catch(e){}
-          /* 报警当班就来，别等下一次 onNewDay 才想起这茬 */
-          setTimeout(function(){
-            try{const ff=g();if(ff.robberyReported&&!ff.policeVisit){ff.policeVisit=1;save();A.policeVisit();}}catch(e){}
-          },900);
-        };
-      }
-      if(n) n.style.display='none';
-    },30);
+    if(typeof playPlotEvent!=='function') return;
+    /* 重试/重复触发时别把已经抢过的剧情再放一遍 */
+    try{if(g().robbery)return;}catch(e){}
+    if(!playPlotEvent('robberyCase',function(){
+      try{
+        A.doRobbery();
+        const ff=g(); ff.robberyReported=1; save();
+        try{ toast('报了警，说一会儿过来看看'); }catch(e){}
+        setTimeout(function(){
+          try{if(!g().policeVisit){g().policeVisit=1;save();A.policeVisit();}}catch(e){}
+        },700);
+      }catch(e){}
+    })){
+      /* 有别的剧情/弹窗占着就先等，别把这场丢了 */
+      if(!A._rbT||A._rbT<40){A._rbT=(A._rbT||0)+1;setTimeout(function(){try{A.playRobbery();}catch(e){}},900);}
+      return;
+    }
+    A._rbT=0;
   };
 
   A.playPolice=function(){
@@ -11001,6 +11006,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01415':['零元购/刘警官改成开场那种整屏剧情（有 CG、对白、轻触继续），不再弹在游戏底图上'],
     '01414':['先马 趣造2 商店略缩图补上（用户图，256×256 webp）——7 个缺图的机箱全部补齐'],
     '01413':['爱国者 星璨 岚商店略缩图补上（用户紫色背景图，裁掉免责声明，256×256）'],
     '01412':['鱼巢 S5MAX 商店略缩图补上（用户图，256×256 webp）'],
