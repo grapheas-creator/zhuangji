@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01392';
+const APP_BUILD='01393';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -5041,6 +5041,8 @@ window.PASTE_IMG={"115x": __IMG24, "am3": __IMG25, "b760": __IMG26, "b550m": __I
 window.BENCH_IMG["itx"]={empty:__IMG32,cpu:__IMG33,ram1:__IMG34,ram2:__IMG35};
 window.PASTE_IMG["itx"]=__IMG36;
 window.CASE_ITX=__IMG37;
+/* 带独显的 ITX 整机图（用户给的宣传图去字版）：装了显卡时用这张 */
+window.CASE_ITX_GPU=__IMG85;
 /* ===== 2026-11-04 四套 ITX 主板实拍（900×900，构图已统一） ===== */
 (function(){
   const S={"itx_am4":{"empty":__IMG38,"cpu":__IMG39,"air":__IMG40,"ram1":__IMG41,"ram2":__IMG42},"itx_115x":{"empty":__IMG43,"cpu":__IMG44,"air":__IMG45,"ram1":__IMG46,"ram2":__IMG47},"itx_am5":{"empty":__IMG48,"cpu":__IMG49,"air":__IMG50,"ram1":__IMG51,"ram2":__IMG52},"itx_x99":{"empty":__IMG53,"cpu":__IMG54,"air":__IMG55,"ram1":__IMG56,"ram2":__IMG57}};
@@ -5070,7 +5072,9 @@ function benchPhoto(){
       /* 只有「纯 ITX」机箱才用 ITX 那张；像九尾狐 U1 这种 MATX/ITX 兼用的便宜箱子，
          应该显示便宜档的机箱内景，不是迷你 ITX 箱。 */
       const _itx=!!(cs&&cs.ff&&cs.ff.length===1&&cs.ff[0]==='ITX');
-      const src=(_itx&&window.CASE_ITX)?window.CASE_ITX:((window.CASE_FRONT||{})[tier]||set.front);
+      /* ITX 机箱：装没装独显用两张不同的整机图——核显那张没有显卡，别让核显单顶着独显照片 */
+      const _itxSrc=(b.gpu1&&window.CASE_ITX_GPU)?window.CASE_ITX_GPU:window.CASE_ITX;
+      const src=(_itx&&_itxSrc)?_itxSrc:((window.CASE_FRONT||{})[tier]||set.front);
       return src?{src,tag:''}:null;   /* 不再打档位标签 */
     }
     /* CPU 装好、散热还没压：涂之前显示干净 CPU，涂完显示带硅脂的实拍图。
@@ -10872,6 +10876,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01393':['ITX 整机图分两张：核显单（没装显卡）用无显卡实拍，装了独显用带显卡那张'],
     '01392':['ITX 机箱图换成用户给的核显实拍（切掉左上角水印），纯 ITX 机箱的工作台图更新'],
     '01391':['修工作台机箱图：只有纯 ITX 机箱才用 ITX 套图；九尾狐 U1 这类 MATX/ITX 兼用的便宜箱子，',
              '显示的是便宜档机箱内景，不再是那个迷你 ITX 箱'],
