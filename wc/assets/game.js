@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01424';
+const APP_BUILD='01425';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2652,6 +2652,8 @@ const PLOT_CG_PORTRAIT=__IMG21;
 const CHAR_AVATAR={'我':__IMG22,
   '墨桀':__IMG23};
 const CHAR_COL={'我':'#d9a066','墨桀':'#4fc4a8','韩经理':'#8a7dff','陈默':'#5b8cff','周芹':'#e0956a'};
+/* 剧情里主角也叫旺财，头像/颜色跟「我」共用 */
+try{CHAR_AVATAR['旺财']=CHAR_AVATAR['我'];CHAR_COL['旺财']=CHAR_COL['我'];}catch(e){}
 const PLOT_EVENTS={
   opening:{id:'opening',who:'我',role:'开业第一天',av:'我',col:'#ffcf8f',
     lines:[
@@ -2882,8 +2884,14 @@ function playPlotEvent(evId,onDone){
   const lines=(ev.lines||[]).slice();
   if(!lines.length){if(typeof onDone==='function')onDone();return true;}
   const portrait=(typeof window!=='undefined'&&window.innerHeight>window.innerWidth);
-  /* 竖屏也要认事件自带的图：零元购那张 CG 不能换成开场的街景 */
-  const baseArt=(ev.art||(portrait?PLOT_CG_PORTRAIT:PLOT_CG));
+  /* 竖屏也要认事件自带的图：零元购那张 CG 不能换成开场的街景；
+     被抢到重开张之前，默认背景用「被洗劫过的店」 */
+  let baseArt=(portrait?PLOT_CG_PORTRAIT:PLOT_CG);
+  try{
+    const _f=(state.story&&state.story.flags)||{};
+    if(_f.robbery&&!_f.reopen)baseArt='assets/shop_robbed.webp';
+  }catch(e){}
+  if(ev.art)baseArt=ev.art;
   const artSeq=ev.artAt||null;
   const artFor=i=>{
     if(!artSeq)return baseArt;
@@ -11002,6 +11010,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01425':['被抢到重开张之前的剧情背景换成「被洗劫过的店」；旺财有头像了（与主角共用）'],
     '01424':['刘警官头像接进剧情（用户确认的生成图，256×256 webp，方形裁切不压扁）'],
     '01423':['工单页剧情卡用上特殊 NPC 头像（陈默/周芹/墨桀/我），没图的才退回文字色块'],
     '01422':['零元购→刘警官→破案→重开张→加显卡 连成一条剧情链：中间不回到游戏页，幕布盖住底页'],
