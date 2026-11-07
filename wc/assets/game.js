@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01404';
+const APP_BUILD='01405';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3948,13 +3948,23 @@ function giftStarterStock(){
   /* 刘警官到店里看现场（原第 2 天那段，抽出来给「报警当天」和 onNewDay 共用） */
   A.policeVisit=function(){
     try{
+      /* 剧情/微信/整屏层还开着就先别叠上去：等它收完再弹，免得按钮文字串台 */
+      if(document.querySelector('#plotEvent,#storyPop,#chatPop,#dayOverlay,#dayOpen,.dayopen')){
+        if(!A._pvT||A._pvT<40){A._pvT=(A._pvT||0)+1;setTimeout(function(){try{A.policeVisit();}catch(e){}},800);}
+        return;
+      }
+      A._pvT=0;
       modal('刘警官',
         '<div style="font-size:14.5px;line-height:1.9;color:#6b5b60">'
         +'「昨儿夜里的事吧？」她翻了翻本子。<br>'
         +'「监控我调了，跑不掉。三天，我给你把人找着。」<br><br>'
         +'<span style="color:#9b8088;font-size:12.5px">'
         +'「货追不追得回来，我不敢打包票。」<br>她说话不绕弯子，是个干活的警察。</span></div>',null);
-      setTimeout(function(){ const y=document.getElementById('mYes'); if(y)y.textContent='等消息'; },30);
+      setTimeout(function(){
+        const y=document.getElementById('mYes'),n=document.getElementById('mNo');
+        if(y)y.textContent='等消息';
+        if(n)n.style.display='none';   /* 这一场只有一个「等消息」，别留着上一个弹窗的按钮文字 */
+      },30);
     }catch(e){}
   };
 
@@ -9396,7 +9406,11 @@ async function playStoryForToday(onDone){
     /* 3. 现实相遇：第 2 天陈默到店 / 第 6 天表姐上门 */
     var plotByDay={2:'meet_chenmo',6:'meet_zhouqin'};
     var pid=plotByDay[state.day];
-    if(pid&&!S.seen['plot_'+pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[pid]){
+    /* 被抢停业期间不播第 2 天「陈默到店」：店还关着，人也进不来；
+       直接记 seen，等重开张后由剧情单把这场戏补回来，别和刘警官撞在一起。 */
+    if(pid&&S.flags.robbery&&!S.flags.reopen){
+      S.seen['plot_'+pid]=1;try{save();}catch(e){}
+    }else if(pid&&!S.seen['plot_'+pid]&&typeof PLOT_EVENTS!=='undefined'&&PLOT_EVENTS[pid]){
       S.seen['plot_'+pid]=1;try{save();}catch(e){}
       await _playScene(function(cb){return playPlotEvent(pid,cb);});
       await _seqWait(260);
@@ -9411,6 +9425,11 @@ async function playStoryForToday(onDone){
     /* 5. 剧情工单的接单卡 */
     var j=null;
     try{j=state.jobs.find(function(x){return x.story&&x.status==='open';});}catch(e){}
+    /* 被抢停业期间，旧存档里那张剧情单的微信卡也别放：店关着，进不来客人 */
+    if(j&&S.flags.robbery&&!S.flags.reopen){
+      try{state.jobs=state.jobs.filter(function(x){return x!==j;});state.dayTotal=state.jobs.length;save();}catch(e){}
+      j=null;
+    }
     if(j&&!S.seen[j.storyId]){
       var sd=storyDef(j.storyId);
       if(sd)await _playScene(function(cb){return playStory(sd,j,cb);});
@@ -10982,6 +11001,8 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01405':['被抢停业期间不播「陈默到店」那场戏，避免和刘警官的弹窗叠在一起',
+             '刘警官弹窗藏掉多余的「取消」，剧情层没收完就先等一收'],
     '01404':['引导最后一步「打烊」弹 2.6 秒就收：连点击锁一起消失，直接进自由模式'],
     '01403':['交付后引导又从头走一遍：步骤完成改回按「按过的记录」判断（交付后 build 会清空）',
              '买错/装错的拦截放在记录写入那一刻：不是点名的那件，不记 bought/parts'],
