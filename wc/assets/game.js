@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01422';
+const APP_BUILD='01423';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3132,8 +3132,10 @@ function buildStoryJob(s){
   return j;
 }
 function chatHTML(s){
+  /* 工单页的剧情卡：特殊 NPC（陈默/周芹/墨桀/我）有头像就用头像，没有才退回文字色块 */
+  let av='';try{av=(typeof CHAR_AVATAR!=='undefined'&&CHAR_AVATAR[s.who])||'';}catch(e){}
   return `<div class="chat"><div class="h">
-    <div class="av" style="background:${s.col||'#5b8cff'}">${s.av||s.who[0]}</div>
+    <div class="av${av?' ph':''}" style="${av?'':'background:'+(s.col||'#5b8cff')}">${av?`<img src="${av}" alt="${s.who||''}">`:(s.av||s.who[0])}</div>
     <div><div class="who">${s.who}</div><div class="role">${s.role||'剧情客户'}</div></div></div>
     ${(s.lines||[]).map(t=>`<div class="line">${t}</div>`).join('')}</div>`;
 }
@@ -11000,6 +11002,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01423':['工单页剧情卡用上特殊 NPC 头像（陈默/周芹/墨桀/我），没图的才退回文字色块'],
     '01422':['零元购→刘警官→破案→重开张→加显卡 连成一条剧情链：中间不回到游戏页，幕布盖住底页'],
     '01421':['第 2 天工单页不再显示陈默「加张卡」那张旧剧情卡（抢劫前和停业期都不显示）'],
     '01420':['第 2 天未抢之前也不播「陈默到店」：重进游戏时不会再先放一段 CG 再跳零元购'],
