@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01417';
+const APP_BUILD='01418';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2441,17 +2441,17 @@ STORY[12]={day:12,id:'c2d5',who:'沈工',role:'三维工作室',av:'沈',col:'#f
    这一章考的不是"会不会装"，是"敢不敢接、接了能不能按时交"。 */
 STORY[13]={day:13,id:'c3d1',who:'陈默',role:'高中同学',av:'陈',col:'#5b8cff',carry:'陈默',
     lines:[
-         '还是我。上次那台我拿去给人拍婚礼，4K 素材一导就卡成 PPT。',
-         '机器我抱来了，你说换什么就换什么，别整台重买，我舍不得。',
+         '还是我。上次那台剪片子挺顺，最近跟室友打《英雄联盟》，帧数有点难看。',
+         '听说加张卡就行？机箱小、电源也不知道够不够，你看着办，别让我白花钱。',
         ],
-  tip:'老客户的机器在工作台上：先看现有平台能带多强的卡，别一上来就换主板换 CPU。',
-  job:{cat:'游戏机',tier:1,name:'升级单 · 4K 剪辑要多一张好卡',
-    sw:'DaVinci 4K 剪辑',level:'m',
-    target:{ts:6000,cs:6000,ram:16},newOnly:false,tight:false,
-    partBudget:1700,labor:400,
-    extra:['旧机上的件已经付过钱，不用再买','电源余量要够新卡']},
-  after:'导出快了四倍。我那帮拍婚礼的同行，都得来找你。',
-  reward:{money:400,note:'老客户第二次回头，开始带人来'}};
+  tip:'回头客的机器已经在工作台上（金色描边是他自带、已经付过钱的件）。加卡前先看机箱限长和电源余量。',
+  job:{cat:'办公机',tier:0,name:'升级单 · 给老同学的机器加一张卡',
+    sw:'《英雄联盟》《CS2》',level:'m',
+    target:{ts:2400,cs:2000,ram:8},newOnly:false,tight:false,
+    partBudget:550,labor:350,
+    extra:['旧机上的件已经付过钱，不用再买','注意电源余量和显卡长度']},
+  after:'可以，这帧数开会都不卡了。下次我室友装机也给你带过来。',
+  reward:{money:300,note:'老客户第二次回头'}};
 
 STORY[14]={day:14,id:'c3d2',who:'苏姐',role:'自媒体工作室',av:'苏',col:'#ff9ac7',
     lines:[
@@ -4156,6 +4156,8 @@ function giftStarterStock(){
       if(state.jobs.some(function(x){return x&&(x.id==='CG1'||x.storyId==='c3d1');}))return;
       state.jobs.push(j);
       state.dayTotal=state.jobs.length;
+      /* 这张就是陈默的加显卡单（英雄联盟）；原来的 c1d2 不再重复补 */
+      try{ state.story=state.story||{}; state.story.done=state.story.done||{}; state.story.done['c1d2']=1; }catch(e){}
       try{save();}catch(e){}
       try{renderAll();}catch(e){}
       try{toast('陈默的机器已经抱来了：升级单在工单列表里');}catch(e){}
@@ -10960,6 +10962,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01418':['陈默的第二单从 4K 剪辑改成《英雄联盟》加显卡：ts 2400 / cs 2000 / 8G，预算 550，旧机加张卡就行'],
     '01417':['猫咖老板（淘宝货源）第一场也改成整屏剧情；临时剧情用唯一 key，避免和别的场次互相覆盖'],
     '01416':['破案（不是阿妈/刘警官/收名片）和半个月后重开张也改成整屏剧情，一直连到重开张接加显卡'],
     '01415':['零元购/刘警官改成开场那种整屏剧情（有 CG、对白、轻触继续），不再弹在游戏底图上'],
