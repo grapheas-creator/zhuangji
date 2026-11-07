@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01420';
+const APP_BUILD='01421';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -3104,7 +3104,14 @@ function chapterBanner(){
   return '';
 }
 function storyDef(id){for(let i=1;i<STORY.length;i++){if(STORY[i]&&STORY[i].id===id)return STORY[i];}return null;}
-function storyToday(){const s=STORY[state.day];if(!s)return null;if(state.story.done[s.id])return null;return s;}
+function storyToday(){
+  const f=(state.story&&state.story.flags)||{};
+  /* 零元购这条线：第 2 天没抢之前、抢完到重开张之前，都别显示当天的剧情卡
+     （以前第 2 天会先把陈默「加张卡」那张旧卡摆在工单页顶上） */
+  if(state.day===2&&!f.robbery)return null;
+  if(f.robbery&&!f.reopen)return null;
+  const s=STORY[state.day];if(!s)return null;if(state.story.done[s.id])return null;return s;
+}
 function buildStoryJob(s){
   const j=Object.assign({id:'S'+s.day,story:true,storyId:s.id,client:s.who,status:'open',
     ultra:false,gpuPref:null,tight:false,newOnly:false,extra:[]},s.job);
@@ -10967,6 +10974,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01421':['第 2 天工单页不再显示陈默「加张卡」那张旧剧情卡（抢劫前和停业期都不显示）'],
     '01420':['第 2 天未抢之前也不播「陈默到店」：重进游戏时不会再先放一段 CG 再跳零元购'],
     '01419':['第 2 天先走零元购：墨桀的二手课不抢在前面，工单也不先派（不再一进来就 3 单）'],
     '01418':['陈默的第二单从 4K 剪辑改成《英雄联盟》加显卡：ts 2400 / cs 2000 / 8G，预算 550，旧机加张卡就行'],
