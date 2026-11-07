@@ -34,7 +34,7 @@
 /* ================= 基础 ================= */
 const APP_VER='v0.12.0';
 /* 小更新只 +1 这个构建号（5 位，自动补零）；大改才动 APP_VER 并把它归零为 00001 */
-const APP_BUILD='01421';
+const APP_BUILD='01422';
 window.__BOOT_OK=1;
 const APP_FULL=APP_VER+'.'+APP_BUILD;
 /* 水印上统一的写法：v0.12.0 · 01182 */
@@ -2848,6 +2848,17 @@ const Scene={
   end(){this.chain=false;if(!this.playing&&document.body.classList.contains('scene-mode'))this.chrome(true);},
   busy(){return !!this.playing||this.chain;}
 };
+/* 剧情链幕布：整段剧情播放期间盖住游戏底页，场与场之间也不露出来 */
+function storyCurtain(on){
+  try{
+    let el=document.getElementById('storyCurtain');
+    if(on){
+      if(!el){el=document.createElement('div');el.id='storyCurtain';el.onclick=function(){el.classList.remove('on');};document.body.appendChild(el);}
+      el.classList.add('on');
+    }else if(el){el.classList.remove('on');}
+  }catch(e){}
+}
+
 /* 临时整屏剧情：破案/重开张/猫咖这些场次也用开场那种剧情，
    临时拼一个 PLOT_EVENTS 条目，播完就删；忙时重试，别丢场。 */
 let _tmpPlotSeq=0;
@@ -3998,7 +4009,22 @@ function giftStarterStock(){
     try{
       if(typeof playPlotEvent!=='function')return;
       /* 整屏剧情模式，和开场一样；剧情/微信层还开着就等一下再进 */
-      if(!playPlotEvent('policeCaseVisit')){
+      if(!playPlotEvent('policeCaseVisit',function(){
+        /* 刘警官这场播完，不回到游戏页：直接把日历跳到破案那天再接剧情 */
+        try{
+          const f=g();
+          const target=(f.policeDay||1)+3;
+          if((state.day||1)<target){
+            const gap=target-(state.day||1);
+            const d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+gap);
+            state.date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+            state.day=target;
+          }
+          state.jobs=[];state.activeId=null;state.dayTotal=0;state.todayStory=0;
+          save();
+          setTimeout(function(){ try{A.playPolice();}catch(e){} },500);
+        }catch(e){}
+      })){
         if(!A._pvT||A._pvT<40){A._pvT=(A._pvT||0)+1;setTimeout(function(){try{A.policeVisit();}catch(e){}},800);}
         return;
       }
@@ -4010,6 +4036,7 @@ function giftStarterStock(){
     if(typeof playPlotEvent!=='function') return;
     /* 重试/重复触发时别把已经抢过的剧情再放一遍 */
     try{if(g().robbery)return;}catch(e){}
+    storyCurtain(true);
     if(!playPlotEvent('robberyCase',function(){
       try{
         A.doRobbery();
@@ -4167,6 +4194,8 @@ function giftStarterStock(){
       if(state.jobs.some(function(x){return x&&(x.id==='CG1'||x.storyId==='c3d1');}))return;
       state.jobs.push(j);
       state.dayTotal=state.jobs.length;
+      /* 剧情链到头：收幕布，回到游戏页 */
+      try{ storyCurtain(false); }catch(e){}
       /* 这张就是陈默的加显卡单（英雄联盟）；原来的 c1d2 不再重复补 */
       try{ state.story=state.story||{}; state.story.done=state.story.done||{}; state.story.done['c1d2']=1; }catch(e){}
       try{save();}catch(e){}
@@ -4238,13 +4267,10 @@ function giftStarterStock(){
             }else{ /* 没有微信场景就到此为止 */ }
           }catch(e){}
         };
-        try{
-          if(window.__GRAMO&&window.__GRAMO.introForce){
-            window.__GRAMO.introForce().then(function(){ setTimeout(function(){ A.ownGpuStory(gotoChat); },2000); });
-            return;
-          }
-        }catch(e){}
-        gotoChat();
+        /* 剧情链里不插留声机：直接接「旺财淘显卡 → 陈默微信 → 加显卡」，
+           否则留声机的 promise 会把整条链卡在幕布后面 */
+        try{ A.ownGpuStory(gotoChat); }
+        catch(e){ try{ gotoChat(); }catch(e2){} }
       },380);
     });
   };
@@ -10974,6 +11000,7 @@ renderAll();
 
   /* ---- 内容更新通知：换了内容版本，进游戏弹一次游戏风弹窗 ---- */
   var BUILD_NOTES={
+    '01422':['零元购→刘警官→破案→重开张→加显卡 连成一条剧情链：中间不回到游戏页，幕布盖住底页'],
     '01421':['第 2 天工单页不再显示陈默「加张卡」那张旧剧情卡（抢劫前和停业期都不显示）'],
     '01420':['第 2 天未抢之前也不播「陈默到店」：重进游戏时不会再先放一段 CG 再跳零元购'],
     '01419':['第 2 天先走零元购：墨桀的二手课不抢在前面，工单也不先派（不再一进来就 3 单）'],
